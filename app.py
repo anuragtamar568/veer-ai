@@ -25,7 +25,26 @@ if user_input := st.chat_input("वीर से कुछ पूछें..."):
     with st.chat_message("user"):
         st.write(user_input)
     
-    with st.chat_message("assistant"):
+    with st.chat_message("with st.chat_message("assistant"):
+        # पहले reply को खाली सेट कर दें
+        reply = "क्षमा करें भाई, अभी जवाब नहीं मिल पा रहा है।"
+        
+        try:
+            response = model.generate_content(user_input)
+            reply = response.text
+            st.write(reply)
+            
+            # आवाज़ जनरेट करना
+            tts = gTTS(text=reply, lang='hi')
+            tts.save("reply.mp3")
+            st.audio("reply.mp3", format="audio/mp3", autoplay=True)
+        except Exception as e:
+            st.write("भाई, कुछ तकनीकी दिक्कत आ रही है।")
+            # यहाँ से पता चलेगा असली एरर क्या है
+            st.write(f"Error details: {e}")
+            
+    # अब ये लाइन यहाँ होने पर एरर नहीं देगी
+    st.session_state.messages.append({"role": "assistant", "content": reply})"):
         # AI से जवाब
         try:
             response = model.generate_content(user_input)
