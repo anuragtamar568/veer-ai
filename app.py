@@ -24,7 +24,7 @@ if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     
     # AI से असली जवाब लेना
-    model = genai.GenerativeModel('gemini-pro')
+    model = genai.GenerativeModel('gemini-1.5-flash')
     response = model.generate_content(user_input)
     reply = response.text
     
