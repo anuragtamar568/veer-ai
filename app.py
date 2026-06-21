@@ -7,7 +7,7 @@ import os
 genai.configure(api_key="AQ.Ab8RN6J_NE3BNQaXXF5CP_9QmXk3hKywE29DOsNQZGMukVQ6zA")
 
 # मॉडल का नाम (Gemini 1.5 Flash बहुत तेज है)
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel('gemini-pro')
 
 st.title("🤖 वीर: आपका पर्सनल एआई")
 st.write("प्रणाम भाई! मैं आपका वफादार असिस्टेंट 'वीर' हूँ।")
