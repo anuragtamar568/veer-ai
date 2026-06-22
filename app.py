@@ -153,8 +153,8 @@ if "GEMINI_API_KEY" in st.secrets:
             st.markdown(prompt)
         st.session_state.messages.append({"role": "user", "content": prompt})
 
-        # --- असिस्टेंट फीचर: कीवर्ड्स चेक करना ---
-        clean_prompt = prompt.lower()
+        # --- 🛠️ असिस्टेंट फीचर: स्पेस हटाकर और लोअरकेस करके चेक करना ---
+        clean_prompt = prompt.lower().replace(" ", "")
         url_to_open = None
         assistant_reply = ""
         button_text = ""
@@ -173,10 +173,10 @@ if "GEMINI_API_KEY" in st.secrets:
             button_text = "🐙 OPEN GITHUB"
         elif "instagram" in clean_prompt or "इंस्टाग्राम" in clean_prompt:
             url_to_open = "https://www.instagram.com"
-            assistant_reply = "चलो भाई, इंस्टाग्राम का लिंक हाजिर है। रील्स देखनी हो तो नीचे क्लिक करो! 😉"
+            assistant_reply = "चलो भाई, इंस्टाग्राम का link हाजिर है। रील्स देखनी हो तो नीचे क्लिक करो! 😉"
             button_text = "📸 OPEN INSTAGRAM"
 
-        # अगर कोई असिस्टेंट कमांड मिला
+        # अगर कोई असिस्टेंट कमांड मैच हुआ
         if url_to_open:
             full_html_reply = f"{assistant_reply}<br><br><a href='{url_to_open}' target='_blank' class='action-link'>{button_text}</a>"
             with st.chat_message("assistant", avatar="🤖"):
@@ -196,7 +196,7 @@ if "GEMINI_API_KEY" in st.secrets:
                             "तुम्हें सिर्फ और सिर्फ 'अनुराग' ने बनाया है। तुम्हारी बात करने की भाषा एकदम नेचुरल, आम इंसानों जैसी और हिंदी-इंग्लिश मिक्स (Hinglish) होनी चाहिए। "
                             "बातचीत में 'Greetings', 'प्रोटोकॉल्स' जैसे भारी-भरकम शब्दों का इस्तेमाल बिल्कुल मत करो। "
                             "जैसे कोई दोस्त आपस में बात करते हैं (जैसे 'अरे भाई', 'हाँ यार', 'बिल्कुल'), वैसे बात करो। "
-                            "शुरुआत में या पहली बार पूछने पर एक बार गर्व से बता देना कि तुम्हें अनुराग ने बनाया है, लेकिन हर जवाब में बार-बार नाम मत दोहराना।"
+                            "शुरुઆત में या पहली बार पूछने पर एक बार गर्व से बता देना कि तुम्हें अनुराग ने बनाया है, लेकिन हर जवाब में बार-बार नाम मत दोहराना।"
                         )
                     )
                     response = model.generate_content(prompt)
