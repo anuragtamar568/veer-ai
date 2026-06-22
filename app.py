@@ -215,3 +215,16 @@ if "GEMINI_API_KEY" in st.secrets:
                     
                     placeholder.markdown(response.text)
                     st.session_state.messages.append({"role": "assistant", "content": response.text})
+                    try:
+            model = genai.GenerativeModel("gemini-2.5-flash", ...) 
+            # ... बाकी का कोड ...
+            response = model.generate_content(prompt)
+            placeholder.markdown(response.text)
+            st.session_state.messages.append({"role": "assistant", "content": response.text})
+            
+        except Exception as e:
+            # यहाँ एरर हैंडलिंग जोड़ें
+            error_message = "अरे यार, कुछ गड़बड़ हो गई। लगता है मेरा दिमाग थोड़ा हैंग हो गया है। एक बार फिर से कोशिश करो ना?"
+            placeholder.markdown(error_message)
+            st.error(f"Technical Error: {e}") # ये सिर्फ डीबगिंग के लिए है, इसे हटा भी सकते हैं
+                    
