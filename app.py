@@ -215,5 +215,3 @@ if "GEMINI_API_KEY" in st.secrets:
                     
                     placeholder.markdown(response.text)
                     st.session_state.messages.append({"role": "assistant", "content": response.text})
-                    
-                except Exception as e:
