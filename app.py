@@ -18,6 +18,16 @@ st.markdown("""
 [data-testid="stHeader"] {
     background: transparent !important;
 }
+<style>
+[data-testid="stAppViewContainer"] {
+    background: linear-gradient(rgba(10, 15, 25, 0.85), rgba(10, 15, 25, 0.85)), url("https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=1400&auto=format&fit=crop") !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
+}
+[data-testid="stHeader"] {
+    background: transparent !important;
+}
 h1 {
     color: #6bf2ff !important;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
@@ -63,35 +73,18 @@ p, span, div, label {
     font-weight: bold;
     margin-top: 15px;
 }
-button {
-    background-color: #050a10 !important;
-    border: 1px solid #00d2ff !important;
-    color: #00d2ff !important;
-    border-radius: 4px !important;
+/* फाइल अपलोडर बॉक्स को साफ़ सुथरा रखना */
+[data-testid="stFileUploader"] {
+    background-color: rgba(8, 20, 30, 0.6) !important;
+    border: 1px dashed #00d2ff !important;
+    border-radius: 10px !important;
+    padding: 10px !important;
 }
-button:hover {
-    background-color: #00d2ff !important;
-    color: black !important;
-    box-shadow: 0 0 10px #00d2ff;
+::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
 }
-div.stLinkButton > a {
-    background-color: #050a10 !important;
-    color: #00ff66 !important;
-    border: 2px solid #00ff66 !important;
-    border-radius: 6px !important;
-    font-family: 'Courier New', monospace !important;
-    font-weight: bold !important;
-    letter-spacing: 1px !important;
-    box-shadow: 0 0 10px rgba(0, 255, 102, 0.3) !important;
-    transition: all 0.3s ease !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 10px 20px !important;
-    text-decoration: none !important;
-}
-div.stLinkButton > a:hover {
-    background-color: #00ff66 !important;
+</style>
     color: #050a10 !important;
     box-shadow: 0 0 15px #00ff66 !important;
 }
