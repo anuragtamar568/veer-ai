@@ -5,17 +5,17 @@ import streamlit.components.v1 as components
 # 1. पेज कॉन्फ़िगरेशन
 st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
 
-# 2. थीम (CSS) - तुम्हारी शर्त के अनुसार कोई बदलाव नहीं
+# 2. थीम (CSS)
 st.markdown("""
     <style>
-    [data-testid="stAppViewContainer"] {background: linear-gradient(rgba(10, 15, 25, 0.85), rgba(10, 15, 25, 0.85)), url("https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=1400&auto=format&fit=crop") !important; background-size: cover !important; background-position: center !important; background-attachment: fixed !important;}
+    [data-testid="stAppViewContainer"] {background: linear-gradient(rgba(10, 15, 25, 0.85), rgba(10, 15, 25, 0.85)), url("https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=1400&auto=format&fit=crop") !important; background-size: cover !important; background-attachment: fixed !important;}
     h1 {color: #6bf2ff !important; text-transform: uppercase; letter-spacing: 5px;}
     .developer-text {color: #00ff66 !important; font-family: monospace; font-weight: bold;}
     div[data-testid="stChatMessage"] {background-color: rgba(8, 20, 30, 0.9) !important; border: 2px solid #00d2ff; border-radius: 12px;}
     </style>
 """, unsafe_allow_html=True)
 
-# 3. वॉइस फंक्शन (ब्राउज़र की नेचुरल आवाज़)
+# 3. वॉइस फंक्शन
 def play_audio(text):
     clean_text = text.replace('"', '').replace("'", "")
     js = f"""
@@ -29,7 +29,7 @@ def play_audio(text):
 
 # 4. ऐप सेटअप
 st.title("VEER AI")
-st.markdown("<div class='developer-text'>SPECIALIST WORKSTATION // DEVELOPED BY ANURAG</div>", unsafe_allow_html=True)
+st.markdown("<div class='developer-text'>SPECIALIST WORKSTATION</div>", unsafe_allow_html=True)
 
 if "GEMINI_API_KEY" in st.secrets:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
@@ -51,18 +51,10 @@ if prompt := st.chat_input("COMMAND..."):
     with st.chat_message("assistant"):
         placeholder = st.empty()
         try:
-            # वीर की पहचान फिक्स की गई
-            model = genai.GenerativeModel(
-                "gemini-2.0-flash",
-                system_instruction=(
-                    "तुम 'वीर' हो। तुम्हें 'अनुराग' ने बनाया है। "
-                    "तुम अनुराग के सबसे अच्छे दोस्त और पर्सनल असिस्टेंट हो। "
-                    "अगर कोई पूछे कि तुम्हें किसने बनाया, तो गर्व से कहना कि मुझे अनुराग ने बनाया है।"
-                )
-            )
+            model = genai.GenerativeModel("gemini-2.0-flash")
             response = model.generate_content(prompt)
             placeholder.write(response.text)
-            play_audio(response.text) # वीर अब बोलेगा भी
+            play_audio(response.text) # वीर बोलेगा
             st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
             st.error("API Error! Please check your Gemini Key.")
