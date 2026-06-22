@@ -5,11 +5,11 @@ from streamlit_mic_recorder import speech_to_text
 # पेज कॉन्फ़िगरेशन (यह सबसे ऊपर होना जरूरी है)
 st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
 
-# 1. बैकग्राउंड इमेज और नियॉन टेक्स्ट लेटर्स के लिए CSS
+# 1. बैकग्राउंड इमेज, नियॉन टेक्स्ट और सफ़ेद पट्टी हटाने के लिए CSS
 def local_css():
     st.markdown("""
     <style>
-    /* पूरे ऐप के बैकग्राउंड को ट्रांसपेरेंट करना */
+    /* पूरे ऐप के मुख्य कंटेनर को ट्रांसपेरेंट करना */
     [data-testid="stAppViewContainer"] {
         background-color: transparent !important;
     }
@@ -28,7 +28,17 @@ def local_css():
         width: 100%;
         height: 100%;
         object-fit: cover;
-        filter: brightness(0.35) contrast(1.1); /* इमेज को डार्क किया ताकि टेक्स्ट साफ़ दिखे */
+        filter: brightness(0.35) contrast(1.1);
+    }
+    
+    /* 🛠️ वॉइस रिकॉर्डर की सफ़ेद पट्टी (White BG) को गायब करने का फिक्स */
+    iframe[title="streamlit_mic_recorder.speech_to_text"] {
+        background: transparent !important;
+        background-color: transparent !important;
+    }
+    
+    div[data-testid="stHtmlBlock"] iframe {
+        background: transparent !important;
     }
     
     /* VEER AI - डिज़ाइनर नियॉन टेक्स्ट लेटर्स */
@@ -113,7 +123,7 @@ def local_css():
 
 local_css()
 
-# नया फुल-वर्किंग प्रीमियम साइबर लैपटॉप बैकग्राउंड लिंक
+# प्रीमियम साइबर लैपटॉप बैकग्राउंड लिंक
 st.markdown(
     '<div class="bg-img-container"><img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1400&auto=format&fit=crop"></div>',
     unsafe_allow_html=True
