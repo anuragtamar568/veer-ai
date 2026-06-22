@@ -24,27 +24,19 @@ st.title("VEER AI 🤖")
 st.markdown("<div class='dev-text'>⚡ SPEAKING WORKSTATION // 👤 CREATED BY ANURAG</div>", unsafe_allow_html=True)
 st.write("---")
 
-# 2. Advanced HTML5 Auto-Play Audio Function (100% Working)
-def speak_now(text_to_speak):
+# 2. Audio Generator & Autoplay Script
+def play_audio(text_to_speak):
     try:
-        # Convert text to speech using gTTS (No API Key Required!)
         tts = gTTS(text=text_to_speak, lang='hi', slow=False)
         tts.save("response.mp3")
         
-        # Read audio file and encode to base64
         with open("response.mp3", "rb") as f:
             audio_bytes = f.read()
         audio_base64 = base64.b64encode(audio_bytes).decode()
         
-        # HTML5 Audio tag with autoplay attribute
-        audio_html = f"""
-            <audio autoplay="true" style="display:none;">
-                <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
-            </audio>
-        """
-        st.markdown(audio_html, unsafe_allow_html=True)
+        # Audio Player (Visible Player with Autoplay for browser override)
+        st.audio(audio_bytes, format="audio/mp3", autoplay=True)
         
-        # Clean up file
         os.remove("response.mp3")
     except Exception as e:
         st.error(f"Audio Error: {e}")
@@ -67,7 +59,6 @@ text_input = st.chat_input("Kuch likho ya bolo...")
 
 final_input = None
 
-# Duplicate Filter
 if voice_input and voice_input.strip():
     if voice_input != st.session_state.last_voice:
         final_input = voice_input
@@ -80,14 +71,12 @@ for chat in st.session_state.chat_history:
     with st.chat_message(chat["role"]):
         st.write(chat["content"])
 
-# 6. Instant Speaking Logic (Bina Kisi Error Ke)
+# 6. Logic
 if final_input:
-    # User text
     st.session_state.chat_history.append({"role": "user", "content": final_input})
     with st.chat_message("user"):
         st.write(final_input)
 
-    # Custom Smart Bot Reply 
     input_lower = final_input.lower()
     if "hii" in input_lower or "hello" in input_lower or "hey" in input_lower:
         reply = "नमस्ते अनुराग भाई! मैं वीर हूँ, आपका सबसे अच्छा दोस्त। कहिए आज क्या हुक्म है?"
@@ -98,10 +87,7 @@ if final_input:
     else:
         reply = f"आपने कहा: {final_input}। अनुराग भाई, आपका यह वीर हमेशा आपकी बात सुनने के लिए तैयार है!"
 
-    # Bot Text and Auto-Speak Execution
     st.session_state.chat_history.append({"role": "assistant", "content": reply})
     with st.chat_message("assistant"):
         st.write(reply)
-        speak_now(reply)  # Yeh line turant sound play karegi
-    
-    st.rerun()
+        play_audio(reply) # Yeh autoplay lagayega + player bhi dikhayega taaki agar automatic na chale toh button daba sako
