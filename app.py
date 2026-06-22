@@ -1,7 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# 1. Page configuration (Yahan sidebar ko disabled aur collapsed rakha hai)
+# 1. Page configuration
 st.set_page_config(
     page_title="VEER AI - Gateway",
     page_icon="👁️",
@@ -9,10 +9,9 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. CSS se left side ka volume panel aur baaki faltu cheezein puri tarah hide karna
+# 2. Hide Sidebar & Headers
 st.markdown("""
     <style>
-        /* Sidebar aur navigation ko hatane ke liye */
         [data-testid="stSidebar"], [data-testid="stSidebarCollapseButton"] {
             display: none !important;
         }
@@ -20,16 +19,24 @@ st.markdown("""
         footer {visibility: hidden;}
         header {visibility: hidden;}
         .stApp {background-color: #05050a;}
+        
+        /* Chat interface styling */
+        .stTextInput > div > div > input {
+            background-color: #111122 !important;
+            color: #00f2ff !important;
+            border: 1px solid #00f2ff !important;
+            border-radius: 10px !important;
+        }
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Session state login track karne ke liye
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
-# --- DYNAMIC 3D EYE GRAPHIC (HTML/CSS) ---
+# --- DYNAMIC 3D EYE GRAPHIC ---
 def render_eye(is_open):
     eye_status_class = "open" if is_open else "closed"
+    color = "#00f2ff" if is_open else "#ff0055"
     
     html_code = f"""
     <!DOCTYPE html>
@@ -41,14 +48,14 @@ def render_eye(is_open):
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                height: 280px;
+                height: 200px;
                 margin: 0;
                 overflow: hidden;
             }}
             .eye-container {{
                 position: relative;
-                width: 220px;
-                height: 220px;
+                width: 150px;
+                height: 150px;
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -58,45 +65,40 @@ def render_eye(is_open):
                 width: 100%;
                 height: 100%;
                 border-radius: 50%;
-                border: 2px dashed #00f2ff;
+                border: 2px dashed {color};
                 animation: rotate 10s linear infinite;
                 box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
             }}
             .eye {{
                 position: relative;
-                width: 160px;
-                height: 100px;
+                width: 120px;
+                height: 75px;
                 background: #000;
                 border-radius: 50%;
-                border: 3px solid #00f2ff;
+                border: 3px solid {color};
                 overflow: hidden;
-                box-shadow: 0 0 30px rgba(0, 242, 255, 0.5);
+                box-shadow: 0 0 30px {color};
                 transition: all 0.8s ease-in-out;
             }}
-            .eye.closed {{
-                height: 4px;
-                box-shadow: 0 0 15px #ff0055;
-                border-color: #ff0055;
-            }}
+            .eye.closed {{ height: 4px; }}
             .iris {{
                 position: absolute;
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                width: 65px;
-                height: 65px;
+                width: 45px;
+                height: 45px;
                 background: radial-gradient(circle, #00f2ff 10%, #0055ff 60%, #000022 90%);
                 border-radius: 50%;
                 border: 2px solid #00f2ff;
-                box-shadow: 0 0 20px #00f2ff;
             }}
             .pupil {{
                 position: absolute;
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                width: 25px;
-                height: 25px;
+                width: 18px;
+                height: 18px;
                 background: #000;
                 border-radius: 50%;
             }}
@@ -107,42 +109,45 @@ def render_eye(is_open):
         <div class="eye-container">
             <div class="radar-glow"></div>
             <div class="eye {eye_status_class}">
-                <div class="iris">
-                    <div class="pupil"></div>
-                </div>
+                <div class="iris"><div class="pupil"></div></div>
             </div>
         </div>
     </body>
     </html>
     """
-    components.html(html_code, height=290)
+    components.html(html_code, height=210)
 
-# --- APP MAIN LOGIC ---
-
+# --- MAIN LOGIC ---
 if not st.session_state.logged_in:
-    # Password nahi dala to band aankh (Red shadow) dikhao
     render_eye(is_open=False)
+    st.markdown("<h2 style='text-align: center; color: #ff0055;'>VEER AI SECURE SYSTEM</h2>", unsafe_allow_html=True)
     
-    st.markdown("<h2 style='text-align: center; color: #00f2ff;'>VEER AI SECURE SYSTEM</h2>", unsafe_allow_html=True)
-    
-    # Password Field
     password = st.text_input("Enter Access Key", type="password")
-    
     if st.button("UNLOCK ACCESS", use_container_width=True):
         if password == "veer123":
             st.session_state.logged_in = True
-            st.jwt_token = "auth" # Simple state track
+            st.clear_cache()
             st.rerun()
         else:
-            st.error("Access Denied: Incorrect Password")
-
+            st.error("Access Denied")
 else:
-    # Password sahi hone par 3D Eye khul jayegi (Blue glow)
     render_eye(is_open=True)
+    st.markdown("<h3 style='text-align: center; color: #00ff66;'>🔓 SYSTEM ONLINE</h3>", unsafe_allow_html=True)
     
-    st.markdown("<h2 style='text-align: center; color: #00ff66;'>🔓 ACCESS GRANTED</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #888;'>Welcome back, Veer. System Mainframe is now Online.</p>", unsafe_allow_html=True)
+    # --- YAHAN SE APNA SEARCH SYSTEM SHURU HAI ---
+    st.write("---")
+    query = st.text_input("🤖 Ask VEER AI anything...", placeholder="Type your question here and press Enter...")
     
+    if query:
+        # Abhi ke liye temporary reply system (Aap yahan AI link kar sakte ho)
+        st.markdown(f"""
+        <div style="background-color: #111122; padding: 15px; border-radius: 10px; border-left: 5px solid #00f2ff; margin-top: 15px;">
+            <p style="color: #888; margin: 0;"><b>You searched:</b> {query}</p>
+            <p style="color: #fff; margin-top: 10px;">🤖 <b>VEER AI Response:</b> Processing data for "{query}"... (System ready for AI API integration!)</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    st.write("---")
     if st.button("Lock System", type="secondary"):
         st.session_state.logged_in = False
         st.rerun()
