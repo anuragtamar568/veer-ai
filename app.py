@@ -1,13 +1,12 @@
 import streamlit as st
 import google.generativeai as genai
 from streamlit_mic_recorder import speech_to_text
-from gtts import gTTS
-import os
+import streamlit.components.v1 as components
 
-# पेज कॉन्फ़िगरेशन
+# 1. पेज कॉन्फ़िगरेशन
 st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
 
-# CSS स्टाइलिंग (आपकी पुरानी थीम सुरक्षित है)
+# 2. CSS स्टाइलिंग (आपकी पुरानी थीम)
 def local_css():
     st.markdown("""
         <style>
@@ -22,33 +21,26 @@ def local_css():
         .voice-label {color: #ffffff !important; font-family: 'Courier New', monospace !important; font-weight: bold; margin-top: 15px;}
         button {background-color: #050a10 !important; border: 1px solid #00d2ff !important; color: #00d2ff !important; border-radius: 4px !important;}
         button:hover {background-color: #00d2ff !important; color: black !important; box-shadow: 0 0 10px #00d2ff;}
-        div.stLinkButton > a {background-color: #050a10 !important; color: #00ff66 !important; border: 2px solid #00ff66 !important; border-radius: 6px !important; font-family: 'Courier New', monospace !important; font-weight: bold !important; letter-spacing: 1px !important; box-shadow: 0 0 10px rgba(0, 255, 102, 0.3) !important; transition: all 0.3s ease !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 10px 20px !important; text-decoration: none !important;}
-        div.stLinkButton > a:hover {background-color: #00ff66 !important; color: #050a10 !important; box-shadow: 0 0 15px #00ff66 !important;}
-        ::-webkit-scrollbar {width: 0px; background: transparent;}
         </style>
     """, unsafe_allow_html=True)
 
 local_css()
 
-# ऑडियो बोलने वाला फंक्शन
-def speak_text(text):
-    try:
-        tts = gTTS(text=text, lang='hi')
-        tts.save("temp.mp3")
-        st.audio("temp.mp3", format="audio/mp3")
-    except Exception:
-        pass
+# ऑटो-बोलने वाला फंक्शन
+def speak_auto(text):
+    clean_text = text.replace('"', '').replace("'", "")
+    js = f"""
+    <script>
+        var msg = new SpeechSynthesisUtterance('{clean_text}');
+        msg.lang = 'hi-IN';
+        window.speechSynthesis.speak(msg);
+    </script>
+    """
+    components.html(js, height=0)
 
-# ऐप्स की लिस्ट
-APPS_LIST = {
-    "youtube": {"url": "https://www.youtube.com", "text": "यूट्यूब खोल रहा हूँ भाई!", "btn": "OPEN YOUTUBE"},
-    "google": {"url": "https://www.google.com", "text": "गूगल सर्च हाजिर है!", "btn": "OPEN GOOGLE"},
-    "instagram": {"url": "https://www.instagram.com", "text": "इंस्टाग्राम खोल रहा हूँ!", "btn": "OPEN INSTAGRAM"},
-    "chatgpt": {"url": "https://chatgpt.com", "text": "चैटजीपीटी खोल रहा हूँ।", "btn": "OPEN CHATGPT"}
-}
-
+# 3. ऐप सेटअप
 st.title("VEER AI")
-st.markdown("<div class='developer-text'>SPECIALIST WORKSTATION // ANURAG</div>", unsafe_allow_html=True)
+st.markdown("<div class='developer-text'>SPECIALIST WORKSTATION // DEVELOPED BY ANURAG</div>", unsafe_allow_html=True)
 st.write("---")
 
 if "GEMINI_API_KEY" in st.secrets:
@@ -57,41 +49,33 @@ if "GEMINI_API_KEY" in st.secrets:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# हिस्ट्री दिखाएं
-for message in st.session_state.messages:
-    avatar = "👤" if message["role"] == "user" else "🤖"
-    with st.chat_message(message["role"], avatar=avatar):
-        if isinstance(message["content"], dict):
-            st.write(message["content"]["text"])
-            st.link_button(message["content"]["btn"], message["content"]["url"])
-        else:
-            st.markdown(str(message["content"]))
+# रिकॉर्डिंग बटन
+st.markdown("<div class='voice-label'>🎙️ RECORD VOICE COMMAND:</div>", unsafe_allow_html=True)
+voice_prompt = speech_to_text(language='hi', use_container_width=True, key='mic')
 
-# इनपुट
-prompt = st.chat_input("ENTER COMMAND...")
+# चैट हिस्ट्री
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.write(msg["content"])
+
+# इनपुट हैंडलिंग
+prompt = voice_prompt if voice_prompt else st.chat_input("TYPE COMMAND...")
 
 if prompt:
-    with st.chat_message("user", avatar="👤"):
-        st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.write(prompt)
 
-    clean_prompt = prompt.lower()
-    found_app = next((info for app, info in APPS_LIST.items() if app in clean_prompt), None)
-
-    with st.chat_message("assistant", avatar="🤖"):
-        if found_app:
-            st.write(found_app["text"])
-            st.link_button(found_app["btn"], found_app["url"])
-            speak_text(found_app["text"]) # वीर बोलेगा
-            st.session_state.messages.append({"role": "assistant", "content": found_app["text"]})
-        else:
-            placeholder = st.empty()
-            placeholder.markdown("`ANALYZING...`")
-            try:
-                model = genai.GenerativeModel("gemini-2.5-flash")
-                response = model.generate_content(prompt)
-                placeholder.markdown(response.text)
-                speak_text(response.text) # वीर बोलेगा
-                st.session_state.messages.append({"role": "assistant", "content": response.text})
-            except Exception as e:
-                placeholder.markdown("अरे यार, कुछ गड़बड़ हो गई!")
+    with st.chat_message("assistant"):
+        placeholder = st.empty()
+        try:
+            model = genai.GenerativeModel(
+                "gemini-2.0-flash",
+                system_instruction="तुम्हारा नाम 'वीर' है। तुम्हें 'अनुराग' ने बनाया है। तुम अनुराग के सबसे अच्छे दोस्त हो। हमेशा गर्व से बताओ कि तुम्हें अनुराग ने बनाया है।"
+            )
+            response = model.generate_content(prompt)
+            placeholder.write(response.text)
+            speak_auto(response.text) # वीर अपने आप बोलेगा
+            st.session_state.messages.append({"role": "assistant", "content": response.text})
+        except Exception as e:
+            st.error("API Error!")
