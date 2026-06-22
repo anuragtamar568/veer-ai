@@ -4,14 +4,14 @@ import google.generativeai as genai
 st.set_page_config(page_title="Veer AI", page_icon="🤖")
 st.title("🤖 Veer AI Assistant")
 
-# Hum yahan 'st.text_input' use kar rahe hain
-# Ye code wahan 'Secrets' wali error nahi dega
+# API Key input (Password style mein taaki safe rahe)
 api_key = st.text_input("Apni Google API Key yahan dalein:", type="password")
 
 if api_key:
     try:
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        # Naya aur stable model naam
+        model = genai.GenerativeModel("gemini-1.5-flash-latest")
         
         if "messages" not in st.session_state:
             st.session_state.messages = []
@@ -26,7 +26,9 @@ if api_key:
                 st.markdown(prompt)
 
             with st.chat_message("assistant"):
-                response = model.generate_content(f"Tum ek personal assistant ho jise Veer ne banaya hai. Sawaal: {prompt}")
+                # System instructions
+                full_prompt = f"Tum Veer dwara banaye gaye personal AI assistant ho. Sawaal: {prompt}"
+                response = model.generate_content(full_prompt)
                 st.markdown(response.text)
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
     except Exception as e:
