@@ -1,96 +1,122 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# Page configuration
+# Page configuration (Yahan sidebar ko disabled rakha hai)
 st.set_page_config(
-    page_title="VEER AI",
-    page_icon="🤖",
-    layout="centered"
+    page_title="VEER AI - Gateway",
+    page_icon="👁️",
+    layout="centered",
+    initial_sidebar_state="collapsed"
 )
 
-st.title("🤖 VEER AI - Media Control Interface")
-
-# Aapka HTML aur SVG Dashboard Code
-custom_html = """
-<!DOCTYPE html>
-<html>
-<head>
+# CSS se Streamlit ka default header aur menu chipana
+st.markdown("""
     <style>
-        body {
-            background-color: #0d1117;
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 80vh;
-            margin: 0;
-        }
-        .media-container {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            text-align: center;
-            border: 1px solid #334155;
-            width: 80%;
-            max-width: 600px;
-        }
-        .media-control {
-            margin-top: 20px;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-        .btn {
-            background: #2563eb;
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        .btn:hover {
-            background: #1d4ed8;
-        }
-        svg {
-            filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.3));
-        }
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header {visibility: hidden;}
+        .stApp {background-color: #05050a;}
     </style>
-</head>
-<body>
+""", unsafe_allow_html=True)
 
-<div class="media-container">
-    <svg width="96" height="96" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#3b82f6" />
-                <stop offset="100%" stop-color="#8b5cf6" />
-            </linearGradient>
-        </defs>
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" fill="url(#grad)"/>
-    </svg>
+# Session state login track karne ke liye
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
 
-    <h2>VEER AI Player</h2>
-    <p style="color: #94a3b8;">System Engine Ready & Functional</p>
+# --- DYNAMIC 3D EYE GRAPHIC (HTML/CSS) ---
+def render_eye(is_open):
+    eye_status_class = "open" if is_open else "closed"
+    
+    html_code = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{
+                background-color: #05050a;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 280px;
+                margin: 0;
+                overflow: hidden;
+            }}
+            .eye-container {{
+                position: relative;
+                width: 220px;
+                height: 220px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }}
+            /* Futuristic Cyber Glow */
+            .radar-glow {{
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                border: 2px dashed #00f2ff;
+                animation: rotate 10s linear infinite;
+                box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+            }}
+            .eye {{
+                position: relative;
+                width: 160px;
+                height: 100px;
+                background: #000;
+                border-radius: 50%;
+                border: 3px solid #00f2ff;
+                overflow: hidden;
+                box-shadow: 0 0 30px rgba(0, 242, 255, 0.5);
+                transition: all 0.8s ease-in-out;
+            }}
+            /* Eye State Logic */
+            .eye.closed {{
+                height: 4px;
+                box-shadow: 0 0 15px #ff0055;
+                border-color: #ff0055;
+            }}
+            .iris {{
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-30%, -50%);
+                width: 65px;
+                height: 65px;
+                background: radial-gradient(circle, #00f2ff 10%, #0055ff 60%, #000022 90%);
+                border-radius: 50%;
+                border: 2px solid #00f2ff;
+                box-shadow: 0 0 20px #00f2ff;
+                animation: look around 4s infinite ease-in-out;
+            }}
+            .pupil {{
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 25px;
+                height: 25px;
+                background: #000;
+                border-radius: 50%;
+                box-shadow: inset 0 0 10px rgba(0,242,255,0.8);
+            }}
+            @keyframes rotate {{ 100% {{ transform: rotate(360deg); }} }}
+        </style>
+    </head>
+    <body>
+        <div class="eye-container">
+            <div class="radar-glow"></div>
+            <div class="eye {eye_status_class}">
+                <div class="iris">
+                    <div class="pupil"></div>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    components.html(html_code, height=290)
 
-    <div class="media-control">
-        <button class="btn">⏮ Prev</button>
-        <button class="btn" style="background:#10b981;">▶ Play</button>
-        <button class="btn">⏭ Next</button>
-    </div>
-</div>
+# --- APP INTERFACE ---
 
-</body>
-</html>
-"""
-
-# HTML component ko sahi tarike se render karne ke liye component ka use karein
-components.html(custom_html, height=500, scrolling=True)
-
-# Streamlit Native Elements (Optional - controls chalane ke liye)
-st.sidebar.header("Settings")
-volume = st.sidebar.slider("Volume Control", 0, 100, 70)
-st.sidebar.write(f"Current Volume: {volume}%")
+if not st.session_state.
