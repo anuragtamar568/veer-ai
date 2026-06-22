@@ -12,53 +12,33 @@ st.set_page_config(
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
-theme_color = "#00ff66" if st.session_state.logged_in else "#ff0055"
+# Theme styling without f-string bugs
+if not st.session_state.logged_in:
+    st.markdown("""
+        <style>
+            [data-testid="stSidebar"], [data-testid="stSidebarCollapseButton"] { display: none !important; }
+            #MainMenu {visibility: hidden;} footer {visibility: hidden;} header {visibility: hidden;}
+            .stApp { background: radial-gradient(circle at center, #120a0a 0%, #020205 100%) !important; }
+            h2, h3, p, span, label, div { color: #ff0055 !important; font-family: 'Courier New', Courier, monospace !important; text-shadow: 0 0 10px #ff005544; }
+            .stTextInput > div > div > input { background-color: #140303 !important; color: #ff0055 !important; border: 2px solid #ff0055 !important; box-shadow: 0 0 15px #ff005522; border-radius: 8px !important; }
+            .stButton>button { background: linear-gradient(135deg, #1a0505 0%, #2e0a0a 100%) !important; color: #ff0055 !important; border: 2px solid #ff0055 !important; border-radius: 8px !important; font-weight: bold !important; letter-spacing: 2px; }
+            .stButton>button:hover { background: #ff0055 !important; color: black !important; box-shadow: 0 0 25px #ff0055; transform: scale(1.02); }
+        </style>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+        <style>
+            [data-testid="stSidebar"], [data-testid="stSidebarCollapseButton"] { display: none !important; }
+            #MainMenu {visibility: hidden;} footer {visibility: hidden;} header {visibility: hidden;}
+            .stApp { background: radial-gradient(circle at center, #0a120a 0%, #020205 100%) !important; }
+            h2, h3, p, span, label, div { color: #00ff66 !important; font-family: 'Courier New', Courier, monospace !important; text-shadow: 0 0 10px #00ff6644; }
+            .stTextInput > div > div > input { background-color: #031403 !important; color: #00ff66 !important; border: 2px solid #00ff66 !important; box-shadow: 0 0 15px #00ff6622; border-radius: 8px !important; }
+            .stButton>button { background: linear-gradient(135deg, #051a05 0%, #0a2e0a 100%) !important; color: #00ff66 !important; border: 2px solid #00ff66 !important; border-radius: 8px !important; font-weight: bold !important; letter-spacing: 2px; }
+            .stButton>button:hover { background: #00ff66 !important; color: black !important; box-shadow: 0 0 25px #00ff66; transform: scale(1.02); }
+        </style>
+    """, unsafe_allow_html=True)
 
-# --- FUTURISTIC CYBERPUNK TERMINAL STYLES ---
-st.markdown(f"""
-    <style>
-        [data-testid="stSidebar"], [data-testid="stSidebarCollapseButton"] {{ display: none !important; }}
-        #MainMenu {{visibility: hidden;}} footer {{visibility: hidden;}} header {{visibility: hidden;}}
-        .stApp {{ background: radial-gradient(circle at center, #0a120a 0%, #020205 100%) !important; }}
-        
-        /* Neon Glow Text & Elements */
-        h2, h3, p, span, label, div {{ 
-            color: {theme_color} !important; 
-            font-family: 'Courier New', Courier, monospace !important;
-            text-shadow: 0 0 10px {theme_color}44;
-        }}
-        
-        /* Input Terminal Styling */
-        .stTextInput > div > div > input {{ 
-            background-color: #031403 !important; 
-            color: #00ff66 !important; 
-            border: 2px solid #00ff66 !important; 
-            box-shadow: 0 0 15px #00ff6622;
-            border-radius: 8px !important;
-            font-size: 16px !important;
-        }}
-        
-        /* Masterpiece Hacker Buttons */
-        .stButton>button {{ 
-            background: linear-gradient(135deg, #051a05 0%, #0a2e0a 100%) !important; 
-            color: {theme_color} !important; 
-            border: 2px solid {theme_color} !important;
-            border-radius: 8px !important;
-            box-shadow: 0 0 10px {theme_color}22;
-            font-weight: bold !important;
-            letter-spacing: 2px;
-            transition: all 0.3s ease;
-        }}
-        .stButton>button:hover {{ 
-            background: {theme_color} !important; 
-            color: black !important; 
-            box-shadow: 0 0 25px {theme_color};
-            transform: scale(1.02);
-        }}
-    </style>
-""", unsafe_allow_html=True)
-
-# --- DYNAMIC EVIL EYE GRAPHIC ---
+# DYNAMIC EVIL EYE GRAPHIC
 def render_eye(is_open):
     status = "open" if is_open else "closed"
     eye_color = "#00ff66" if is_open else "#ff0055"
@@ -93,14 +73,4 @@ def render_eye(is_open):
 # --- SYSTEM MAIN ROUTINE ---
 if not st.session_state.logged_in:
     render_eye(is_open=False)
-    st.markdown("<h2 style='text-align: center;'>⚡ [ VEER CORE MATRIX: LOCKED ] ⚡</h2>", unsafe_allow_html=True)
-    password = st.text_input("ENTER DECRYPTION KEY", type="password")
-    if st.button("BYPASS FIREWALL"):
-        if password == "veer123":
-            st.session_state.logged_in = True
-            st.rerun()
-        else:
-            st.error("ACCESS DENIED: FIREWALL SAFEGUARD ACTIVE")
-else:
-    render_eye(is_open=True)
-    st.markdown("<h3 style='text-align: center;'>⚡ VEER MULTILINGUAL NEXUS ONLINE</h3>", unsafe_
+    st.markdown("<h2 style='text
