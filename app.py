@@ -183,35 +183,4 @@ if "GEMINI_API_KEY" in st.secrets:
             with st.chat_message("assistant", avatar="🤖"):
                 st.markdown(assistant_reply)
                 # ब्राउज़र ब्लॉक न करे इसलिए सुंदर और सेफ नियॉन बटन देना
-                st.markdown(f'<a href="{url_to_open}" target="_blank" class="action-link">{button_text}</a>', unsafe_allow_html=True)
-            
-            # चैट हिस्ट्री में सेव करना
-            full_html_reply = f"{assistant_reply}<br><br><a href='{url_to_open}' target='_blank' class='action-link'>{button_text}</a>"
-            st.session_state.messages.append({"role": "assistant", "content": full_html_reply})
-        else:
-            # अगर नॉर्मल बात है, तो AI दोस्त की तरह जवाब देगा
-            with st.chat_message("assistant", avatar="🤖"):
-                placeholder = st.empty()
-                placeholder.markdown("`ANALYZING COMMAND...`")
-                
-                try:
-                    model = genai.GenerativeModel(
-                        "gemini-2.5-flash",
-                        system_instruction=(
-                            "तुम्हारा नाम 'वीर' है। तुम कोई रोबोट या मशीन नहीं हो, बल्कि एक बेहद समझदार, कूल और दोस्ताना एआई असिस्टेंट हो। "
-                            "तुम्हें सिर्फ और सिर्फ 'अनुराग' ने बनाया है। तुम्हारी बात करने की भाषा एकदम नेचुरल, आम इंसानों जैसी और हिंदी-इंग्लिश मिक्स (Hinglish) होनी चाहिए। "
-                            "बातचीत में 'Greetings', 'प्रोटोकॉल्स' जैसे भारी-भरकम शब्दों का इस्तेमाल बिल्कुल मत करो। "
-                            "जैसे कोई दोस्त आपस में बात करते हैं (जैसे 'अरे भाई', 'हाँ यार', 'बिल्कुल'), वैसे बात करो। "
-                            "शुरुઆત में या पहली बार पूछने पर एक बार गर्व से बता देना कि तुम्हें अनुराग ने बनाया है, लेकिन हर जवाब में बार-बार नाम मत दोहराना।"
-                        )
-                    )
-                    response = model.generate_content(prompt)
-                    
-                    placeholder.markdown(response.text)
-                    st.session_state.messages.append({"role": "assistant", "content": response.text})
-                    
-                except Exception as e:
-                    placeholder.markdown(f"❌ `SYSTEM ERROR: {str(e)}`")
-
-else:
-    st.error("⚠️ CRITICAL: GEMINI_API_KEY NOT FOUND.")
+                st.markdown(f'<a href="{url_to
