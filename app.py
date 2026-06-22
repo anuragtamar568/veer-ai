@@ -1,11 +1,13 @@
 import streamlit as st
 import google.generativeai as genai
 from streamlit_mic_recorder import speech_to_text
+from gtts import gTTS
+import os
 
-# 1. पेज कॉन्फ़िगरेशन
+# पेज कॉन्फ़िगरेशन
 st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
 
-# 2. CSS स्टाइलिंग (ओरिजिनल थीम - नो चेंज)
+# CSS स्टाइलिंग (आपकी पुरानी थीम सुरक्षित है)
 def local_css():
     st.markdown("""
         <style>
@@ -28,35 +30,34 @@ def local_css():
 
 local_css()
 
-# 3. APPS की लिस्ट (साफ-सुथरी)
+# ऑडियो बोलने वाला फंक्शन
+def speak_text(text):
+    try:
+        tts = gTTS(text=text, lang='hi')
+        tts.save("temp.mp3")
+        st.audio("temp.mp3", format="audio/mp3")
+    except Exception:
+        pass
+
+# ऐप्स की लिस्ट
 APPS_LIST = {
     "youtube": {"url": "https://www.youtube.com", "text": "यूट्यूब खोल रहा हूँ भाई!", "btn": "OPEN YOUTUBE"},
     "google": {"url": "https://www.google.com", "text": "गूगल सर्च हाजिर है!", "btn": "OPEN GOOGLE"},
-    "github": {"url": "https://www.github.com", "text": "गिटहब तैयार है भाई!", "btn": "OPEN GITHUB"},
     "instagram": {"url": "https://www.instagram.com", "text": "इंस्टाग्राम खोल रहा हूँ!", "btn": "OPEN INSTAGRAM"},
-    "facebook": {"url": "https://www.facebook.com", "text": "फेसबुक ओपन हो रहा है!", "btn": "OPEN FACEBOOK"},
-    "whatsapp": {"url": "https://web.whatsapp.com", "text": "व्हाट्सएप वेब तैयार है!", "btn": "OPEN WHATSAPP"},
-    "linkedin": {"url": "https://www.linkedin.com", "text": "लिंक्डइन कनेक्ट कर रहा हूँ...", "btn": "OPEN LINKEDIN"},
-    "twitter": {"url": "https://x.com", "text": "ट्विटर (X) पेश है!", "btn": "OPEN TWITTER"},
-    "chatgpt": {"url": "https://chatgpt.com", "text": "चैटजीपीटी खोल रहा हूँ।", "btn": "OPEN CHATGPT"},
-    "gemini": {"url": "https://gemini.google.com", "text": "जेमिनी ओपन हो रहा है।", "btn": "OPEN GEMINI"},
-    "canva": {"url": "https://www.canva.com", "text": "कैनवा डिज़ाइन पोर्टल खुल रहा है।", "btn": "OPEN CANVA"}
+    "chatgpt": {"url": "https://chatgpt.com", "text": "चैटजीपीटी खोल रहा हूँ।", "btn": "OPEN CHATGPT"}
 }
 
-# 4. हेडर
 st.title("VEER AI")
-st.markdown("<div class='developer-text'>SPECIALIST WORKSTATION</div>", unsafe_allow_html=True)
-st.markdown("<div class='developer-text'>DEVELOPER: ANURAG // SECURE CONNECTION</div>", unsafe_allow_html=True)
+st.markdown("<div class='developer-text'>SPECIALIST WORKSTATION // ANURAG</div>", unsafe_allow_html=True)
 st.write("---")
 
-# 5. API Setup
 if "GEMINI_API_KEY" in st.secrets:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# चैट हिस्ट्री
+# हिस्ट्री दिखाएं
 for message in st.session_state.messages:
     avatar = "👤" if message["role"] == "user" else "🤖"
     with st.chat_message(message["role"], avatar=avatar):
@@ -66,11 +67,8 @@ for message in st.session_state.messages:
         else:
             st.markdown(str(message["content"]))
 
-# 6. इनपुट
-st.markdown("<div class='voice-label'>🎙️ VOICE COMMAND // INTERACT:</div>", unsafe_allow_html=True)
-voice_input = speech_to_text(start_prompt="START RECORDING", stop_prompt="STOP RECORDING", language='hi', key='speech')
-text_input = st.chat_input("ENTER COMMAND...")
-prompt = voice_input if voice_input else text_input
+# इनपुट
+prompt = st.chat_input("ENTER COMMAND...")
 
 if prompt:
     with st.chat_message("user", avatar="👤"):
@@ -78,29 +76,22 @@ if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     clean_prompt = prompt.lower()
-    found_app = None
-    for app_name, info in APPS_LIST.items():
-        if app_name in clean_prompt:
-            found_app = info
-            break
+    found_app = next((info for app, info in APPS_LIST.items() if app in clean_prompt), None)
 
-    if found_app:
-        with st.chat_message("assistant", avatar="🤖"):
+    with st.chat_message("assistant", avatar="🤖"):
+        if found_app:
             st.write(found_app["text"])
             st.link_button(found_app["btn"], found_app["url"])
-        st.session_state.messages.append({"role": "assistant", "content": {"type": "link_button", "text": found_app["text"], "btn": found_app["btn"], "url": found_app["url"]}})
-    else:
-        with st.chat_message("assistant", avatar="🤖"):
+            speak_text(found_app["text"]) # वीर बोलेगा
+            st.session_state.messages.append({"role": "assistant", "content": found_app["text"]})
+        else:
             placeholder = st.empty()
             placeholder.markdown("`ANALYZING...`")
             try:
-                model = genai.GenerativeModel("gemini-2.5-flash", system_instruction=(
-                    "तुम्हारा नाम 'वीर' है। तुम्हें 'अनुराग' ने बनाया है। तुम अनुराग के सबसे अच्छे दोस्त हो। "
-                    "हमेशा फ्रेंडली और नेचुरल बात करो।"
-                ))
+                model = genai.GenerativeModel("gemini-2.5-flash")
                 response = model.generate_content(prompt)
                 placeholder.markdown(response.text)
+                speak_text(response.text) # वीर बोलेगा
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
             except Exception as e:
                 placeholder.markdown("अरे यार, कुछ गड़बड़ हो गई!")
-                st.error(str(e))
