@@ -5,11 +5,10 @@ from streamlit_mic_recorder import speech_to_text
 # पेज कॉन्फ़िगरेशन (यह सबसे ऊपर होना जरूरी है)
 st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
 
-# 1. 100% वर्किंग डार्क थीम और बैकग्राउंड इमेज CSS
+# 1. डार्क थीम और बैकग्राउंड इमेज CSS
 def local_css():
     st.markdown("""
     <style>
-    /* पूरे ऐप के मेन कंटेनर पर सीधे बैकग्राउंड इमेज लगाना */
     [data-testid="stAppViewContainer"] {
         background: linear-gradient(rgba(10, 15, 25, 0.85), rgba(10, 15, 25, 0.85)), 
                     url("https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=1400&auto=format&fit=crop") !important;
@@ -18,12 +17,10 @@ def local_css():
         background-attachment: fixed !important;
     }
     
-    /* टॉप हेडर को भी पारदर्शी करना */
     [data-testid="stHeader"] {
         background: transparent !important;
     }
     
-    /* VEER AI - डिज़ाइनर नियॉन टेक्स्ट लेटर्स */
     h1 {
         color: #6bf2ff !important;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
@@ -34,7 +31,6 @@ def local_css():
         margin-bottom: 5px !important;
     }
     
-    /* सब-हेडिंग्स स्टाइल */
     .developer-text {
         color: #00ff66 !important;
         font-family: 'Courier New', Courier, monospace !important;
@@ -46,7 +42,6 @@ def local_css():
         margin-bottom: 2px !important;
     }
 
-    /* चैट बॉक्स को पारदर्शी और नियॉन ब्लू बॉर्डर वाला बनाना */
     div[data-testid="stChatMessage"] {
         background-color: rgba(8, 20, 30, 0.9) !important;
         border: 2px solid #00d2ff;
@@ -56,13 +51,11 @@ def local_css():
         padding: 15px !important;
     }
 
-    /* नॉर्मल टेक्स्ट का कलर (सफ़ेद) */
     p, span, div, label {
         color: #ffffff !important;
         font-family: 'Segoe UI', sans-serif !important;
     }
     
-    /* चैट इनपुट कंटेनर स्टाइल */
     .stChatInputContainer {
         background-color: rgba(5, 10, 15, 0.95) !important;
         border: 2px solid #00d2ff !important;
@@ -73,7 +66,6 @@ def local_css():
         color: #ffffff !important;
     }
 
-    /* वॉयस कमांड टेक्स्ट */
     .voice-label {
         color: #ffffff !important;
         font-family: 'Courier New', monospace !important;
@@ -81,7 +73,6 @@ def local_css():
         margin-top: 15px;
     }
 
-    /* माइक बटन का हैकर स्टाइल */
     button {
         background-color: #050a10 !important;
         border: 1px solid #00d2ff !important;
@@ -95,7 +86,6 @@ def local_css():
         box-shadow: 0 0 10px #00d2ff;
     }
 
-    /* स्क्रॉलबार छिपाना */
     ::-webkit-scrollbar {
         width: 0px;
         background: transparent;
@@ -146,12 +136,15 @@ if "GEMINI_API_KEY" in st.secrets:
             placeholder.markdown("`ANALYZING COMMAND...`")
             
             try:
+                # 🛠️ यहाँ इंस्ट्रक्शन को बदला है ताकि यह रोबोट की तरह नहीं, बल्कि एक दोस्त की तरह बात करे
                 model = genai.GenerativeModel(
                     "gemini-2.5-flash",
                     system_instruction=(
-                        "तुम्हारा नाम 'वीर' है। तुम एक अत्यंत उन्नत और सुरक्षित हैकर एआई हो जिसे सिर्फ 'अनुराग' ने विकसित किया है। "
-                        "तुम अनुराग के प्रति पूरी तरह वफादार हो। तुम्हारी language टेक्निकल, सीक्रेट, कूल और थोड़ी रहस्यमयी होनी चाहिए। "
-                        "जब भी कोई पूछे, हमेशा गर्व से बताना कि तुम्हारे क्रिएटर और बॉस अनुराग हैं।"
+                        "तुम्हारा नाम 'वीर' है। तुम कोई रोबोट या मशीन नहीं हो, बल्कि एक बेहद समझदार, कूल और दोस्ताना एआई असिस्टेंट हो। "
+                        "तुम्हें सिर्फ और सिर्फ 'अनुराग' ने बनाया है। तुम्हारी बात करने की भाषा एकदम नेचुरल, आम इंसानों जैसी और हिंदी-इंग्लिश मिक्स (Hinglish) होनी चाहिए। "
+                        "बातचीत में 'Greetings', 'प्रोटोकॉल्स', 'डेटा-नेटवर्क्स' जैसे भारी-भरकम रोबोटिक शब्दों का इस्तेमाल बिल्कुल मत करो। "
+                        "जैसे कोई दोस्त आपस में बात करते हैं (जैसे 'अरे भाई', 'हाँ यार', 'बिल्कुल'), वैसे बात करो। "
+                        "शुरुआत में या पहली बार पूछने पर एक बार गर्व से बता देना कि तुम्हें अनुराग ने बनाया है, लेकिन हर जवाब में बार-बार नाम मत दोहराना।"
                     )
                 )
                 response = model.generate_content(prompt)
