@@ -1,10 +1,9 @@
 import streamlit as st
 
-# Streamlit page configuration (Tabs configurations)
 st.set_page_config(page_title="VEER AI Workstation", layout="centered")
 
-# Visual elements ko frontend ke liye string me pack kiya hai
-interface_html = """
+# Front-end design ko do parts me breakdown kiya hai taaki JS literals crash na ho
+html_part1 = """
 <!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -223,14 +222,13 @@ interface_html = """
 
         function appendMessage(sender, text) {
             const card = document.createElement('div');
-            card.className = `msg-card \${sender === 'user' ? 'user-card' : 'ai-card'}`;
+            card.className = "msg-card " + (sender === 'user' ? 'user-card' : 'ai-card');
             
-            card.innerHTML = `
-                <div class="avatar">\${sender === 'user' ? '👤' : '🤖'}</div>
-                <div class="msg-content">
-                    <div class="msg-text">\${text}</div>
-                </div>
-            `;
+            // Yahan string concatenation use kar liya taaki literal conflict khatam ho jaye
+            card.innerHTML = '<div class="avatar">' + (sender === 'user' ? '👤' : '🤖') + '</div>' +
+                             '<div class="msg-content">' +
+                                 '<div class="msg-text">' + text + '</div>' +
+                             '</div>';
             
             chatLog.appendChild(card);
             chatLog.scrollTop = chatLog.scrollHeight;
@@ -247,7 +245,7 @@ interface_html = """
                 let response = "कमांड समझ नहीं आई। क्या आप दोबारा स्पेसिफाई कर सकते हैं?";
                 
                 if(query.includes('2+2') || query.includes('2 + 2')) {
-                    response = "कैलकुलेशन कम्पलीट: **4**। इसके लिए ज्यादा कोर प्रोसेसिंग की जरूरत नहीं पड़ी।";
+                    response = "कैलकुलेशन कम्पलीट: 4। इसके लिए ज्यादा कोर प्रोसेसिंग की जरूरत नहीं पड़ी।";
                 } else if(query.toLowerCase() === 'hii' || query.toLowerCase() === 'hello') {
                     response = "सिस्टम ऑनलाइन है। कमांड दीजिए, अनुराग।";
                 }
@@ -265,5 +263,5 @@ interface_html = """
 </html>
 """
 
-# HTML code ko Streamlit frame ke andar render karne ke liye render call
-st.components.v1.html(interface_html, height=650, scrolling=True)
+# HTML code render injection
+st.components.v1.html(html_part1, height=650, scrolling=True)
