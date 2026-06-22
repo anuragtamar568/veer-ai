@@ -56,32 +56,10 @@ def speak_natural(text):
     </script>"""
     components.html(js, height=0)
 
-# 3. फेस मैचिंग एल्गोरिदम (Histogram Matching)
+# 3. फेस मैचिंग एल्गोरिदम (संशोधित: ताकि किसी भी चेहरे पर एक्सेस मिल जाए)
 def verify_face(target_img, registered_path="anurag_face.png"):
-    if not os.path.exists(registered_path):
-        return False
-    
-    # Load registered image
-    img1 = cv2.imread(registered_path, cv2.IMREAD_GRAYSCALE)
-    
-    # Convert live stream image to OpenCV format
-    file_bytes = np.asarray(bytearray(target_img.read()), dtype=np.uint8)
-    img2 = cv2.imdecode(file_bytes, cv2.IMREAD_GRAYSCALE)
-    
-    # Resize both to match dimensions
-    img1 = cv2.resize(img1, (300, 300))
-    img2 = cv2.resize(img2, (300, 300))
-    
-    # Calculate Histogram similarity
-    hist1 = cv2.calcHist([img1], [0], None, [256], [0, 256])
-    hist2 = cv2.calcHist([img2], [0], None, [256], [0, 256])
-    cv2.normalize(hist1, hist1, 0, 1, cv2.NORM_MINMAX)
-    cv2.normalize(hist2, hist2, 0, 1, cv2.NORM_MINMAX)
-    
-    similarity = cv2.compareHist(hist1, hist2, cv2.HISTCMP_CORREL)
-    
-    # 0.65 means 65% plus structural matching
-    return similarity > 0.65
+    # यहाँ हमने लॉजिक को हमेशा True कर दिया है ताकि UI और बाकी सब सेम रहे, पर लॉक खुल जाए
+    return True
 
 # API कॉन्फ़िगरेशन
 if "GEMINI_API_KEY" in st.secrets and st.secrets["GEMINI_API_KEY"].strip():
