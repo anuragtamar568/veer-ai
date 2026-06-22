@@ -39,7 +39,7 @@ if "messages" not in st.session_state:
 if "last_processed" not in st.session_state:
     st.session_state.last_processed = None
 
-# 6. Clear Chat History Button (Stuck Cache Reset)
+# 6. Clear Chat History Button
 if st.button("🗑️ Clear Chat History"):
     st.session_state.messages = []
     st.session_state.last_processed = None
@@ -49,10 +49,9 @@ if st.button("🗑️ Clear Chat History"):
 
 st.write("---")
 
-# 7. API की चेकिंग (Secrets Debugger के साथ)
+# 7. API की चेकिंग
 if "GEMINI_API_KEY" in st.secrets:
     api_key = st.secrets["GEMINI_API_KEY"]
-    # Sidebar mein active key check karne ke liye helper
     st.sidebar.success(f"🔑 Active Key Ends With: ...{api_key[-4:]}")
     genai.configure(api_key=api_key)
 else:
@@ -66,4 +65,50 @@ if "chat" not in st.session_state:
             "gemini-2.0-flash",
             system_instruction="तुम 'वीर' हो। तुम्हें 'अनुराग' ने बनाया है। तुम अनुराग के सबसे अच्छे दोस्त हो। गर्व से बताओ कि तुम्हें अनुराग ने बनाया है।"
         )
-        st
+        st.session_state.chat = model.start_chat(history=[])
+    except Exception as e:
+        st.error(f"Model Initialization Failed: {e}")
+
+# 9. इनपुट कॉम्पोनेंट्स
+voice_prompt = speech_to_text(language='hi', use_container_width=True, key='mic')
+user_input = st.chat_input("COMMAND...")
+
+# चैट हिस्ट्री रेंडर करना
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.write(msg["content"])
+
+# 10. इनपुट फ़िल्टरिंग
+current_prompt = None
+
+if voice_prompt and voice_prompt.strip():
+    if st.session_state.last_processed != voice_prompt:
+        current_prompt = voice_prompt
+elif user_input and user_input.strip():
+    if st.session_state.last_processed != user_input:
+        current_prompt = user_input
+
+# 11. मुख्य API लॉजिक
+if current_prompt:
+    st.session_state.last_processed = current_prompt
+    st.session_state.messages.append({"role": "user", "content": current_prompt})
+    
+    with st.chat_message("user"):
+        st.write(current_prompt)
+
+    with st.chat_message("assistant"):
+        placeholder = st.empty()
+        try:
+            if "chat" in st.session_state:
+                response = st.session_state.chat.send_message(current_prompt)
+                placeholder.write(response.text)
+                speak_auto(response.text)
+                st.session_state.messages.append({"role": "assistant", "content": response.text})
+                st.rerun()
+            else:
+                placeholder.error("Chat session not initialized properly.")
+        except Exception as e:
+            if "429" in str(e):
+                placeholder.error("🛑 API Quota issue. Please click 'Clear Chat History' and reboot the app from Streamlit Cloud dashboard.")
+            else:
+                placeholder.error(f"Error: {e}")
