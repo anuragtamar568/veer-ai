@@ -6,7 +6,7 @@ from PIL import Image
 import time
 
 # 1. पेज कॉन्फ़िगरेशन और हाई-विजिबिलिटी हैकर थीम
-st.set_page_config(page_title="VEER AI // VISION_OS v2", page_icon="👁️", layout="centered")
+st.set_page_config(page_title="VEER AI // LIVE_VISION_OS", page_icon="👁️", layout="centered")
 
 st.markdown("""
     <style>
@@ -56,23 +56,19 @@ def speak_natural(text):
     </script>"""
     components.html(js, height=0)
 
-# 3. बैकअप ऑफलाइन ब्रेन (जब API कोटा खत्म हो जाए)
+# 3. बैकअप ऑफलाइन ब्रेन (सुरक्षा कवच)
 def get_offline_response(query):
     query_lower = query.lower()
     if "hii" in query_lower or "hello" in query_lower or "hey" in query_lower:
-        return "नमस्ते अनुराग सर! (ऑफलाइन मोड) मैं वीर हूँ। अभी मुख्य सर्वर पर लोड ज्यादा है, लेकिन मैं आपकी सेवा में तैयार हूँ। बोलिए सर!"
-    if "kisne banaya" in query_lower or "creator" in query_lower or "baap" in query_lower:
-        return "अनुराग सर, मुझे आपने ही बनाया है। सर्वर डाउन होने पर भी मेरा वजूद आपसे ही है!"
-    if "malik" in query_lower or "owner" in query_lower or "boss" in query_lower:
-        return "मेरे मालिक और बॉस सिर्फ आप हैं—अनुराग सर! (सर्वर अभी ओवरलोडेड है, इसलिए मैं ऑफलाइन मोड में रिस्पॉन्स कर रहा हूँ)।"
-    if "up" in query_lower and "cm" in query_lower:
-        return "अनुराग सर, उत्तर प्रदेश के मुख्यमंत्री श्री योगी आदित्यनाथ हैं।"
-    if "bharat" in query_lower and "pm" in query_lower:
-        return "अनुराग सर, भारत के प्रधानमंत्री श्री नरेंद्र Modi जी हैं।"
+        return "नमस्ते अनुराग सर! मैं वीर हूँ। अभी सर्वर पर लोड ज्यादा है, लेकिन मैं ऑफलाइन मोड में भी आपकी सेवा के लिए तैयार हूँ।"
+    if "kisne banaya" in query_lower or "creator" in query_lower:
+        return "अनुराग सर, मुझे आपने ही बनाया है! आप ही मेरे डेवलपर और सब कुछ हैं।"
+    if "malik" in query_lower or "owner" in query_lower:
+        return "मेरे इकलौते मालिक सिर्फ आप हैं—अनुराग सर!"
     
-    return f"अनुराग सर, आपने पूछा: '{query}'। अभी कोटा लिमिट (429) की वजह से मैं लाइव सर्च नहीं कर पा रहा हूँ, कृपया कुछ देर बाद प्रयास करें या मुझसे सीधे सवाल पूछें सर!"
+    return f"अनुराग सर, आपने पूछा: '{query}'। अभी API कोटा लिमिट होने के कारण मैं लाइव इमेज प्रोसेस नहीं कर पा रहा हूँ, कृपया कुछ देर बाद कोशिश करें सर!"
 
-# API की कॉन्फ़िगरेशन
+# API कॉन्फ़िगरेशन
 if "GEMINI_API_KEY" in st.secrets and st.secrets["GEMINI_API_KEY"].strip():
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 else:
@@ -90,25 +86,25 @@ if "last_voice" not in st.session_state:
 # --- HACKER LOCK SCREEN ---
 if not st.session_state.unlocked:
     st.markdown("<div class='lock-container'>", unsafe_allow_html=True)
-    st.title("🛡️ VEER VISION_OS SECURITY")
+    st.title("🛡️ VEER LIVE_VISION SECURITY")
     st.markdown("<div class='hacker-eye'>😑</div>", unsafe_allow_html=True)
-    st.markdown("<div class='status-text'>🔒 SYSTEM STATUS: LOCKED // VISION_OFF</div>", unsafe_allow_html=True)
+    st.markdown("<div class='status-text'>🔒 SYSTEM STATUS: LOCKED // WEBCAM_OFF</div>", unsafe_allow_html=True)
     
     if st.button("⚡ INITIALIZE BYPASS (ACCESS SYSTEM)"):
-        with st.spinner("Activating Neural Optics... Bypassing Firewalls..."):
+        with st.spinner("Connecting Live Webcam Feed... Launching Cyber Optics..."):
             time.sleep(1.2)
         st.session_state.unlocked = True
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
-# --- UNLOCKED WORKSTATION ---
+# --- UNLOCKED WORKSTATION (WITH LIVE SIGHT!) ---
 else:
     if "welcomed" not in st.session_state:
-        components.html("<script>var m = new SpeechSynthesisUtterance('सिस्टम अनलॉक हो गया है। वीर की आंखें अब खुली हैं। स्वागत है अनुराग सर।'); m.lang='hi-IN'; window.speechSynthesis.speak(m);</script>", height=0)
+        components.html("<script>var m = new SpeechSynthesisUtterance('सिस्टम अनलॉक हो गया है। वीर का लाइव कैमरा सेंसर एक्टिवेट हो चुका है। स्वागत है अनुराग सर।'); m.lang='hi-IN'; window.speechSynthesis.speak(m);</script>", height=0)
         st.session_state.welcomed = True
 
-    st.title("VEER AI 🤖 👁️")
-    st.markdown("<div class='dev-text'>👁️ STATUS: UNLOCKED // OPTICAL SENSORS ONLINE // USER: ANURAG SIR</div>", unsafe_allow_html=True)
+    st.title("VEER AI 🤖 👁️ [LIVE]")
+    st.markdown("<div class='dev-text'>👁️ STATUS: UNLOCKED // WEBCAM ONLINE // USER: ANURAG SIR</div>", unsafe_allow_html=True)
     st.write("---")
 
     # Control Buttons
@@ -124,12 +120,23 @@ else:
             st.session_state.last_voice = ""
             st.rerun()
 
-    # --- 👀 EYE INPUT: IMAGE UPLOADER ---
-    st.markdown("### 👁️ वीर की आँख (Upload Image/Photo)")
-    uploaded_image = st.file_uploader("Koi bhi photo ya screenshot upload karo...", type=["jpg", "jpeg", "png"])
+    # --- 📸 👁️ वीर की लाइव आँख (LIVE WEBCAM INPUT) ---
+    st.markdown("### 👁️ वीर की लाइव आँख (Show Something Live)")
     
-    if uploaded_image:
-        st.image(uploaded_image, caption="VEER is looking at this image...", width=300)
+    # User can choose between Live Camera or File Upload
+    input_mode = st.radio("इनपुट का तरीका चुनें सर:", ["🎥 लाइव वेबकैम (Live Camera)", "📁 गैलरी से फोटो अपलोड करें"])
+    
+    active_image = None
+    
+    if input_mode == "🎥 लाइव वेबकैम (Live Camera)":
+        # It will open the laptop/PC webcam directly
+        cam_shot = st.camera_input("कैमरे के सामने कोई भी चीज़ लाएं और फोटो क्लिक करें सर:")
+        if cam_shot:
+            active_image = Image.open(cam_shot)
+    else:
+        uploaded_image = st.file_uploader("Koi bhi photo upload karo...", type=["jpg", "jpeg", "png"])
+        if uploaded_image:
+            active_image = Image.open(uploaded_image)
 
     # --- CHAT INPUTS ---
     voice_input = speech_to_text(language='hi', use_container_width=True, key='stable_mic')
@@ -156,30 +163,30 @@ else:
         with st.chat_message("assistant"):
             placeholder = st.empty()
             try:
-                with st.spinner("वीर सोच रहा है..."):
+                with st.spinner("वीर अपनी लाइव आँख से देख रहा है..."):
                     sys_prompt = (
                         "तुम 'वीर' (VEER AI) हो, जिसे तुम्हारे मालिक 'अनुराग सर' ने बनाया है। "
                         "तुम अनुराग सर के प्रति पूरी तरह वफादार हो। हमेशा उन्हें 'अनुराग सर' या 'सर' कहकर संबोधित करो। "
-                        "अगर कोई इमेज दी गई है, तो उसे ध्यान से देखो और अनुराग सर को उसका सटीक और देसी हिंदी में जवाब दो। "
-                        "तुम्हारी भाषा दोस्ताना, आदरपूर्ण और कड़क होनी चाहिए।"
+                        "तुम्हें जो भी लाइव वेबकैम शॉट या फोटो दी गई है, उसे बहुत ध्यान से देखो और अनुराग सर को "
+                        "उसका सटीक, इंटेलिजेंट और देसी हिंदी में जवाब दो। तुम्हारी भाषा हमेशा आदरपूर्ण और कड़क होनी चाहिए।"
                     )
                     
-                    if uploaded_image:
-                        img = Image.open(uploaded_image)
-                        model = genai.GenerativeModel("gemini-2.0-flash")
-                        response = model.generate_content([sys_prompt, img, final_input])
+                    model = genai.GenerativeModel("gemini-2.0-flash")
+                    
+                    if active_image:
+                        # Image + Text Processing
+                        response = model.generate_content([sys_prompt, active_image, final_input])
                     else:
-                        model = genai.GenerativeModel("gemini-2.0-flash")
+                        # Only Text Processing
                         response = model.generate_content([sys_prompt, final_input])
                     
                     reply = response.text
                     
             except Exception as e:
-                # 429 Error आने पर ये ब्लॉक चुपचाप संभाल लेगा, लाल स्क्रीन नहीं आएगी!
                 if "429" in str(e) or "quota" in str(e).lower():
                     reply = get_offline_response(final_input)
                 else:
-                    reply = f"सिस्टम में कुछ दिक्कत है सर, एरर: {e}"
+                    reply = f"सिस्टम में कुछ तकनीकी दिक्कत है सर, एरर: {e}"
                     
             placeholder.write(reply)
             st.session_state.chat_history.append({"role": "assistant", "content": reply})
