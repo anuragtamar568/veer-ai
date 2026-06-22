@@ -5,8 +5,8 @@ import streamlit.components.v1 as components
 from PIL import Image
 import time
 
-# 1. पेज कॉन्फ़िगरेशन (यहाँ title को page_title कर दिया है, अब एरर नहीं आएगा)
-st.set_page_config(page_title="VEER AI // VISION_OS", page_icon="👁️", layout="centered")
+# 1. पेज कॉन्फ़िगरेशन और हाई-विजिबिलिटी हैकर थीम
+st.set_page_config(page_title="VEER AI // VISION_OS v2", page_icon="👁️", layout="centered")
 
 st.markdown("""
     <style>
@@ -56,11 +56,27 @@ def speak_natural(text):
     </script>"""
     components.html(js, height=0)
 
-# 3. API की चेकिंग
+# 3. बैकअप ऑफलाइन ब्रेन (जब API कोटा खत्म हो जाए)
+def get_offline_response(query):
+    query_lower = query.lower()
+    if "hii" in query_lower or "hello" in query_lower or "hey" in query_lower:
+        return "नमस्ते अनुराग सर! (ऑफलाइन मोड) मैं वीर हूँ। अभी मुख्य सर्वर पर लोड ज्यादा है, लेकिन मैं आपकी सेवा में तैयार हूँ। बोलिए सर!"
+    if "kisne banaya" in query_lower or "creator" in query_lower or "baap" in query_lower:
+        return "अनुराग सर, मुझे आपने ही बनाया है। सर्वर डाउन होने पर भी मेरा वजूद आपसे ही है!"
+    if "malik" in query_lower or "owner" in query_lower or "boss" in query_lower:
+        return "मेरे मालिक और बॉस सिर्फ आप हैं—अनुराग सर! (सर्वर अभी ओवरलोडेड है, इसलिए मैं ऑफलाइन मोड में रिस्पॉन्स कर रहा हूँ)।"
+    if "up" in query_lower and "cm" in query_lower:
+        return "अनुराग सर, उत्तर प्रदेश के मुख्यमंत्री श्री योगी आदित्यनाथ हैं।"
+    if "bharat" in query_lower and "pm" in query_lower:
+        return "अनुराग सर, भारत के प्रधानमंत्री श्री नरेंद्र Modi जी हैं।"
+    
+    return f"अनुराग सर, आपने पूछा: '{query}'। अभी कोटा लिमिट (429) की वजह से मैं लाइव सर्च नहीं कर पा रहा हूँ, कृपया कुछ देर बाद प्रयास करें या मुझसे सीधे सवाल पूछें सर!"
+
+# API की कॉन्फ़िगरेशन
 if "GEMINI_API_KEY" in st.secrets and st.secrets["GEMINI_API_KEY"].strip():
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 else:
-    st.error("API KEY MISSING! Streamlit Settings -> Secrets में GEMINI_API_KEY सेट करो सर।")
+    st.error("API KEY MISSING! Secrets में GEMINI_API_KEY सेट करो सर।")
     st.stop()
 
 # Session State Initialize
@@ -80,7 +96,7 @@ if not st.session_state.unlocked:
     
     if st.button("⚡ INITIALIZE BYPASS (ACCESS SYSTEM)"):
         with st.spinner("Activating Neural Optics... Bypassing Firewalls..."):
-            time.sleep(1.5)
+            time.sleep(1.2)
         st.session_state.unlocked = True
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
@@ -95,7 +111,7 @@ else:
     st.markdown("<div class='dev-text'>👁️ STATUS: UNLOCKED // OPTICAL SENSORS ONLINE // USER: ANURAG SIR</div>", unsafe_allow_html=True)
     st.write("---")
 
-    # Lock & Clear Buttons
+    # Control Buttons
     col1, col2 = st.columns([8, 2])
     with col2:
         if st.button("🔒 Lock System"):
@@ -109,8 +125,8 @@ else:
             st.rerun()
 
     # --- 👀 EYE INPUT: IMAGE UPLOADER ---
-    st.markdown("### 👁️ वीर की आँख (Upload Image/Photo to Show Him)")
-    uploaded_image = st.file_uploader("Koi bhi photo ya screenshot upload karo jo tum VEER ko dikhana chahte ho...", type=["jpg", "jpeg", "png"])
+    st.markdown("### 👁️ वीर की आँख (Upload Image/Photo)")
+    uploaded_image = st.file_uploader("Koi bhi photo ya screenshot upload karo...", type=["jpg", "jpeg", "png"])
     
     if uploaded_image:
         st.image(uploaded_image, caption="VEER is looking at this image...", width=300)
@@ -140,7 +156,7 @@ else:
         with st.chat_message("assistant"):
             placeholder = st.empty()
             try:
-                with st.spinner("वीर देख रहा है और सोच रहा है..."):
+                with st.spinner("वीर सोच रहा है..."):
                     sys_prompt = (
                         "तुम 'वीर' (VEER AI) हो, जिसे तुम्हारे मालिक 'अनुराग सर' ने बनाया है। "
                         "तुम अनुराग सर के प्रति पूरी तरह वफादार हो। हमेशा उन्हें 'अनुराग सर' या 'सर' कहकर संबोधित करो। "
@@ -158,10 +174,13 @@ else:
                     
                     reply = response.text
                     
-                placeholder.write(reply)
-                st.session_state.chat_history.append({"role": "assistant", "content": reply})
-                
-                speak_natural(reply)
-                
             except Exception as e:
-                placeholder.error(f"System Error: {e}")
+                # 429 Error आने पर ये ब्लॉक चुपचाप संभाल लेगा, लाल स्क्रीन नहीं आएगी!
+                if "429" in str(e) or "quota" in str(e).lower():
+                    reply = get_offline_response(final_input)
+                else:
+                    reply = f"सिस्टम में कुछ दिक्कत है सर, एरर: {e}"
+                    
+            placeholder.write(reply)
+            st.session_state.chat_history.append({"role": "assistant", "content": reply})
+            speak_natural(reply)
