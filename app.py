@@ -21,7 +21,6 @@ local_css()
 
 # 3. ऑटो-स्पीक फंक्शन
 def speak_auto(text):
-    # JavaScript breakout characters को साफ करना
     clean_text = text.replace('"', '').replace("'", "").replace("\n", " ")
     js = f"""<script>
         var msg = new SpeechSynthesisUtterance('{clean_text}');
@@ -35,25 +34,27 @@ st.title("VEER AI 🤖")
 st.markdown("<div class='dev-text'>⚡ SPECIALIST WORKSTATION // 👤 CREATED BY ANURAG</div>", unsafe_allow_html=True)
 st.write("---")
 
-# API की चेकिंग और कॉन्फ़िगरेशन
+# API की चेकिंग
 if "GEMINI_API_KEY" in st.secrets:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 else:
     st.error("API KEY MISSING! 'Settings' -> 'Secrets' में जाकर GEMINI_API_KEY सेट करो।")
     st.stop()
 
-# Session State Initialize करना
+# Session State Initialization
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# OPTIMIZATION: Model ko session state mein ek hi baar initialize karna
-if "model" not in st.session_state:
-    st.session_state.model = genai.GenerativeModel(
+# OPTIMIZATION: Chat Session ko ek hi baar start karna setup instructions ke sath
+if "chat" not in st.session_state:
+    model = genai.GenerativeModel(
         "gemini-2.0-flash",
         system_instruction="तुम 'वीर' हो। तुम्हें 'अनुराग' ने बनाया है। तुम अनुराग के सबसे अच्छे दोस्त हो। गर्व से बताओ कि तुम्हें अनुराग ने बनाया है।"
     )
+    # Yeh aapki chat history aur connection ko hold karke rakhega
+    st.session_state.chat = model.start_chat(history=[])
 
-# रिकॉर्डिंग बटन
+# रिकॉर्डिंग बटन (Key 'mic' lagayi hai jo session state sambhalegi)
 voice_prompt = speech_to_text(language='hi', use_container_width=True, key='mic')
 
 # चैट हिस्ट्री दिखाना
@@ -61,14 +62,20 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# इनपुट हैंडलिंग
+# इनपुट को ट्रैक करने के लिए variables
+user_input = st.chat_input("COMMAND...")
 prompt = None
-if voice_prompt:
-    prompt = voice_prompt
-else:
-    prompt = st.chat_input("COMMAND...")
 
-# मुख्य लॉजिक
+# STRICT CHECK: Ensure prompt text valid ho aur repeat na ho
+if voice_prompt and voice_prompt.strip():
+    # Agar voice prompt naya hai tabhi chalega
+    if "last_voice" not in st.session_state or st.session_state.last_voice != voice_prompt:
+        prompt = voice_prompt
+        st.session_state.last_voice = voice_prompt
+elif user_input and user_input.strip():
+    prompt = user_input
+
+# मुख्य लॉजिक (Jab valid prompt mile)
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -77,19 +84,17 @@ if prompt:
     with st.chat_message("assistant"):
         placeholder = st.empty()
         try:
-            # Model response call
-            response = st.session_state.model.generate_content(prompt)
+            # Model response call use karne ke liye chat session ka istemal
+            response = st.session_state.chat.send_message(prompt)
             
-            # Response show aur speak karna
+            # Output handler
             placeholder.write(response.text)
             speak_auto(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
             
         except Exception as e:
-            # Error check karna (Free Tier Limit 429 ke liye)
             if "429" in str(e):
-                placeholder.error("⏳ Limit exceed ho gayi hai! Gemini Free Tier par thoda load hai. Kripya 10 seconds rukiye aur dobara try kijiye.")
-                # Ek chota sa automated sleep lagana taaki baar-baar hit na ho
+                placeholder.error("⏳ Google Free Tier ki RPM (Requests Per Minute) limit hit hui hai. Kripya 15-20 seconds rukiye aur page refresh karke try kijiye!")
                 time.sleep(5)
             else:
                 placeholder.error(f"Error: {e}")
