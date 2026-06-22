@@ -11,7 +11,7 @@ st.title("🤖 वीर: आपका पर्सनल एआई")
 # सुनिश्चित करें कि आपने Streamlit Secrets में GEMINI_API_KEY सेट की हुई है
 @st.cache_resource
 def get_genai_client():
-    return genai.Client(api_key=st.secrets["AQ.Ab8RN6II0uxAJP-umAyJfqajkSqdh7dkeRoW8TzjRn4eIXO8Fw"])
+    return genai.Client(api_key=st.secrets["AQ.Ab8RN6IkMPcqFCgPfQqoVvnxEhIu3fI68rjP2fRdTVJiJpsPvA"])
 
 try:
     client = get_genai_client()
