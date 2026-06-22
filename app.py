@@ -11,7 +11,6 @@ st.set_page_config(
 )
 
 # --- MATRIX HACKER BACKGROUND & VOICES (HTML/CSS/JS) ---
-# Isme Matrix Rain Background aur Speech Recognition dono integrated hain
 hacker_ui = """
 <!DOCTYPE html>
 <html>
@@ -30,7 +29,7 @@ hacker_ui = """
             width: 100vw;
             height: 100vh;
             z-index: -1;
-            opacity: 0.35; /* Hacker coding rain background opacity */
+            opacity: 0.35;
         }
     </style>
 </head>
@@ -59,7 +58,7 @@ hacker_ui = """
             ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            ctx.fillStyle = '#0F0'; // Neon Green color
+            ctx.fillStyle = '#0F0';
             ctx.font = fontSize + 'px monospace';
 
             for (let i = 0; i < rainDrops.length; i++) {
@@ -97,12 +96,11 @@ st.markdown("""
         footer {visibility: hidden;}
         header {visibility: hidden;}
         
-        /* Hacker Theme Colors */
         .stApp {
             background-color: #020205 !important;
         }
         h2, h3, p, span, label {
-            color: #00ff66 !important; /* Total Green */
+            color: #00ff66 !important;
             font-family: 'Courier New', Courier, monospace !important;
         }
         .stTextInput > div > div > input {
@@ -145,7 +143,7 @@ else:
     # Text Input Command
     query = st.text_input("⌨️ Terminal Command (or type below):", placeholder="Type here, Boss...")
 
-    # JavaScript integration for Voice (Sunne aur Bolne ke liye browser hooks)
+    # JavaScript integration for Voice Input
     voice_js = """
     <script>
     function startListening() {
@@ -155,7 +153,6 @@ else:
         
         recognition.onresult = function(event) {
             const speechToText = event.results[0][0].transcript;
-            // Send back to Streamlit input via prompt trick or alert
             const inputEl = parent.document.querySelector('input[type="text"]');
             if(inputEl) {
                 inputEl.value = speechToText;
@@ -195,10 +192,4 @@ else:
         # Output Text
         st.markdown(f"""
         <div style="background-color: #051a05; padding: 15px; border-radius: 10px; border: 1px solid #00ff66; margin-top: 15px;">
-            <p style="color: #888; margin: 0;"><b>[COMMAND]:</b> {query}</p>
-            <p style="color: #00ff66; margin-top: 10px;">🤖 <b>[VEER AI]:</b> {st.session_state.ai_response_text}</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # TTS (Text to speech) - AI ab bolega aapka response automatically!
-        if st.session_state.ai_response_text
+            <p style="color: #888; margin: 0;"><b>
