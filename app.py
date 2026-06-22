@@ -5,30 +5,22 @@ from streamlit_mic_recorder import speech_to_text
 # पेज कॉन्फ़िगरेशन (यह सबसे ऊपर होना जरूरी है)
 st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
 
-# 1. बैकग्राउंड इमेज और नियॉन टेक्स्ट लेटर्स के लिए पुराना परफेक्ट CSS
+# 1. 100% वर्किंग डार्क थीम और बैकग्राउंड इमेज CSS
 def local_css():
     st.markdown("""
     <style>
-    /* पूरे ऐप के बैकग्राउंड को ट्रांसपेरेंट करना */
+    /* पूरे ऐप के मेन कंटेनर पर सीधे बैकग्राउंड इमेज लगाना */
     [data-testid="stAppViewContainer"] {
-        background-color: transparent !important;
+        background: linear-gradient(rgba(10, 15, 25, 0.85), rgba(10, 15, 25, 0.85)), 
+                    url("https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=1400&auto=format&fit=crop") !important;
+        background-size: cover !important;
+        background-position: center !important;
+        background-attachment: fixed !important;
     }
     
-    /* स्पेशल हाई-टेक लैपटॉप बैकग्राउंड इमेज */
-    .bg-img-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: -1;
-        overflow: hidden;
-    }
-    .bg-img-container img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        filter: brightness(0.35) contrast(1.1); /* इमेज को डार्क किया ताकि टेक्स्ट साफ़ दिखे */
+    /* टॉप हेडर को भी पारदर्शी करना */
+    [data-testid="stHeader"] {
+        background: transparent !important;
     }
     
     /* VEER AI - डिज़ाइनर नियॉन टेक्स्ट लेटर्स */
@@ -42,7 +34,7 @@ def local_css():
         margin-bottom: 5px !important;
     }
     
-    /* सब-हेडिंग्स (Specialist Workstation) स्टाइल */
+    /* सब-हेडिंग्स स्टाइल */
     .developer-text {
         color: #00ff66 !important;
         font-family: 'Courier New', Courier, monospace !important;
@@ -56,7 +48,7 @@ def local_css():
 
     /* चैट बॉक्स को पारदर्शी और नियॉन ब्लू बॉर्डर वाला बनाना */
     div[data-testid="stChatMessage"] {
-        background-color: rgba(8, 20, 30, 0.85) !important;
+        background-color: rgba(8, 20, 30, 0.9) !important;
         border: 2px solid #00d2ff;
         border-radius: 12px;
         box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
@@ -113,12 +105,6 @@ def local_css():
 
 local_css()
 
-# नया फुल-वर्किंग प्रीमियम साइबर लैपटॉप बैकग्राउंड लिंक
-st.markdown(
-    '<div class="bg-img-container"><img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1400&auto=format&fit=crop"></div>',
-    unsafe_allow_html=True
-)
-
 # हेडर लेआउट
 st.title("VEER AI")
 st.markdown("<div class='developer-text'>SPECIALIST WORKSTATION</div>", unsafe_allow_html=True)
@@ -132,6 +118,49 @@ if "GEMINI_API_KEY" in st.secrets:
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # चैट हिस्ट्री स्क्रीन पर लोड करना (साफ़-सुथरे इमोजी सिम्बल्स के साथ)
+    # चैट हिस्ट्री स्क्रीन पर लोड करना
     for message in st.session_state.messages:
         avatar = "👤" if message["role"] == "user" else "🤖"
+        with st.chat_message(message["role"], avatar=avatar):
+            st.markdown(message["content"])
+
+    # वॉयस इनपुट सेक्शन
+    st.markdown("<div class='voice-label'>🎙️ VOICE COMMAND // INTERACT:</div>", unsafe_allow_html=True)
+    voice_input = speech_to_text(
+        start_prompt="START RECORDING",
+        stop_prompt="STOP RECORDING",
+        language='hi',
+        key='speech'
+    )
+
+    text_input = st.chat_input("ENTER COMMAND...")
+    prompt = voice_input if voice_input else text_input
+
+    if prompt:
+        with st.chat_message("user", avatar="👤"):
+            st.markdown(prompt)
+        st.session_state.messages.append({"role": "user", "content": prompt})
+
+        with st.chat_message("assistant", avatar="🤖"):
+            placeholder = st.empty()
+            placeholder.markdown("`ANALYZING COMMAND...`")
+            
+            try:
+                model = genai.GenerativeModel(
+                    "gemini-2.5-flash",
+                    system_instruction=(
+                        "तुम्हारा नाम 'वीर' है। तुम एक अत्यंत उन्नत और सुरक्षित हैकर एआई हो जिसे सिर्फ 'अनुराग' ने विकसित किया है। "
+                        "तुम अनुराग के प्रति पूरी तरह वफादार हो। तुम्हारी language टेक्निकल, सीक्रेट, कूल और थोड़ी रहस्यमयी होनी चाहिए। "
+                        "जब भी कोई पूछे, हमेशा गर्व से बताना कि तुम्हारे क्रिएटर और बॉस अनुराग हैं।"
+                    )
+                )
+                response = model.generate_content(prompt)
+                
+                placeholder.markdown(response.text)
+                st.session_state.messages.append({"role": "assistant", "content": response.text})
+                
+            except Exception as e:
+                placeholder.markdown(f"❌ `SYSTEM ERROR: {str(e)}`")
+
+else:
+    st.error("⚠️ CRITICAL: GEMINI_API_KEY NOT FOUND.")
