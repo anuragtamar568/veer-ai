@@ -2,45 +2,61 @@ import streamlit as st
 import google.generativeai as genai
 from streamlit_mic_recorder import speech_to_text
 
-# 1. 3D Cyber Laptop Background & Designer Glowing Letters CSS
+# पेज कॉन्फ़िगरेशन (यह सबसे ऊपर होना चाहिए)
+st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
+
+# 1. बैकग्राउंड को फुल स्क्रीन इमेज बनाने और टेक्स्ट लेटर्स को डिज़ाइनर लुक देने के लिए CSS
 def local_css():
     st.markdown("""
     <style>
-    /* 3D साइबर लैपटॉप बैकग्राउंड */
-    .stApp {
-        background: linear-gradient(rgba(10, 15, 20, 0.4), rgba(10, 15, 20, 0.5)), 
-                    url("http://googleusercontent.com/image_generation_content/259");
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
+    /* पूरे ऐप के बैकग्राउंड को इमेज के ऊपर सेट करना */
+    [data-testid="stAppViewContainer"] {
+        background-color: transparent !important;
     }
     
-    /* VEER AI - डिज़ाइनर नियॉन टेक्स्ट */
+    /* बैकग्राउंड इमेज को फिक्स और फुल-स्क्रीन करने के लिए */
+    .bg-img-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: -1;
+        overflow: hidden;
+    }
+    .bg-img-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: brightness(0.4) contrast(1.1); /* इमेज को थोड़ा डार्क किया ताकि टेक्स्ट चमके */
+    }
+    
+    /* VEER AI - डिज़ाइनर नियॉन टेक्स्ट लेटर्स */
     h1 {
         color: #6bf2ff !important;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
         font-weight: 300 !important;
         text-transform: uppercase;
         letter-spacing: 5px;
-        text-shadow: 0 0 8px rgba(107, 242, 255, 0.6), 0 0 20px rgba(107, 242, 255, 0.4);
+        text-shadow: 0 0 10px rgba(107, 242, 255, 0.8), 0 0 25px rgba(107, 242, 255, 0.5);
         margin-bottom: 5px !important;
     }
     
-    /* सब-हेडिंग्स स्टाइल */
+    /* सब-हेडिंग्स (Specialist Workstation) स्टाइल */
     .developer-text {
         color: #00ff66 !important;
         font-family: 'Courier New', Courier, monospace !important;
         font-weight: bold;
         letter-spacing: 2px;
         font-size: 14px;
-        text-shadow: 0 0 5px rgba(0, 255, 102, 0.5);
+        text-shadow: 0 0 8px rgba(0, 255, 102, 0.6);
         margin-top: 2px !important;
         margin-bottom: 2px !important;
     }
 
-    /* चैट बॉक्स को इमेज जैसा पारदर्शी और नियॉन बॉर्डर वाला बनाना */
+    /* चैट बॉक्स को पारदर्शी और नियॉन बॉर्डर वाला बनाना */
     div[data-testid="stChatMessage"] {
-        background-color: rgba(10, 25, 35, 0.75) !important;
+        background-color: rgba(8, 20, 30, 0.8) !important;
         border: 2px solid #00d2ff;
         border-radius: 12px;
         box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
@@ -56,7 +72,7 @@ def local_css():
     
     /* चैट इनपुट कंटेनर स्टाइल */
     .stChatInputContainer {
-        background-color: rgba(5, 10, 15, 0.9) !important;
+        background-color: rgba(5, 10, 15, 0.95) !important;
         border: 2px solid #00d2ff !important;
         border-radius: 8px !important;
     }
@@ -79,7 +95,6 @@ def local_css():
         border: 1px solid #00d2ff !important;
         color: #00d2ff !important;
         border-radius: 4px !important;
-        transition: all 0.3s ease;
     }
     
     button:hover {
@@ -88,7 +103,7 @@ def local_css():
         box-shadow: 0 0 10px #00d2ff;
     }
 
-    /* स्कॉर्लबार छिपाना */
+    /* स्क्रॉलबार छिपाना */
     ::-webkit-scrollbar {
         width: 0px;
         background: transparent;
@@ -96,11 +111,15 @@ def local_css():
     </style>
     """, unsafe_allow_html=True)
 
-# पेज कॉन्फ़िगरेशन
-st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
 local_css()
 
-# हेडर (बिल्कुल इमेज की तरह लेआउट)
+# HTML और st.image के कॉम्बिनेशन से बैकग्राउंड में 3D साइबर लैपटॉप इन्जेक्ट करना
+st.markdown(
+    f'<div class="bg-img-container"><img src="http://googleusercontent.com/image_generation_content/259"></div>',
+    unsafe_allow_html=True
+)
+
+# हेडर (बिल्कुल डिज़ाइनर लेआउट)
 st.title("VEER AI")
 st.markdown("<div class='developer-text'>SPECIALIST WORKSTATION</div>", unsafe_allow_html=True)
 st.markdown("<div class='developer-text'>DEVELOPER: ANURAG // SECURE CONNECTION</div>", unsafe_allow_html=True)
