@@ -217,6 +217,15 @@ if "GEMINI_API_KEY" in st.secrets:
                     st.session_state.messages.append({"role": "assistant", "content": response.text})
                     
                 except Exception as e:
+                    if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+
+if not st.session_state.authenticated:
+    password = st.text_input("ENTER ACCESS CODE", type="password")
+    if password == "VEER123": # तुम्हारा पासवर्ड
+        st.session_state.authenticated = True
+        st.rerun()
+    st.stop() # जब तक सही न हो, आगे का ऐप मत दिखाओ
                     placeholder.markdown(f"❌ `SYSTEM ERROR: {str(e)}`")
 
 else:
