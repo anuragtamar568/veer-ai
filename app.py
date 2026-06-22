@@ -5,7 +5,7 @@ from streamlit_mic_recorder import speech_to_text
 # पेज कॉन्फ़िगरेशन (यह सबसे ऊपर होना जरूरी है)
 st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
 
-# 1. डार्क थीम, नियॉन लेटर्स और यूआई सेटिंग्स के लिए CSS
+# 1. डार्क थीम, नियॉन लेटर्स और असिस्टेंट बटन्स के लिए CSS
 def local_css():
     st.markdown("""
     <style>
@@ -73,6 +73,7 @@ def local_css():
         margin-top: 15px;
     }
 
+    /* मुख्य माइक और सबमिट बटन्स */
     button {
         background-color: #050a10 !important;
         border: 1px solid #00d2ff !important;
@@ -84,6 +85,29 @@ def local_css():
         background-color: #00d2ff !important;
         color: black !important;
         box-shadow: 0 0 10px #00d2ff;
+    }
+
+    /* 🔗 असिस्टेंट के स्पेशल नियॉन लिंक बटन का स्टाइल */
+    .action-link {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #050a10;
+        color: #00ff66 !important;
+        border: 2px solid #00ff66;
+        border-radius: 6px;
+        text-decoration: none;
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        letter-spacing: 1px;
+        text-shadow: 0 0 5px #00ff66;
+        box-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
+        margin-top: 10px;
+        transition: all 0.3s ease;
+    }
+    .action-link:hover {
+        background-color: #00ff66;
+        color: #050a10 !important;
+        box-shadow: 0 0 15px #00ff66;
     }
 
     ::-webkit-scrollbar {
@@ -100,11 +124,6 @@ st.title("VEER AI")
 st.markdown("<div class='developer-text'>SPECIALIST WORKSTATION</div>", unsafe_allow_html=True)
 st.markdown("<div class='developer-text'>DEVELOPER: ANURAG // SECURE CONNECTION</div>", unsafe_allow_html=True)
 st.write("---")
-
-# JavaScript से ब्राउज़र में नई टैब खोलने का फंक्शन
-def open_website(url):
-    js = f"window.open('{url}', '_blank');"
-    st.components.v1.html(f"<script>{js}</script>", height=0, width=0)
 
 # API Configuration
 if "GEMINI_API_KEY" in st.secrets:
@@ -136,32 +155,41 @@ if "GEMINI_API_KEY" in st.secrets:
             st.markdown(prompt)
         st.session_state.messages.append({"role": "user", "content": prompt})
 
-        # --- असिस्टेंट फीचर: कीवर्ड्स डिटेक्ट करना ---
+        # --- असिस्टेंट फीचर: कीवर्ड्स चेक करना ---
         clean_prompt = prompt.lower()
         url_to_open = None
         assistant_reply = ""
+        button_text = ""
 
         if "youtube" in clean_prompt or "यूट्यूब" in clean_prompt:
             url_to_open = "https://www.youtube.com"
-            assistant_reply = "हाँ भाई, अभी खोलता हूँ यूट्यूब तुम्हारे लिए! एक नई टैब चेक करो।"
+            assistant_reply = "हाँ भाई, यूट्यूब खोलने का लिंक तैयार है! नीचे दिए बटन पर क्लिक करो और मजे करो।"
+            button_text = "🚀 OPEN YOUTUBE"
         elif "google" in clean_prompt or "गूगल" in clean_prompt:
             url_to_open = "https://www.google.com"
-            assistant_reply = "लो भाई, गूगल बाबा को ओपन कर दिया है नई टैब में।"
+            assistant_reply = "लो भाई, गूगल बाबा का एक्सेस रेडी है। नीचे क्लिक करो।"
+            button_text = "🔍 OPEN GOOGLE"
         elif "github" in clean_prompt or "गिटहब" in clean_prompt:
             url_to_open = "https://www.github.com"
-            assistant_reply = "बिल्कुल अनुराग भाई, गिटहब ओपन कर रहा हूँ।"
+            assistant_reply = "बिल्कुल अनुराग भाई, गिटहब ओपन करने के लिए नीचे दिए बटन पर क्लिक करो।"
+            button_text = "🐙 OPEN GITHUB"
         elif "instagram" in clean_prompt or "इंस्टाग्राम" in clean_prompt:
             url_to_open = "https://www.instagram.com"
-            assistant_reply = "चलो भाई, इंस्टाग्राम खोल दिया है। रील्स देखने का मन है क्या? 😉"
+            assistant_reply = "चलो भाई, इंस्टाग्राम का लिंक हाजिर है। रील्स देखनी हो तो नीचे क्लिक करो! 😉"
+            button_text = "📸 OPEN INSTAGRAM"
 
-        # अगर कोई असिस्टेंट कमांड मिल गया
+        # अगर कोई असिस्टेंट कमांड मिला
         if url_to_open:
             with st.chat_message("assistant", avatar="🤖"):
                 st.markdown(assistant_reply)
-            st.session_state.messages.append({"role": "assistant", "content": assistant_reply})
-            open_website(url_to_open)
+                # ब्राउज़र ब्लॉक न करे इसलिए सुंदर और सेफ नियॉन बटन देना
+                st.markdown(f'<a href="{url_to_open}" target="_blank" class="action-link">{button_text}</a>', unsafe_allow_html=True)
+            
+            # चैट हिस्ट्री में सेव करना
+            full_html_reply = f"{assistant_reply}<br><br><a href='{url_to_open}' target='_blank' class='action-link'>{button_text}</a>"
+            st.session_state.messages.append({"role": "assistant", "content": full_html_reply})
         else:
-            # अगर नॉर्मल सवाल है, तो AI दोस्त की तरह जवाब देगा
+            # अगर नॉर्मल बात है, तो AI दोस्त की तरह जवाब देगा
             with st.chat_message("assistant", avatar="🤖"):
                 placeholder = st.empty()
                 placeholder.markdown("`ANALYZING COMMAND...`")
@@ -174,7 +202,7 @@ if "GEMINI_API_KEY" in st.secrets:
                             "तुम्हें सिर्फ और सिर्फ 'अनुराग' ने बनाया है। तुम्हारी बात करने की भाषा एकदम नेचुरल, आम इंसानों जैसी और हिंदी-इंग्लिश मिक्स (Hinglish) होनी चाहिए। "
                             "बातचीत में 'Greetings', 'प्रोटोकॉल्स' जैसे भारी-भरकम शब्दों का इस्तेमाल बिल्कुल मत करो। "
                             "जैसे कोई दोस्त आपस में बात करते हैं (जैसे 'अरे भाई', 'हाँ यार', 'बिल्कुल'), वैसे बात करो। "
-                            "शुरुआत में या पहली बार पूछने पर एक बार गर्व से बता देना कि तुम्हें अनुराग ने बनाया है, लेकिन हर जवाब में बार-बार नाम मत दोहराना।"
+                            "शुरुઆત में या पहली बार पूछने पर एक बार गर्व से बता देना कि तुम्हें अनुराग ने बनाया है, लेकिन हर जवाब में बार-बार नाम मत दोहराना।"
                         )
                     )
                     response = model.generate_content(prompt)
