@@ -39,7 +39,10 @@ if "GEMINI_API_KEY" in st.secrets and st.secrets["GEMINI_API_KEY"].strip() != ""
             
             try:
                 # यहाँ हमने मॉडल अपडेट कर दिया है
-                model = genai.GenerativeModel("gemini-2.5-flash")
+                model = genai.GenerativeModel(
+    "gemini-2.5-flash",
+    system_instruction="तुम्हारा नाम 'वीर' है। तुम एक बुद्धिमान और मददगार एआई असिस्टेंट हो, जिसे अनुराग (anuragtamar568) ने बनाया है। जब भी कोई तुम्हारा नाम पूछे, तो गर्व से अपना नाम 'वीर' बताना और अपने डेवलपर का नाम लेना।"
+)
                 response = model.generate_content(prompt)
                 
                 # जवाब दिखाना और सेव करना
