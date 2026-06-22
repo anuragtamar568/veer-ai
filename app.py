@@ -2,19 +2,19 @@ import streamlit as st
 import google.generativeai as genai
 from streamlit_mic_recorder import speech_to_text
 
-# पेज कॉन्फ़िगरेशन (यह सबसे ऊपर होना चाहिए)
+# पेज कॉन्फ़िगरेशन (यह सबसे ऊपर होना जरूरी है)
 st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
 
-# 1. बैकग्राउंड को फुल स्क्रीन इमेज बनाने और टेक्स्ट लेटर्स को डिज़ाइनर लुक देने के लिए CSS
+# 1. बैकग्राउंड इमेज और नियॉन टेक्स्ट लेटर्स के लिए CSS
 def local_css():
     st.markdown("""
     <style>
-    /* पूरे ऐप के बैकग्राउंड को इमेज के ऊपर सेट करना */
+    /* पूरे ऐप के बैकग्राउंड को ट्रांसपेरेंट करना */
     [data-testid="stAppViewContainer"] {
         background-color: transparent !important;
     }
     
-    /* बैकग्राउंड इमेज को फिक्स और फुल-स्क्रीन करने के लिए */
+    /* स्पेशल हाई-टेक लैपटॉप बैकग्राउंड इमेज */
     .bg-img-container {
         position: fixed;
         top: 0;
@@ -28,7 +28,7 @@ def local_css():
         width: 100%;
         height: 100%;
         object-fit: cover;
-        filter: brightness(0.4) contrast(1.1); /* इमेज को थोड़ा डार्क किया ताकि टेक्स्ट चमके */
+        filter: brightness(0.35) contrast(1.1); /* इमेज को डार्क किया ताकि टेक्स्ट साफ़ दिखे */
     }
     
     /* VEER AI - डिज़ाइनर नियॉन टेक्स्ट लेटर्स */
@@ -54,9 +54,9 @@ def local_css():
         margin-bottom: 2px !important;
     }
 
-    /* चैट बॉक्स को पारदर्शी और नियॉन बॉर्डर वाला बनाना */
+    /* चैट बॉक्स को पारदर्शी और नियॉन ब्लू बॉर्डर वाला बनाना */
     div[data-testid="stChatMessage"] {
-        background-color: rgba(8, 20, 30, 0.8) !important;
+        background-color: rgba(8, 20, 30, 0.85) !important;
         border: 2px solid #00d2ff;
         border-radius: 12px;
         box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
@@ -64,7 +64,7 @@ def local_css():
         padding: 15px !important;
     }
 
-    /* नॉर्मल टेक्स्ट का कलर */
+    /* नॉर्मल टेक्स्ट का कलर (सफ़ेद) */
     p, span, div, label {
         color: #ffffff !important;
         font-family: 'Segoe UI', sans-serif !important;
@@ -113,13 +113,13 @@ def local_css():
 
 local_css()
 
-# HTML और st.image के कॉम्बिनेशन से बैकग्राउंड में 3D साइबर लैपटॉप इन्जेक्ट करना
+# नया फुल-वर्किंग प्रीमियम साइबर लैपटॉप बैकग्राउंड लिंक
 st.markdown(
-    f'<div class="bg-img-container"><img src="http://googleusercontent.com/image_generation_content/259"></div>',
+    '<div class="bg-img-container"><img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1400&auto=format&fit=crop"></div>',
     unsafe_allow_html=True
 )
 
-# हेडर (बिल्कुल डिज़ाइनर लेआउट)
+# हेडर लेआउट
 st.title("VEER AI")
 st.markdown("<div class='developer-text'>SPECIALIST WORKSTATION</div>", unsafe_allow_html=True)
 st.markdown("<div class='developer-text'>DEVELOPER: ANURAG // SECURE CONNECTION</div>", unsafe_allow_html=True)
@@ -132,9 +132,10 @@ if "GEMINI_API_KEY" in st.secrets:
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # चैट हिस्ट्री स्क्रीन पर लोड करना
+    # चैट हिस्ट्री स्क्रीन पर लोड करना (साफ़-सुथरे इमोजी सिम्बल्स के साथ)
     for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
+        avatar = "👤" if message["role"] == "user" else "🤖"
+        with st.chat_message(message["role"], avatar=avatar):
             st.markdown(message["content"])
 
     # वॉयस इनपुट सेक्शन
@@ -150,11 +151,11 @@ if "GEMINI_API_KEY" in st.secrets:
     prompt = voice_input if voice_input else text_input
 
     if prompt:
-        with st.chat_message("user"):
+        with st.chat_message("user", avatar="👤"):
             st.markdown(prompt)
         st.session_state.messages.append({"role": "user", "content": prompt})
 
-        with st.chat_message("assistant"):
+        with st.chat_message("assistant", avatar="🤖"):
             placeholder = st.empty()
             placeholder.markdown("`ANALYZING COMMAND...`")
             
