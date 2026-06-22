@@ -33,19 +33,19 @@ def speak_auto(text):
 st.title("VEER AI 🤖")
 st.markdown("<div class='dev-text'>⚡ SPECIALIST WORKSTATION // 👤 CREATED BY ANURAG</div>", unsafe_allow_html=True)
 
-# 5. Session State Initialization
+# 5. Session State Initialize
 if "messages" not in st.session_state:
     st.session_state.messages = []
+if "last_sent" not in st.session_state:
+    st.session_state.last_sent = None
 
-# Clear Chat History Button (Stuck Cache Reset karne ke liye)
+# Clear Chat History Button
 if st.button("🗑️ Clear Chat History"):
     st.session_state.messages = []
     if "chat" in st.session_state:
         del st.session_state["chat"]
-    if "last_processed_voice" in st.session_state:
-        del st.session_state["last_processed_voice"]
-    st.success("Chat history cleared successfully!")
-    time.sleep(1)
+    if "last_sent" in st.session_state:
+        st.session_state.last_sent = None
     st.rerun()
 
 st.write("---")
@@ -68,7 +68,7 @@ if "chat" not in st.session_state:
     except Exception as e:
         st.error(f"Model Init Error: {e}")
 
-# रिकॉर्डिंग बटन
+# रिकॉर्डिंग बटन - Isko ek form block jaisa control karenge
 voice_prompt = speech_to_text(language='hi', use_container_width=True, key='mic')
 
 # चैट हिस्ट्री दिखाना
@@ -76,40 +76,41 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# इनपुट ट्रैकिंग और डुप्लीकेट प्रोटेक्शन
-prompt = None
+# इनपुट कैप्चर
 user_input = st.chat_input("COMMAND...")
+final_prompt = None
 
+# STRICT SPAM PROTECTION: Agar voice prompt bilkul naya hai aur pichle sent message se alag hai tabhi chalega
 if voice_prompt and voice_prompt.strip():
-    if "last_processed_voice" not in st.session_state or st.session_state.last_processed_voice != voice_prompt:
-        prompt = voice_prompt
-        st.session_state.last_processed_voice = voice_prompt
+    if st.session_state.last_sent != voice_prompt:
+        final_prompt = voice_prompt
 elif user_input and user_input.strip():
-    prompt = user_input
+    if st.session_state.last_sent != user_input:
+        final_prompt = user_input
 
 # मुख्य लॉजिक
-if prompt:
-    st.session_state.messages.append({"role": "user", "content": prompt})
+if final_prompt:
+    # Turant last_sent ko lock karo taaki agla background rerun ise chalaye na
+    st.session_state.last_sent = final_prompt
+    
+    st.session_state.messages.append({"role": "user", "content": final_prompt})
     with st.chat_message("user"):
-        st.write(prompt)
+        st.write(final_prompt)
 
     with st.chat_message("assistant"):
         placeholder = st.empty()
         try:
             # Gemini Chat Call
-            response = st.session_state.chat.send_message(prompt)
+            response = st.session_state.chat.send_message(final_prompt)
             
             # Response handling
             placeholder.write(response.text)
             speak_auto(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
-            
-            # Page ko fresh state dena taaki mic spam na kare
             st.rerun()
             
         except Exception as e:
             if "429" in str(e):
-                placeholder.error("⏳ Google Free API par thoda load hai. Kripya 15 seconds wait karein aur fir se try karein!")
-                time.sleep(2)
+                placeholder.error("🛑 Google ki block limit active hai. Pehle upar 'Clear Chat History' dabayein, fir page ko refresh karke 10 second baad check karein.")
             else:
                 placeholder.error(f"Error: {e}")
