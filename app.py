@@ -1,190 +1,273 @@
-import streamlit as st
-import google.generativeai as genai
-from streamlit_mic_recorder import speech_to_text
-
-# पेज कॉन्फ़िगरेशन (यह सबसे ऊपर होना जरूरी है)
-st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
-
-# 1. बैकग्राउंड इमेज, नियॉन टेक्स्ट और सफ़ेद पट्टी हटाने के लिए CSS
-def local_css():
-    st.markdown("""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VEER AI - Specialist Workstation</title>
     <style>
-    /* पूरे ऐप के मुख्य कंटेनर को ट्रांसपेरेंट करना */
-    [data-testid="stAppViewContainer"] {
-        background-color: transparent !important;
-    }
-    
-    /* स्पेशल हाई-टेक लैपटॉप बैकग्राउंड इमेज */
-    .bg-img-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: -1;
-        overflow: hidden;
-    }
-    .bg-img-container img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        filter: brightness(0.35) contrast(1.1);
-    }
-    
-    /* 🛠️ वॉइस रिकॉर्डर की सफ़ेद पट्टी (White BG) को गायब करने का फिक्स */
-    iframe[title="streamlit_mic_recorder.speech_to_text"] {
-        background: transparent !important;
-        background-color: transparent !important;
-    }
-    
-    div[data-testid="stHtmlBlock"] iframe {
-        background: transparent !important;
-    }
-    
-    /* VEER AI - डिज़ाइनर नियॉन टेक्स्ट लेटर्स */
-    h1 {
-        color: #6bf2ff !important;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-        font-weight: 300 !important;
-        text-transform: uppercase;
-        letter-spacing: 5px;
-        text-shadow: 0 0 10px rgba(107, 242, 255, 0.8), 0 0 25px rgba(107, 242, 255, 0.5);
-        margin-bottom: 5px !important;
-    }
-    
-    /* सब-हेडिंग्स (Specialist Workstation) स्टाइल */
-    .developer-text {
-        color: #00ff66 !important;
-        font-family: 'Courier New', Courier, monospace !important;
-        font-weight: bold;
-        letter-spacing: 2px;
-        font-size: 14px;
-        text-shadow: 0 0 8px rgba(0, 255, 102, 0.6);
-        margin-top: 2px !important;
-        margin-bottom: 2px !important;
-    }
+        /* Global & Theme Settings */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        body {
+            background-color: #0b0f19; /* Perfect Dark Terminal Background */
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 20px;
+        }
 
-    /* चैट बॉक्स को पारदर्शी और नियॉन ब्लू बॉर्डर वाला बनाना */
-    div[data-testid="stChatMessage"] {
-        background-color: rgba(8, 20, 30, 0.85) !important;
-        border: 2px solid #00d2ff;
-        border-radius: 12px;
-        box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
-        margin-bottom: 15px;
-        padding: 15px !important;
-    }
+        /* Header Section */
+        header {
+            border-bottom: 1px solid #334155;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.6), 0 0 20px rgba(0, 255, 255, 0.3);
+            letter-spacing: 2px;
+        }
+        .subtitle {
+            color: #00ff66; /* Neon Green */
+            font-size: 0.9rem;
+            margin-top: 5px;
+            font-weight: bold;
+        }
 
-    /* नॉर्मल टेक्स्ट का कलर (सफ़ेद) */
-    p, span, div, label {
-        color: #ffffff !important;
-        font-family: 'Segoe UI', sans-serif !important;
-    }
-    
-    /* चैट इनपुट कंटेनर स्टाइल */
-    .stChatInputContainer {
-        background-color: rgba(5, 10, 15, 0.95) !important;
-        border: 2px solid #00d2ff !important;
-        border-radius: 8px !important;
-    }
-    
-    .stChatInputContainer textarea {
-        color: #ffffff !important;
-    }
+        /* Chat Container */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+            margin-bottom: 20px;
+        }
 
-    /* वॉयस कमांड टेक्स्ट */
-    .voice-label {
-        color: #ffffff !important;
-        font-family: 'Courier New', monospace !important;
-        font-weight: bold;
-        margin-top: 15px;
-    }
+        /* Message Boxes */
+        .message-row {
+            display: flex;
+            margin-bottom: 20px;
+            align-items: flex-start;
+        }
+        .message-box {
+            background-color: #1e293b;
+            border-radius: 8px;
+            padding: 15px;
+            max-width: 85%;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.15);
+        }
+        /* Border color logic based on sender */
+        .user-row .message-box {
+            border: 1px solid #00d4ff; /* Sleek Cyan for User */
+        }
+        .ai-row .message-box {
+            border: 1px solid #00ff66; /* Cyber Green for AI */
+        }
 
-    /* माइक बटन का हैकर स्टाइल */
-    button {
-        background-color: #050a10 !important;
-        border: 1px solid #00d2ff !important;
-        color: #00d2ff !important;
-        border-radius: 4px !important;
-    }
-    
-    button:hover {
-        background-color: #00d2ff !important;
-        color: black !important;
-        box-shadow: 0 0 10px #00d2ff;
-    }
+        /* Icons */
+        .icon-container {
+            background-color: #ffffff;
+            border-radius: 5px;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+        }
+        .icon-container span {
+            font-size: 1.2rem;
+        }
 
-    /* स्क्रॉलबार छिपाना */
-    ::-webkit-scrollbar {
-        width: 0px;
-        background: transparent;
-    }
+        /* Text Styling */
+        .text-content {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #e2e8f0;
+        }
+
+        /* Controls & Recording */
+        .controls {
+            margin-bottom: 15px;
+        }
+        .record-btn {
+            background-color: #1e293b;
+            border: 1px solid #475569;
+            color: #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+        .record-btn:hover {
+            border-color: #00ff66;
+            color: #00ff66;
+            box-shadow: 0 0 8px rgba(0, 255, 102, 0.3);
+        }
+
+        /* Input Area Fixes */
+        .input-area {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .command-input {
+            width: 100%;
+            background-color: #1e293b;
+            border: 1px solid #334155; /* Normal subtle border */
+            border-radius: 8px;
+            padding: 15px 60px 15px 15px;
+            color: #ffffff;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+        /* Red border strictly removed, now focuses with cyber green */
+        .command-input:focus {
+            border-color: #00ff66;
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);
+        }
+        .send-btn {
+            position: absolute;
+            right: 15px;
+            background-color: #00d4ff;
+            border: none;
+            color: #0b0f19;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .send-btn:hover {
+            background-color: #00ff66;
+        }
     </style>
-    """, unsafe_allow_html=True)
+</head>
+<body>
 
-local_css()
+    <!-- Header Section -->
+    <header>
+        <div class="title">VEER AI</div>
+        <div class="subtitle">SPECIALIST WORKSTATION // DEVELOPER: ANURAG // SECURE CONNECTION</div>
+    </header>
 
-# प्रीमियम साइबर लैपटॉप बैकग्राउंड लिंक
-st.markdown(
-    '<div class="bg-img-container"><img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1400&auto=format&fit=crop"></div>',
-    unsafe_allow_html=True
-)
+    <!-- Chat Stream -->
+    <div class="chat-container" id="chatContainer">
+        <!-- AI Initial Welcome Message -->
+        <div class="message-row ai-row">
+            <div class="message-box">
+                <div class="icon-container"><span>🤖</span></div>
+                <div class="text-content" id="welcome-text">Ping received. Veer online hai. Anurag, bolo kya command hai?</div>
+            </div>
+        </div>
+    </div>
 
-# हेडर लेआउट
-st.title("VEER AI")
-st.markdown("<div class='developer-text'>SPECIALIST WORKSTATION</div>", unsafe_allow_html=True)
-st.markdown("<div class='developer-text'>DEVELOPER: ANURAG // SECURE CONNECTION</div>", unsafe_allow_html=True)
-st.write("---")
+    <!-- Recording Section -->
+    <div class="controls">
+        <button class="record-btn">
+            <span>🎙️</span> START RECORDING
+        </button>
+    </div>
 
-# API Configuration
-if "GEMINI_API_KEY" in st.secrets:
-    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-    
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+    <!-- Command Input Box -->
+    <div class="input-area">
+        <input type="text" class="command-input" id="userInput" placeholder="ENTER COMMAND..." onkeypress="handleKeyPress(event)">
+        <button class="send-btn" onclick="processCommand()">↑</button>
+    </div>
 
-    # चैट हिस्ट्री स्क्रीन पर लोड करना (साफ़-सुथरे इमोजी सिम्बल्स के साथ)
-    for message in st.session_state.messages:
-        avatar = "👤" if message["role"] == "user" else "🤖"
-        with st.chat_message(message["role"], avatar=avatar):
-            st.markdown(message["content"])
+    <!-- JavaScript for Terminal Mechanics -->
+    <script>
+        // Terminal Typewriter Effect function
+        function typeWriter(element, text, speed = 30) {
+            let i = 0;
+            element.innerHTML = '';
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
 
-    # वॉयस इनपुट सेक्शन
-    st.markdown("<div class='voice-label'>🎙️ VOICE COMMAND // INTERACT:</div>", unsafe_allow_html=True)
-    voice_input = speech_to_text(
-        start_prompt="START RECORDING",
-        stop_prompt="STOP RECORDING",
-        language='hi',
-        key='speech'
-    )
+        // Handle Enter Key Press
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                processCommand();
+            }
+        }
 
-    text_input = st.chat_input("ENTER COMMAND...")
-    prompt = voice_input if voice_input else text_input
+        // Process Input and Simulate AI Reply
+        function processCommand() {
+            const inputField = document.getElementById('userInput');
+            const chatContainer = document.getElementById('chatContainer');
+            const query = inputField.value.trim();
 
-    if prompt:
-        with st.chat_message("user", avatar="👤"):
-            st.markdown(prompt)
-        st.session_state.messages.append({"role": "user", "content": prompt})
+            if (query === '') return;
 
-        with st.chat_message("assistant", avatar="🤖"):
-            placeholder = st.empty()
-            placeholder.markdown("`ANALYZING COMMAND...`")
-            
-            try:
-                model = genai.GenerativeModel(
-                    "gemini-2.5-flash",
-                    system_instruction=(
-                        "तुम्हारा नाम 'वीर' है। तुम एक अत्यंत उन्नत और सुरक्षित हैकर एआई हो जिसे सिर्फ 'अनुराग' ने विकसित किया है। "
-                        "तुम अनुराग के प्रति पूरी तरह वफादार हो। तुम्हारी भाषा टेक्निकल, सीक्रेट, कूल और थोड़ी रहस्यमयी होनी चाहिए। "
-                        "जब भी कोई पूछे, हमेशा गर्व से बताना कि तुम्हारे क्रिएटर और बॉस अनुराग हैं।"
-                    )
-                )
-                response = model.generate_content(prompt)
+            // 1. Append User Message
+            const userRow = document.createElement('div');
+            userRow.className = 'message-row user-row';
+            userRow.innerHTML = `
+                <div class="message-box">
+                    <div class="icon-container"><span>👤</span></div>
+                    <div class="text-content">${query}</div>
+                </div>
+            `;
+            chatContainer.appendChild(userRow);
+            inputField.value = ''; // Clear input
+
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            // 2. Simulate AI Dynamic Response (Replace this block with your actual Fetch API call)
+            setTimeout(() => {
+                const aiRow = document.createElement('div');
+                aiRow.className = 'message-row ai-row';
                 
-                placeholder.markdown(response.text)
-                st.session_state.messages.append({"role": "assistant", "content": response.text})
-                
-            except Exception as e:
-                placeholder.markdown(f"❌ `SYSTEM ERROR: {str(e)}`")
+                // Temporary response simulation logic
+                let replyText = "Command processed. System status normal.";
+                if(query.includes('2+2')) {
+                    replyText = "4. Yeh toh basic math tha, kuch complex pucho master!";
+                } else if(query.toLowerCase() === 'hii' || query.toLowerCase() === 'hello') {
+                    replyText = "Hello! Access granted. Kaise madad karu aapki?";
+                }
 
-else:
-    st.error("⚠️ CRITICAL: GEMINI_API_KEY NOT FOUND.")
+                aiRow.innerHTML = `
+                    <div class="message-box">
+                        <div class="icon-container"><span>🤖</span></div>
+                        <div class="text-content"></div>
+                    </div>
+                `;
+                
+                chatContainer.appendChild(aiRow);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+
+                // Trigger typewriter text effect on the newly added text block
+                const textTarget = aiRow.querySelector('.text-content');
+                typeWriter(textTarget, replyText, 25);
+
+            }, 800);
+        }
+    </script>
+</body>
+</html>
