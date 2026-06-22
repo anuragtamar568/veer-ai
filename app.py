@@ -1,12 +1,14 @@
 import streamlit as st
 import google.generativeai as genai
 from streamlit_mic_recorder import speech_to_text
+from PIL import Image
 
-# पेज कॉन्फ़िगरेशन (यह सबसे ऊपर होना जरूरी है)
+# पेज कॉन्फ़िगरेशन
 st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
 
-# 1. डार्क थीम और नियॉन लेटर्स के लिए साफ़-सुथरा CSS
-def local_css():
+# 1. डार्क थीम, नियॉन लेटर्स और रोबोटिक वॉयस के लिए स्क्रिप्ट
+def local_css_and_js():
+    # CSS फॉर डार्क नियॉन थीम
     st.markdown("""
     <style>
     [data-testid="stAppViewContainer"] {
@@ -58,12 +60,11 @@ def local_css():
         color: #ffffff !important;
     }
     .voice-label {
-        color: #ffffff !important;
+        color: #00ff66 !important;
         font-family: 'Courier New', monospace !important;
         font-weight: bold;
         margin-top: 15px;
     }
-    /* मुख्य माइक और सबमिट बटन्स का स्टाइल */
     button {
         background-color: #050a10 !important;
         border: 1px solid #00d2ff !important;
@@ -75,7 +76,6 @@ def local_css():
         color: black !important;
         box-shadow: 0 0 10px #00d2ff;
     }
-    /* 🔗 Streamlit के ऑफिशियल लिंक बटन को हैकर स्टाइल देना */
     div.stLinkButton > a {
         background-color: #050a10 !important;
         color: #00ff66 !important;
@@ -104,112 +104,18 @@ def local_css():
     </style>
     """, unsafe_allow_html=True)
 
-local_css()
+local_css_and_js()
 
-# हेडर लेआउट
-st.title("VEER AI")
-st.markdown("<div class='developer-text'>SPECIALIST WORKSTATION</div>", unsafe_allow_html=True)
-st.markdown("<div class='developer-text'>DEVELOPER: ANURAG // SECURE CONNECTION</div>", unsafe_allow_html=True)
-st.write("---")
-
-# --- 🔐 पर्सनल पासवर्ड प्रोटेक्शन लॉजिक ---
-if "authenticated" not in st.session_state:
-    st.session_state.authenticated = False
-
-if not st.session_state.authenticated:
-    st.markdown("### 🔒 SECURE LOGIN REQUIRED")
-    password_input = st.text_input("ENTER ACCESS KEY // सिर्फ अनुराग के लिए:", type="password")
-    if st.button("ACCESS SYSTEM"):
-        # यहाँ आप अपना मनपसंद पासवर्ड बदल सकते हैं (अभी मैंने 'anurag123' रखा है)
-        if password_input == "anurag123": 
-            st.session_state.authenticated = True
-            st.rerun()
-        else:
-            st.error("❌ ACCESS DENIED // INVALID ACCESS KEY")
-    st.stop() # जब तक सही पासवर्ड नहीं डलेगा, आगे का कोड रन नहीं होगा
-# ----------------------------------------------
-
-# API Configuration
-if "GEMINI_API_KEY" in st.secrets:
-    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-else:
-    st.error("⚠️ API Key नहीं मिली! कृपया Streamlit Secrets में GEMINI_API_KEY सेट करें।")
-    st.stop()
-
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-# चैट हिस्ट्री स्क्रीन पर लोड करना
-for message in st.session_state.messages:
-    avatar = "👤" if message["role"] == "user" else "🤖"
-    with st.chat_message(message["role"], avatar=avatar):
-        if isinstance(message["content"], dict) and message["content"].get("type") == "link_button":
-            st.write(message["content"]["text"])
-            st.link_button(message["content"]["button_text"], message["content"]["url"])
-        else:
-            st.markdown(str(message["content"]))
-
-# वॉयस इनपुट सेक्शन
-st.markdown("<div class='voice-label'>🎙️ VOICE COMMAND // INTERACT:</div>", unsafe_allow_html=True)
-voice_input = speech_to_text(start_prompt="START RECORDING", stop_prompt="STOP RECORDING", language='hi', key='speech')
-text_input = st.chat_input("ENTER COMMAND...")
-
-prompt = voice_input if voice_input else text_input
-
-if prompt:
-    with st.chat_message("user", avatar="👤"):
-        st.markdown(prompt)
-    st.session_state.messages.append({"role": "user", "content": prompt})
-
-    # --- असिस्टेंट फीचर: कीवर्ड्स चेक करना ---
-    clean_prompt = prompt.lower().replace(" ", "")
-    url_to_open = None
-    assistant_reply = ""
-    button_text = ""
-
-    if "youtube" in clean_prompt or "यूट्यूब" in clean_prompt:
-        url_to_open = "https://www.youtube.com"
-        assistant_reply = "हाँ भाई, यूट्यूब खोलने का लिंक तैयार है! नीचे दिए बटन पर क्लिक करो और मजे करो।"
-        button_text = "🚀 OPEN YOUTUBE"
-    elif "google" in clean_prompt or "गूगल" in clean_prompt:
-        url_to_open = "https://www.google.com"
-        assistant_reply = "लो भाई, गूगल बाबा का एक्सेस रेडी है। नीचे क्लिक करो।"
-        button_text = "🔍 OPEN GOOGLE"
-    elif "github" in clean_prompt or "गिटहब" in clean_prompt:
-        url_to_open = "https://www.github.com"
-        assistant_reply = "बिल्कुल अनुराग भाई, गिटहब ओपन करने के लिए नीचे दिए बटन पर क्लिक करो।"
-        button_text = "🐙 OPEN GITHUB"
-    elif "instagram" in clean_prompt or "इंस्टाग्राम" in clean_prompt:
-        url_to_open = "https://www.instagram.com"
-        assistant_reply = "चलो भाई, इंस्टाग्राम का लिंक हाजिर है। रील्स देखनी हो तो नीचे क्लिक करो! 😉"
-        button_text = "📸 OPEN INSTAGRAM"
-
-    # अगर कोई असिस्टेंट कमांड मैच हुआ
-    if url_to_open:
-        with st.chat_message("assistant", avatar="🤖"):
-            st.write(assistant_reply)
-            st.link_button(button_text, url_to_open)
-        st.session_state.messages.append({
-            "role": "assistant", 
-            "content": {"type": "link_button", "text": assistant_reply, "button_text": button_text, "url": url_to_open}
-        })
-    else:
-        # अगर नॉर्मल बात है, तो AI दोस्त की तरह जवाब देगा
-        with st.chat_message("assistant", avatar="🤖"):
-            placeholder = st.empty()
-            placeholder.markdown("`ANALYZING COMMAND...`")
-            try:
-                model = genai.GenerativeModel(
-                    "gemini-2.5-flash", 
-                    system_instruction=(
-                        "तुम्हारा नाम 'वीर' है। तुम कोई रोबोट या मशीन नहीं हो, बल्कि एक बेहद समझदार, कूल और दोस्ताना एआई असिस्टेंट हो। "
-                        "तुम्हें सिर्फ और सिर्फ 'अनुराग' ने बनाया है। तुम्हारी बात करने की भाषा एकदम नेचुरल, आम इंसानों जैसी और हिंदी-इंग्लिश मिक्स (Hinglish) होनी चाहिए। "
-                        "बातचीत में 'Greetings', 'प्रोटोकॉल्स' जैसे भारी-भरकम शब्दों का इस्तेमाल बिल्कुल मत करो। "
-                        "जैसे कोई दोस्त आपस में बात करते हैं (जैसे 'अरे भाई', 'हाँ यार', 'बिल्कुल'), वैसे बात करो।"
-                    )
-                )
-                response = model.generate_content(prompt)
-                placeholder.markdown(response.text)
-                st.session_state.messages.append({"role": "assistant", "content": response.text})
-            except Exception as e:
-                placeholder.markdown(f"❌ एरर आया: {str(e)}")
+# रोबोटिक आवाज़ जनरेट करने वाला जावास्क्रिप्ट फंक्शन
+def robot_speak(text_to_say):
+    clean_text = text_to_say.replace("'", "\\'").replace("\n", " ")
+    js_code = f"""
+    <script>
+    if ('speechSynthesis' in window) {{
+        window.speechSynthesis.cancel(); // पुरानी आवाज़ रोको
+        var msg = new SpeechSynthesisUtterance('{clean_text}');
+        
+        // रोबोटिक इफ़ेक्ट के लिए सेटिंग्स:
+        msg.pitch = 0.4;  // आवाज़ को बहुत भारी (Deep) बनाने के लिए
+        msg.rate = 0.85;  // थोडा धीरे बोलने के लिए ताकि रोबोट जैसा लगे
+        msg
