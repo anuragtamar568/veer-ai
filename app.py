@@ -45,7 +45,7 @@ else:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Chat Session setup
+# Chat Session Setup
 if "chat" not in st.session_state:
     model = genai.GenerativeModel(
         "gemini-2.0-flash",
@@ -56,26 +56,24 @@ if "chat" not in st.session_state:
 # रिकॉर्डिंग बटन
 voice_prompt = speech_to_text(language='hi', use_container_width=True, key='mic')
 
-# चैट हिस्ट्री दिखाना (Duplicate messages filter karne ke liye unique tracking)
+# चैट हिस्ट्री दिखाना
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# इनपुट कैप्चर और डुप्लीकेट प्रोटेक्शन लॉजिक
+# इनपुट ट्रैकिंग
 prompt = None
 user_input = st.chat_input("COMMAND...")
 
 if voice_prompt and voice_prompt.strip():
-    # Mic se input mila, check karein ki kya ye wahi purana text toh nahi jo rerun ho raha hai
     if "last_processed_voice" not in st.session_state or st.session_state.last_processed_voice != voice_prompt:
         prompt = voice_prompt
-        st.session_state.last_processed_voice = voice_prompt  # Mark as processed
+        st.session_state.last_processed_voice = voice_prompt
 elif user_input and user_input.strip():
     prompt = user_input
 
-# मुख्य लॉजिक (Sirf tabhi chalega jab real naya prompt ho)
+# मुख्य लॉजिक
 if prompt:
-    # Double check to prevent automated reload spam
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.write(prompt)
@@ -86,17 +84,18 @@ if prompt:
             # Gemini Call
             response = st.session_state.chat.send_message(prompt)
             
-            # Output & Speech
+            # Response handling
             placeholder.write(response.text)
             speak_auto(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
             
-            # Response aane ke baad page ko clean refresh kar do taaki mic ka purana data session se udd jaye
+            # Chat history ko clean refresh dena taaki mic loop na kare
             st.rerun()
             
         except Exception as e:
             if "429" in str(e):
-                placeholder.error("⏳ Google Free Tier ki RPM (Requests Per Minute) limit hit hui hai. Kripya 15-20 seconds rukiye aur page refresh karke try kijiye!")
-                time.sleep(3)
+                placeholder.error("⏳ Aapka message save ho gaya hai, par Google Free API temporary block hai. Kripya 30 seconds wait karein aur page ko Refresh (F5) karke check karein!")
+                # Error status ko handle karne ke liye user message delete nahi karenge taaki history bani rahe
+                time.sleep(2)
             else:
                 placeholder.error(f"Error: {e}")
