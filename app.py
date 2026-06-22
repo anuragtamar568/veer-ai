@@ -189,7 +189,28 @@ else:
         else:
             st.session_state.ai_response_text = f"Command '{query}' recognized. Mainframe execution complete, Boss!"
 
-        # Output Text
+        # Output Text Box Style
         st.markdown(f"""
         <div style="background-color: #051a05; padding: 15px; border-radius: 10px; border: 1px solid #00ff66; margin-top: 15px;">
-            <p style="color: #888; margin: 0;"><b>
+            <p style="color: #888; margin: 0;"><b>[COMMAND]:</b> {query}</p>
+            <p style="color: #00ff66; margin-top: 10px;">🤖 <b>[VEER AI]:</b> {st.session_state.ai_response_text}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # TTS (Text to speech) JS code trigger
+        if st.session_state.ai_response_text:
+            tts_js = f"""
+            <script>
+                const speech = new SpeechSynthesisUtterance("{st.session_state.ai_response_text}");
+                speech.lang = 'en-US';
+                speech.rate = 1.0;
+                window.speechSynthesis.speak(speech);
+            </script>
+            """
+            components.html(tts_js, height=1)
+
+    st.write("---")
+    if st.button("TERMINATE SESSION"):
+        st.session_state.logged_in = False
+        st.session_state.ai_response_text = ""
+        st.rerun()
