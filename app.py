@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 import google.generativeai as genai
 
-# 1. Page Configuration
+# Page Configuration
 st.set_page_config(
     page_title="VEER AI - Personal Assistant",
     page_icon="👁️",
@@ -10,7 +10,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. Hide Sidebar & Headers
+# Hide Sidebar & Headers
 st.markdown("""
     <style>
         [data-testid="stSidebar"], [data-testid="stSidebarCollapseButton"] {
@@ -85,21 +85,20 @@ else:
     
     if query:
         with st.spinner("Accessing Core Memory..."):
-            try:
-                # 🛠️ YAHAN APNI ASLI GEMINI API KEY DALO 🛠️
-                # Agar Streamlit secrets kaam nahi kar raha, to apni key niche quotes "" ke andar daal do direct!
-                asli_api_key = "PASTE_YOUR_GEMINI_API_KEY_HERE"
-                
-                genai.configure(api_key=asli_api_key)
-                model = genai.GenerativeModel("gemini-1.5-flash")
-                
-                # System prompt taaki wo aapke assistant ki tarah baat kare
-                prompt = f"You are VEER AI, a loyal, highly advanced, and smart personal AI assistant for your boss/creator whose name is Veer. Keep your reply crisp, helpful, and address him respectfully as Boss or Sir. Here is his command: {query}"
-                
-                response = model.generate_content(prompt)
-                ai_reply = response.text
-            except Exception as e:
-                ai_reply = "Boss, please open `app.py` and put your actual Gemini API Key inside line 97: `asli_api_key = 'your_key'`."
+            # SECURE: Yeh line direct Streamlit Secrets se key legi (code me kuch nahi dikhega)
+            if "GEMINI_API_KEY" in st.secrets:
+                try:
+                    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+                    model = genai.GenerativeModel("gemini-1.5-flash")
+                    
+                    prompt = f"You are VEER AI, a loyal, highly advanced, and smart personal AI assistant for your boss/creator whose name is Veer. Keep your reply crisp, helpful, and address him respectfully as Boss or Sir. Here is his command: {query}"
+                    
+                    response = model.generate_content(prompt)
+                    ai_reply = response.text
+                except Exception as e:
+                    ai_reply = "Boss, API Key invalid lag rahi hai. Ek baar check karein."
+            else:
+                ai_reply = "Boss, mujhe dashboard ke Secrets panel me 'GEMINI_API_KEY' nahi mili."
 
         # Response UI
         st.markdown(f"""
