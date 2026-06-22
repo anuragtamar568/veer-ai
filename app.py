@@ -4,10 +4,10 @@ from streamlit_mic_recorder import speech_to_text
 from gtts import gTTS
 import os
 
-# 1. पेज कॉन्फ़िगरेशन
+# पेज कॉन्फ़िगरेशन
 st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
 
-# 2. CSS स्टाइलिंग (आपकी वही पुरानी थीम)
+# CSS स्टाइलिंग (आपकी पुरानी थीम सुरक्षित है)
 def local_css():
     st.markdown("""
         <style>
@@ -30,33 +30,34 @@ def local_css():
 
 local_css()
 
-# ऑडियो बोलने का फंक्शन
+# ऑडियो बोलने वाला फंक्शन
 def speak_text(text):
-    tts = gTTS(text=text, lang='hi')
-    tts.save("response.mp3")
-    audio_file = open("response.mp3", "rb")
-    st.audio(audio_file.read(), format="audio/mp3")
+    try:
+        tts = gTTS(text=text, lang='hi')
+        tts.save("temp.mp3")
+        st.audio("temp.mp3", format="audio/mp3")
+    except Exception:
+        pass
 
-# APPS_LIST
+# ऐप्स की लिस्ट
 APPS_LIST = {
     "youtube": {"url": "https://www.youtube.com", "text": "यूट्यूब खोल रहा हूँ भाई!", "btn": "OPEN YOUTUBE"},
     "google": {"url": "https://www.google.com", "text": "गूगल सर्च हाजिर है!", "btn": "OPEN GOOGLE"},
     "instagram": {"url": "https://www.instagram.com", "text": "इंस्टाग्राम खोल रहा हूँ!", "btn": "OPEN INSTAGRAM"},
-    "chatgpt": {"url": "https://chatgpt.com", "text": "चैटजीपीटी ओपन कर रहा हूँ।", "btn": "OPEN CHATGPT"}
+    "chatgpt": {"url": "https://chatgpt.com", "text": "चैटजीपीटी खोल रहा हूँ।", "btn": "OPEN CHATGPT"}
 }
 
-# हेडर
 st.title("VEER AI")
+st.markdown("<div class='developer-text'>SPECIALIST WORKSTATION // ANURAG</div>", unsafe_allow_html=True)
 st.write("---")
 
-# API Setup
 if "GEMINI_API_KEY" in st.secrets:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# चैट हिस्ट्री
+# हिस्ट्री दिखाएं
 for message in st.session_state.messages:
     avatar = "👤" if message["role"] == "user" else "🤖"
     with st.chat_message(message["role"], avatar=avatar):
@@ -81,7 +82,7 @@ if prompt:
         if found_app:
             st.write(found_app["text"])
             st.link_button(found_app["btn"], found_app["url"])
-            speak_text(found_app["text"])
+            speak_text(found_app["text"]) # वीर बोलेगा
             st.session_state.messages.append({"role": "assistant", "content": found_app["text"]})
         else:
             placeholder = st.empty()
@@ -90,7 +91,7 @@ if prompt:
                 model = genai.GenerativeModel("gemini-2.5-flash")
                 response = model.generate_content(prompt)
                 placeholder.markdown(response.text)
-                speak_text(response.text)
+                speak_text(response.text) # वीर बोलेगा
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
             except Exception as e:
                 placeholder.markdown("अरे यार, कुछ गड़बड़ हो गई!")
