@@ -5,7 +5,7 @@ from streamlit_mic_recorder import speech_to_text
 # पेज कॉन्फ़िगरेशन
 st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
 
-# CSS स्टाइलिंग
+# CSS स्टाइलिंग (आपकी पुरानी थीम)
 def local_css():
     st.markdown("""
         <style>
@@ -28,70 +28,10 @@ def local_css():
 
 local_css()
 
-# हेडर लेआउट
-st.title("VEER AI")
-st.markdown("<div class='developer-text'>SPECIALIST WORKSTATION</div>", unsafe_allow_html=True)
-st.markdown("<div class='developer-text'>DEVELOPER: ANURAG // SECURE CONNECTION</div>", unsafe_allow_html=True)
-st.write("---")
-
-# API Configuration
-if "GEMINI_API_KEY" in st.secrets:
-    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-# चैट हिस्ट्री
-for message in st.session_state.messages:
-    avatar = "👤" if message["role"] == "user" else "🤖"
-    with st.chat_message(message["role"], avatar=avatar):
-        if isinstance(message["content"], dict):
-            st.write(message["content"]["text"])
-            st.link_button(message["content"]["button_text"], message["content"]["url"])
-        else:
-            st.markdown(str(message["content"]))
-
-# इनपुट सेक्शन
-st.markdown("<div class='voice-label'>🎙️ VOICE COMMAND // INTERACT:</div>", unsafe_allow_html=True)
-voice_input = speech_to_text(start_prompt="START RECORDING", stop_prompt="STOP RECORDING", language='hi', key='speech')
-text_input = st.chat_input("ENTER COMMAND...")
-prompt = voice_input if voice_input else text_input
-
-if prompt:
-    with st.chat_message("user", avatar="👤"):
-        st.markdown(prompt)
-    st.session_state.messages.append({"role": "user", "content": prompt})
-
-    clean_prompt = prompt.lower().replace(" ", "")
-    url_to_open, assistant_reply, button_text = None, "", ""
-
-    if "youtube" in clean_prompt or "यूट्यूब" in clean_prompt:
-        url_to_open, assistant_reply, button_text = "https://www.youtube.com", "यूट्यूब खोल रहा हूँ भाई!", "🚀 OPEN YOUTUBE"
-    elif "google" in clean_prompt or "गूगल" in clean_prompt:
-        url_to_open, assistant_reply, button_text = "https://www.google.com", "गूगल सर्च ओपन कर रहा हूँ।", "🔍 OPEN GOOGLE"
-    elif "github" in clean_prompt or "गिटहब" in clean_prompt:
-        url_to_open, assistant_reply, button_text = "https://www.github.com", "गिटहब तैयार है, भाई!", "🐙 OPEN GITHUB"
-    elif "instagram" in clean_prompt or "इंस्टाग्राम" in clean_prompt:
-        url_to_open, assistant_reply, button_text = "https://www.instagram.com", "इंस्टाग्राम का लिंक हाजिर है! 😉", "📸 OPEN INSTAGRAM"
-
-    if url_to_open:
-        with st.chat_message("assistant", avatar="🤖"):
-            st.write(assistant_reply)
-            st.link_button(button_text, url_to_open)
-        st.session_state.messages.append({"role": "assistant", "content": {"type": "link_button", "text": assistant_reply, "button_text": button_text, "url": url_to_open}})
-    else:
-        with st.chat_message("assistant", avatar="🤖"):
-            placeholder = st.empty()
-            placeholder.markdown("`ANALYZING...`")
-            try:
-                model = genai.GenerativeModel("gemini-2.5-flash", system_instruction=(
-                    "तुम्हारा नाम 'वीर' है। तुम्हें 'अनुराग' ने बनाया है। तुम अनुराग के बेहद करीबी और समझदार दोस्त हो। "
-                    "तुम कोई रोबोट या मशीन नहीं हो, बल्कि एक बहुत ही कूल, नेचुरल और फ्रेंडली एआई असिस्टेंट हो। "
-                    "हमेशा अपनी बातचीत में अनुराग का ज़िक्र और अपनी पहचान एक दोस्त की तरह ही रखो।"
-                ))
-                response = model.generate_content(prompt)
-                placeholder.markdown(response.text)
-                st.session_state.messages.append({"role": "assistant", "content": response.text})
-            except Exception as e:
-                placeholder.markdown("अरे यार, कुछ गड़बड़ हो गई!")
-                st.error(str(e))
+# ऐप्स की लिस्ट - यहाँ आप और भी नाम जोड़ सकते हैं
+APPS_LIST = {
+    "youtube": {"url": "https://www.youtube.com", "text": "यूट्यूब खोल रहा हूँ भाई!", "btn": "🚀 OPEN YOUTUBE"},
+    "google": {"url": "https://www.google.com", "text": "गूगल हाजिर है!", "btn": "🔍 OPEN GOOGLE"},
+    "github": {"url": "https://www.github.com", "text": "गिटहब तैयार है, भाई!", "btn": "🐙 OPEN GITHUB"},
+    "instagram": {"url": "https://www.instagram.com", "text": "इंस्टाग्राम का लिंक मिल गया!", "btn": "📸 OPEN INSTAGRAM"},
+    "facebook": {"url": "https://www.facebook.com", "text": "फेसबुक ओपन हो
