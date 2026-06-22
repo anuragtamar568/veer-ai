@@ -5,7 +5,7 @@ from streamlit_mic_recorder import speech_to_text
 # पेज कॉन्फ़िगरेशन (यह सबसे ऊपर होना जरूरी है)
 st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
 
-# 1. डार्क थीम, नियॉन लेटर्स और असिस्टेंट बटन्स के लिए साफ़-सुथरा CSS
+# 1. डार्क थीम और नियॉन लेटर्स के लिए साफ़-सुथरा CSS
 def local_css():
     st.markdown("""
     <style>
@@ -73,6 +73,7 @@ def local_css():
         margin-top: 15px;
     }
 
+    /* मुख्य माइक और सबमिट बटन्स का स्टाइल */
     button {
         background-color: #050a10 !important;
         border: 1px solid #00d2ff !important;
@@ -86,26 +87,27 @@ def local_css():
         box-shadow: 0 0 10px #00d2ff;
     }
 
-    .action-link {
-        display: inline-block;
-        padding: 10px 20px;
-        background-color: #050a10;
+    /* 🔗 Streamlit के ऑफिशियल लिंक बटन को हैकर स्टाइल देना */
+    div.stLinkButton > a {
+        background-color: #050a10 !important;
         color: #00ff66 !important;
-        border: 2px solid #00ff66;
-        border-radius: 6px;
-        text-decoration: none;
-        font-family: 'Courier New', monospace;
-        font-weight: bold;
-        letter-spacing: 1px;
-        text-shadow: 0 0 5px #00ff66;
-        box-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
-        margin-top: 10px;
-        transition: all 0.3s ease;
+        border: 2px solid #00ff66 !important;
+        border-radius: 6px !important;
+        font-family: 'Courier New', monospace !important;
+        font-weight: bold !important;
+        letter-spacing: 1px !important;
+        box-shadow: 0 0 10px rgba(0, 255, 102, 0.3) !important;
+        transition: all 0.3s ease !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 10px 20px !important;
+        text-decoration: none !important;
     }
-    .action-link:hover {
-        background-color: #00ff66;
+    div.stLinkButton > a:hover {
+        background-color: #00ff66 !important;
         color: #050a10 !important;
-        box-shadow: 0 0 15px #00ff66;
+        box-shadow: 0 0 15px #00ff66 !important;
     }
 
     ::-webkit-scrollbar {
@@ -134,7 +136,12 @@ if "GEMINI_API_KEY" in st.secrets:
     for message in st.session_state.messages:
         avatar = "👤" if message["role"] == "user" else "🤖"
         with st.chat_message(message["role"], avatar=avatar):
-            st.markdown(message["content"], unsafe_allow_html=True)
+            # अगर कोई बटन डेटा है, तो उसे रेंडर करें
+            if isinstance(message["content"], dict) and message["content"].get("type") == "link_button":
+                st.write(message["content"]["text"])
+                st.link_button(message["content"]["button_text"], message["content"]["url"])
+            else:
+                st.markdown(str(message["content"]))
 
     # वॉयस इनपुट सेक्शन
     st.markdown("<div class='voice-label'>🎙️ VOICE COMMAND // INTERACT:</div>", unsafe_allow_html=True)
@@ -153,7 +160,7 @@ if "GEMINI_API_KEY" in st.secrets:
             st.markdown(prompt)
         st.session_state.messages.append({"role": "user", "content": prompt})
 
-        # --- 🛠️ असिस्टेंट फीचर: स्पेस हटाकर और लोअरकेस करके चेक करना ---
+        # --- असिस्टेंट फीचर: कीवर्ड्स चेक करना ---
         clean_prompt = prompt.lower().replace(" ", "")
         url_to_open = None
         assistant_reply = ""
@@ -173,15 +180,20 @@ if "GEMINI_API_KEY" in st.secrets:
             button_text = "🐙 OPEN GITHUB"
         elif "instagram" in clean_prompt or "इंस्टाग्राम" in clean_prompt:
             url_to_open = "https://www.instagram.com"
-            assistant_reply = "चलो भाई, इंस्टाग्राम का link हाजिर है। रील्स देखनी हो तो नीचे क्लिक करो! 😉"
+            assistant_reply = "चलो भाई, इंस्टाग्राम का लिंक हाजिर है। रील्स देखनी हो तो नीचे क्लिक करो! 😉"
             button_text = "📸 OPEN INSTAGRAM"
 
         # अगर कोई असिस्टेंट कमांड मैच हुआ
         if url_to_open:
-            full_html_reply = f"{assistant_reply}<br><br><a href='{url_to_open}' target='_blank' class='action-link'>{button_text}</a>"
             with st.chat_message("assistant", avatar="🤖"):
-                st.markdown(full_html_reply, unsafe_allow_html=True)
-            st.session_state.messages.append({"role": "assistant", "content": full_html_reply})
+                st.write(assistant_reply)
+                st.link_button(button_text, url_to_open)
+            
+            # चैट हिस्ट्री के लिए डिक्शनरी फॉर्मेट में सेव करना
+            st.session_state.messages.append({
+                "role": "assistant", 
+                "content": {"type": "link_button", "text": assistant_reply, "button_text": button_text, "url": url_to_open}
+            })
         else:
             # अगर नॉर्मल बात है, तो AI दोस्त की तरह जवाब देगा
             with st.chat_message("assistant", avatar="🤖"):
@@ -196,16 +208,4 @@ if "GEMINI_API_KEY" in st.secrets:
                             "तुम्हें सिर्फ और सिर्फ 'अनुराग' ने बनाया है। तुम्हारी बात करने की भाषा एकदम नेचुरल, आम इंसानों जैसी और हिंदी-इंग्लिश मिक्स (Hinglish) होनी चाहिए। "
                             "बातचीत में 'Greetings', 'प्रोटोकॉल्स' जैसे भारी-भरकम शब्दों का इस्तेमाल बिल्कुल मत करो। "
                             "जैसे कोई दोस्त आपस में बात करते हैं (जैसे 'अरे भाई', 'हाँ यार', 'बिल्कुल'), वैसे बात करो। "
-                            "शुरुઆત में या पहली बार पूछने पर एक बार गर्व से बता देना कि तुम्हें अनुराग ने बनाया है, लेकिन हर जवाब में बार-बार नाम मत दोहराना।"
-                        )
-                    )
-                    response = model.generate_content(prompt)
-                    
-                    placeholder.markdown(response.text)
-                    st.session_state.messages.append({"role": "assistant", "content": response.text})
-                    
-                except Exception as e:
-                    placeholder.markdown(f"❌ `SYSTEM ERROR: {str(e)}`")
-
-else:
-    st.error("⚠️ CRITICAL: GEMINI_API_KEY NOT FOUND.")
+                            "शुरुઆત
