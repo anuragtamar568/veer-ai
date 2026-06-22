@@ -1,4 +1,11 @@
 import streamlit as st
+import os
+
+# यह चेक करेगा कि API की मिल रही है या नहीं
+if "GEMINI_API_KEY" in st.secrets:
+    st.sidebar.success("API Key मिल गई है!")
+else:
+    st.sidebar.error("API Key नहीं मिल रही है! 'Settings -> Secrets' चेक करो।")import streamlit as st
 import google.generativeai as genai
 from streamlit_mic_recorder import speech_to_text
 import streamlit.components.v1 as components
