@@ -1,27 +1,58 @@
-import streamlit as st
+import customtkinter as ctk
 import google.generativeai as genai
+import speech_recognition as sr
+import pyttsx3
+import threading
 
-# Page Config
-st.set_page_config(page_title="VEER AI", layout="centered")
+# --- 1. CONFIGURATION ---
+genai.configure(api_key="YOUR_API_KEY_HERE") # Yahan apni API key daalein
+model = genai.GenerativeModel("gemini-1.5-flash")
+my_creator = "Aapka Naam"
 
-# API Setup - Robust
-try:
-    api_key = st.secrets["GEMINI_API_KEY"]
-    genai.configure(api_key=api_key)
-    # 'gemini-pro' har jagah support karta hai
-    model = genai.GenerativeModel('gemini-pro') 
-except Exception as e:
-    st.error("API Key ka issue hai. Secrets check karo.")
+# Speech engine setup
+engine = pyttsx3.init()
 
-st.markdown("<style>.stApp {background:#000; color:#0f0; font-family:monospace;}</style>", unsafe_allow_html=True)
+def speak(text):
+    engine.say(text)
+    engine.runAndWait()
 
-st.markdown("## 📟 VEER AI [CORE NEXUS]")
-query = st.text_input("COMMAND:")
+def get_ai_response(prompt):
+    full_prompt = f"Tum {my_creator} dwara banaye gaye ho. Tum ek personal assistant ho. {prompt}"
+    response = model.generate_content(full_prompt)
+    return response.text
 
-if query:
-    try:
-        # Prompt
-        response = model.generate_content(f"You are VEER AI, assistant of Anurag. Reply: {query}")
-        st.write(f"🤖: {response.text}")
-    except Exception as e:
-        st.error(f"Error: {e}")
+# --- 2. GUI INTERFACE (Theme aur Design) ---
+class AssistantApp(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+        self.geometry("600x400")
+        self.title("My Personal AI Assistant")
+        ctk.set_appearance_mode("dark") # Dark theme
+        
+        self.label = ctk.CTkLabel(self, text="Assistant ready...", font=("Arial", 20))
+        self.label.pack(pady=20)
+
+        self.btn = ctk.CTkButton(self, text="Sunn Raha Hoon...", command=self.start_voice_mode)
+        self.btn.pack(pady=20)
+
+    def start_voice_mode(self):
+        threading.Thread(target=self.process_voice).start()
+
+    def process_voice(self):
+        r = sr.Recognizer()
+        with sr.Microphone() as source:
+            self.label.configure(text="Boliye...")
+            audio = r.listen(source)
+            try:
+                user_text = r.recognize_google(audio)
+                self.label.configure(text=f"Aapne kaha: {user_text}")
+                
+                ai_reply = get_ai_response(user_text)
+                speak(ai_reply)
+                self.label.configure(text=ai_reply)
+            except:
+                self.label.configure(text="Maafi chahta hoon, samajh nahi paya.")
+
+if __name__ == "__main__":
+    app = AssistantApp()
+    app.mainloop()
