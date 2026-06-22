@@ -109,7 +109,7 @@ else:
     if query:
         user_input = query.lower().strip()
         
-        # Natural Human-Like Responses
+        # Natural Human-Like Responses with Creator Recognition
         if "hello" in user_input or "hii" in user_input or "hey" in user_input:
             responses = [
                 "Arey, Hello Boss! VEER A.I. is fully active. Sab mast chal raha hai, tell me your command.",
@@ -119,10 +119,10 @@ else:
             st.session_state.ai_response_text = random.choice(responses)
             
         elif "who are you" in user_input or "naam" in user_input:
-            st.session_state.ai_response_text = "I am VEER A.I., your personal tactical assistant. Main aapka right-hand hoon, Boss!"
+            st.session_state.ai_response_text = "I am VEER A.I., your personal tactical assistant. Mujhe Anurag ne banaya hai exclusive aapke liye, Boss!"
             
-        elif "owner" in user_input or "boss" in user_input:
-            st.session_state.ai_response_text = "Duniya me sirf ek hi person mera commander hai, aur wo hain aap—Veer Sir."
+        elif "owner" in user_input or "boss" in user_input or "creator" in user_input or "banaya" in user_input:
+            st.session_state.ai_response_text = "Mera dimaag aur ye poora mainframe system Anurag ne design kiya hai, aur mera commander sirf aap hain—Veer Sir!"
             
         else:
             st.session_state.ai_response_text = f"Understood Boss. Command '{query}' is being executed. Give me a second!"
@@ -139,17 +139,16 @@ else:
         if st.session_state.ai_response_text:
             tts_js = f"""
             <script>
-                window.speechSynthesis.cancel(); // Purani voice clean karein
+                window.speechSynthesis.cancel(); 
                 const speech = new SpeechSynthesisUtterance("{st.session_state.ai_response_text}");
                 
-                // Sabse natural voice select karna (Microsoft/Google Natural English)
                 const voices = window.speechSynthesis.getVoices();
                 const naturalVoice = voices.find(v => v.name.includes('Natural') || v.name.includes('Google US English')) || voices[0];
                 if (naturalVoice) speech.voice = naturalVoice;
                 
                 speech.lang = 'en-US';
-                speech.rate = 1.05;  // Bolne ki speed thodi tez (Natural human vibe)
-                speech.pitch = 0.95; // Thoda bhaari aur deep voice control (Jarvis style)
+                speech.rate = 1.05;  
+                speech.pitch = 0.95; 
                 
                 window.speechSynthesis.speak(speech);
             </script>
