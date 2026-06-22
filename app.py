@@ -114,7 +114,7 @@ else:
             reply = "I am VEER A.I., your personal tactical assistant. Anurag Sir designed my mainframe."
         elif "owner" in user_input or "creator" in user_input or "master" in user_input or "banaya" in user_input:
             reply = "Mera dimaag aur pure core ko Anurag Master ne banaya hai, aur main unke exclusive service ke liye online hoon!"
-        elif "veer sir" in user_input or "veer kon h" in user_input:
+        elif "veer" in user_input or "naam" in user_input:
             reply = "Arey Boss, Veer mera hi code naam hai. Mera full name VEER A.I. hai."
         else:
             reply = f"Command '{query}' analyzed. Ready for execution, Master Anurag!"
@@ -129,14 +129,33 @@ else:
         """, unsafe_allow_html=True)
 
         if st.session_state.ai_response_text:
+            # Enhanced Voice Script with Speech Synthesis Voice Queuing Fix
             tts_js = f"""
             <script>
                 window.speechSynthesis.cancel();
-                const speech = new SpeechSynthesisUtterance("{st.session_state.ai_response_text}");
-                speech.lang = 'en-IN'; 
-                speech.rate = 1.05;  
-                speech.pitch = 0.95; 
-                window.speechSynthesis.speak(speech);
+                
+                function speak() {{
+                    const speech = new SpeechSynthesisUtterance("{st.session_state.ai_response_text}");
+                    const voices = window.speechSynthesis.getVoices();
+                    
+                    // Priority: Find an Indian English/Hindi voice for natural Hinglish accent
+                    let targetVoice = voices.find(v => v.lang.includes('en-IN') || v.lang.includes('hi-IN'));
+                    if (!targetVoice) {{
+                        targetVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Natural'));
+                    }}
+                    
+                    if (targetVoice) speech.voice = targetVoice;
+                    
+                    speech.rate = 1.0;  // Normal human conversational speed
+                    speech.pitch = 1.0; // Clear, natural voice pitch
+                    window.speechSynthesis.speak(speech);
+                }}
+
+                if (window.speechSynthesis.getVoices().length !== 0) {{
+                    speak();
+                }} else {{
+                    window.speechSynthesis.onvoiceschanged = speak;
+                }}
             </script>
             """
             components.html(tts_js, height=1)
