@@ -2,16 +2,21 @@ import streamlit as st
 import google.generativeai as genai
 from streamlit_mic_recorder import speech_to_text
 import streamlit.components.v1 as components
-import time
 
-# 1. पेज कॉन्फ़िगरेशन
+# 1. Page Configuration
 st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
 
-# 2. CSS (तुम्हारी ओरिजिनल थीम)
+# 2. CSS Theme
 def local_css():
     st.markdown("""
         <style>
-        [data-testid="stAppViewContainer"] {background: linear-gradient(rgba(10, 15, 25, 0.85), rgba(10, 15, 25, 0.85)), url("https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=1400&auto=format&fit=crop") !important; background-size: cover !important; background-position: center !important; background-attachment: fixed !important;}
+        [data-testid="stAppViewContainer"] {
+            background: linear-gradient(rgba(10, 15, 25, 0.85), rgba(10, 15, 25, 0.85)), 
+                        url("https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=1400&auto=format&fit=crop") !important; 
+            background-size: cover !important; 
+            background-position: center !important; 
+            background-attachment: fixed !important;
+        }
         h1 {color: #6bf2ff !important; font-weight: 300 !important; text-transform: uppercase; letter-spacing: 5px; text-shadow: 0 0 10px #6bf2ff;}
         .dev-text {color: #00ff66 !important; font-family: monospace; font-weight: bold; letter-spacing: 2px;}
         div[data-testid="stChatMessage"] {background-color: rgba(8, 20, 30, 0.9) !important; border: 2px solid #00d2ff; border-radius: 12px;}
@@ -19,7 +24,7 @@ def local_css():
     """, unsafe_allow_html=True)
 local_css()
 
-# 3. ऑटो-स्पीक फंक्शन
+# 3. Audio Output Function
 def speak_auto(text):
     clean_text = text.replace('"', '').replace("'", "").replace("\n", " ")
     js = f"""<script>
@@ -29,86 +34,91 @@ def speak_auto(text):
     </script>"""
     components.html(js, height=0)
 
-# 4. ऐप सेटअप
+# 4. Heading
 st.title("VEER AI 🤖")
 st.markdown("<div class='dev-text'>⚡ SPECIALIST WORKSTATION // 👤 CREATED BY ANURAG</div>", unsafe_allow_html=True)
 
 # 5. Session State Initialization
 if "messages" not in st.session_state:
     st.session_state.messages = []
-if "last_processed" not in st.session_state:
-    st.session_state.last_processed = None
+if "prev_voice_input" not in st.session_state:
+    st.session_state.prev_voice_input = ""
 
-# 6. Clear Chat History Button
+# Clear History Button
 if st.button("🗑️ Clear Chat History"):
     st.session_state.messages = []
-    st.session_state.last_processed = None
+    st.session_state.prev_voice_input = ""
     if "chat" in st.session_state:
         del st.session_state["chat"]
     st.rerun()
 
 st.write("---")
 
-# 7. API की चेकिंग
-if "GEMINI_API_KEY" in st.secrets:
+# 6. API Key Verification
+if "GEMINI_API_KEY" in st.secrets and st.secrets["GEMINI_API_KEY"].strip():
     api_key = st.secrets["GEMINI_API_KEY"]
-    st.sidebar.success(f"🔑 Active Key Ends With: ...{api_key[-4:]}")
+    # Key verify karne ke liye safe sidebar info
+    st.sidebar.success(f"🔑 Key Loaded (Ends: ...{api_key[-4:]})")
     genai.configure(api_key=api_key)
 else:
-    st.error("API KEY MISSING! 'Settings' -> 'Secrets' में जाकर GEMINI_API_KEY सेट करो।")
+    st.error("API KEY MISSING! Streamlit Cloud ke Secrets mein GEMINI_API_KEY set karo.")
     st.stop()
 
-# 8. Chat Session Setup
+# 7. Gemini Chat Setup
 if "chat" not in st.session_state:
     try:
         model = genai.GenerativeModel(
             "gemini-2.0-flash",
-            system_instruction="तुम 'वीर' हो। तुम्हें 'अनुराग' ने बनाया है। तुम अनुराग के सबसे अच्छे दोस्त हो। गर्व से बताओ कि तुम्हें अनुराग ने बनाया है।"
+            system_instruction="तुम 'वीर' हो। तुम्हें 'अनुراق' ने बनाया है। तुम अनुराग के सबसे अच्छे दोस्त हो।"
         )
         st.session_state.chat = model.start_chat(history=[])
     except Exception as e:
-        st.error(f"Model Initialization Failed: {e}")
+        st.error(f"Model Init Error: {e}")
+        st.stop()
 
-# 9. इनपुट कॉम्पोनेंट्स
-voice_prompt = speech_to_text(language='hi', use_container_width=True, key='mic')
-user_input = st.chat_input("COMMAND...")
-
-# चैट हिस्ट्री रेंडर करना
+# 8. Chat History Render
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# 10. इनपुट फ़िल्टरिंग
-current_prompt = None
+# 9. Input Components
+voice_input = speech_to_text(language='hi', use_container_width=True, key='mic_recorder')
+text_input = st.chat_input("COMMAND...")
 
-if voice_prompt and voice_prompt.strip():
-    if st.session_state.last_processed != voice_prompt:
-        current_prompt = voice_prompt
-elif user_input and user_input.strip():
-    if st.session_state.last_processed != user_input:
-        current_prompt = user_input
+final_prompt = None
 
-# 11. मुख्य API लॉजिक
-if current_prompt:
-    st.session_state.last_processed = current_prompt
-    st.session_state.messages.append({"role": "user", "content": current_prompt})
-    
+# 10. Strict Duplication Filter (Taaki mic automatically loop na kare)
+if voice_input and voice_input.strip():
+    if voice_input != st.session_state.prev_voice_input:
+        final_prompt = voice_input
+        st.session_state.prev_voice_input = voice_input  # Lock lag gaya
+elif text_input and text_input.strip():
+    final_prompt = text_input
+
+# 11. Main Executive Logic
+if final_prompt:
+    # User message display aur save
+    st.session_state.messages.append({"role": "user", "content": final_prompt})
     with st.chat_message("user"):
-        st.write(current_prompt)
+        st.write(final_prompt)
 
+    # Assistant Response
     with st.chat_message("assistant"):
         placeholder = st.empty()
         try:
-            if "chat" in st.session_state:
-                response = st.session_state.chat.send_message(current_prompt)
-                placeholder.write(response.text)
-                speak_auto(response.text)
-                st.session_state.messages.append({"role": "assistant", "content": response.text})
-                st.rerun()
-            else:
-                placeholder.error("Chat session not initialized properly.")
+            with st.spinner("Veer is thinking..."):
+                response = st.session_state.chat.send_message(final_prompt)
+                
+            ans_text = response.text
+            placeholder.write(ans_text)
+            speak_auto(ans_text)
+            
+            # Save response
+            st.session_state.messages.append({"role": "assistant", "content": ans_text})
+            st.rerun()
+            
         except Exception as e:
             if "429" in str(e):
-                placeholder.error("🛑 API Quota issue. Please click 'Clear Chat History' and reboot the app from Streamlit Cloud dashboard.")
+                placeholder.error("🛑 Error 429: Google Free Limit Over. Apne Streamlit Cloud Dashboard par jaakar app ko 'REBOOT' kijiye taaki purana server session khatam ho sake.")
             else:
                 placeholder.error(f"Error: {e}")
