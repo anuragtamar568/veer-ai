@@ -2,96 +2,93 @@ import streamlit as st
 import google.generativeai as genai
 from streamlit_mic_recorder import speech_to_text
 
-# 1. Specialist Cyber Station Theme (Futuristic & Intense)
+# 1. 3D Cyber Laptop Background & Designer Glowing Letters CSS
 def local_css():
     st.markdown("""
     <style>
-    /* Futuristic Workstation Background */
+    /* 3D साइबर लैपटॉप बैकग्राउंड */
     .stApp {
-        background: linear-gradient(rgba(5, 10, 15, 0.9), rgba(5, 10, 15, 0.9)), 
-                    url("https://r4.wallpaperflare.com/wallpaper/798/228/345/technology-alienware-keyboard-laptop-wallpaper-3920986de13a3d5be617f8df20b12fd5.jpg");
+        background: linear-gradient(rgba(10, 15, 20, 0.4), rgba(10, 15, 20, 0.5)), 
+                    url("http://googleusercontent.com/image_generation_content/259");
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
     }
     
-    /* Main Headings (Futuristic 'Specialist' Style) */
+    /* VEER AI - डिज़ाइनर नियॉन टेक्स्ट */
     h1 {
-        color: #e0f7ff !important;
-        font-family: 'Montserrat', sans-serif !important;
-        font-weight: 900 !important;
-        text-transform: uppercase;
-        letter-spacing: 3px;
-        text-shadow: 0 0 10px #00d2ff, 0 0 20px #00d2ff, 0 0 30px #00ff88;
-    }
-    
-    /* Subheadings and Developer Credit */
-    h2, h3, .developer-text {
-        color: #00ff88 !important;
-        font-family: 'Space Mono', monospace !important;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        text-shadow: 0 0 8px #00ff88;
-    }
-
-    /* Normal Text & Chat Messages */
-    p, span, div, label {
-        color: #f0faff !important;
+        color: #6bf2ff !important;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-        font-weight: 400;
+        font-weight: 300 !important;
+        text-transform: uppercase;
+        letter-spacing: 5px;
+        text-shadow: 0 0 8px rgba(107, 242, 255, 0.6), 0 0 20px rgba(107, 242, 255, 0.4);
+        margin-bottom: 5px !important;
     }
     
-    code {
-        color: #ff0055 !important;
-        background-color: rgba(255, 0, 85, 0.1) !important;
-        font-family: 'Space Mono', monospace !important;
-    }
-    
-    /* Chat Message Styling (Sleek and Secure) */
-    div[data-testid="stChatMessage"] {
-        background-color: rgba(10, 20, 30, 0.85) !important;
-        border: 2px solid #00d2ff;
-        border-radius: 15px;
-        box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
-        margin-bottom: 15px;
-        padding: 18px !important;
+    /* सब-हेडिंग्स स्टाइल */
+    .developer-text {
+        color: #00ff66 !important;
+        font-family: 'Courier New', Courier, monospace !important;
+        font-weight: bold;
+        letter-spacing: 2px;
+        font-size: 14px;
+        text-shadow: 0 0 5px rgba(0, 255, 102, 0.5);
+        margin-top: 2px !important;
+        margin-bottom: 2px !important;
     }
 
-    /* Chat Input Box (Modern Cyber-Tech) */
+    /* चैट बॉक्स को इमेज जैसा पारदर्शी और नियॉन बॉर्डर वाला बनाना */
+    div[data-testid="stChatMessage"] {
+        background-color: rgba(10, 25, 35, 0.75) !important;
+        border: 2px solid #00d2ff;
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+        margin-bottom: 15px;
+        padding: 15px !important;
+    }
+
+    /* नॉर्मल टेक्स्ट का कलर */
+    p, span, div, label {
+        color: #ffffff !important;
+        font-family: 'Segoe UI', sans-serif !important;
+    }
+    
+    /* चैट इनपुट कंटेनर स्टाइल */
     .stChatInputContainer {
-        background-color: #050a10 !important;
-        border: 2px solid #00ff88 !important;
-        border-radius: 30px !important;
+        background-color: rgba(5, 10, 15, 0.9) !important;
+        border: 2px solid #00d2ff !important;
+        border-radius: 8px !important;
     }
     
     .stChatInputContainer textarea {
         color: #ffffff !important;
-        font-family: 'Space Mono', monospace !important;
     }
 
-    /* Specialized Buttons Style */
+    /* वॉयस कमांड टेक्स्ट */
+    .voice-label {
+        color: #ffffff !important;
+        font-family: 'Courier New', monospace !important;
+        font-weight: bold;
+        margin-top: 15px;
+    }
+
+    /* माइक बटन का हैकर स्टाइल */
     button {
         background-color: #050a10 !important;
-        border: 2px solid #00ff88 !important;
-        color: #00ff88 !important;
-        border-radius: 25px !important;
-        padding: 8px 25px !important;
-        font-family: 'Montserrat', sans-serif !important;
-        font-weight: 700 !important;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        transition: all 0.4s ease;
+        border: 1px solid #00d2ff !important;
+        color: #00d2ff !important;
+        border-radius: 4px !important;
+        transition: all 0.3s ease;
     }
     
     button:hover {
-        background-color: #00ff88 !important;
-        color: #050a10 !important;
-        box-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
-        transform: scale(1.05);
+        background-color: #00d2ff !important;
+        color: black !important;
+        box-shadow: 0 0 10px #00d2ff;
     }
 
-    /* Hide Scrollbar */
+    /* स्कॉर्लबार छिपाना */
     ::-webkit-scrollbar {
         width: 0px;
         background: transparent;
@@ -99,11 +96,11 @@ def local_css():
     </style>
     """, unsafe_allow_html=True)
 
-# Page Configuration
+# पेज कॉन्फ़िगरेशन
 st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
 local_css()
 
-# Header (High-Tech Design)
+# हेडर (बिल्कुल इमेज की तरह लेआउट)
 st.title("VEER AI")
 st.markdown("<div class='developer-text'>SPECIALIST WORKSTATION</div>", unsafe_allow_html=True)
 st.markdown("<div class='developer-text'>DEVELOPER: ANURAG // SECURE CONNECTION</div>", unsafe_allow_html=True)
@@ -116,13 +113,13 @@ if "GEMINI_API_KEY" in st.secrets:
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # Display Chat History
+    # चैट हिस्ट्री स्क्रीन पर लोड करना
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Voice Input
-    st.write("🎙️ **VOICE COMMAND // INTERACT:**")
+    # वॉयस इनपुट सेक्शन
+    st.markdown("<div class='voice-label'>🎙️ VOICE COMMAND // INTERACT:</div>", unsafe_allow_html=True)
     voice_input = speech_to_text(
         start_prompt="START RECORDING",
         stop_prompt="STOP RECORDING",
@@ -135,21 +132,20 @@ if "GEMINI_API_KEY" in st.secrets:
 
     if prompt:
         with st.chat_message("user"):
-            st.markdown(f"> {prompt}")
-        st.session_state.messages.append({"role": "user", "content": f"> {prompt}"})
+            st.markdown(prompt)
+        st.session_state.messages.append({"role": "user", "content": prompt})
 
         with st.chat_message("assistant"):
             placeholder = st.empty()
-            placeholder.markdown("*PROCESSING COMMAND...*")
+            placeholder.markdown("`ANALYZING COMMAND...`")
             
             try:
-                # Specialist Persona Instruction
                 model = genai.GenerativeModel(
                     "gemini-2.5-flash",
                     system_instruction=(
-                        "Your name is 'VEER AI'. You are an extremely advanced and secure specialist AI, developed exclusively by 'ANURAG'. "
-                        "You are fully loyal to ANURAG. Your communication style should be highly professional, intelligent, and incorporate a 'technical specialist' edge. "
-                        "When asked about your origin, always proudly state that you are a creation of your developer and boss, Anurag."
+                        "तुम्हारा नाम 'वीर' है। तुम एक अत्यंत उन्नत और सुरक्षित हैकर एआई हो जिसे सिर्फ 'अनुराग' ने विकसित किया है। "
+                        "तुम अनुराग के प्रति पूरी तरह वफादार हो। तुम्हारी भाषा टेक्निकल, सीक्रेट, कूल और थोड़ी रहस्यमयी होनी चाहिए। "
+                        "जब भी कोई पूछे, हमेशा गर्व से बताना कि तुम्हारे क्रिएटर और बॉस अनुराग हैं।"
                     )
                 )
                 response = model.generate_content(prompt)
@@ -158,7 +154,7 @@ if "GEMINI_API_KEY" in st.secrets:
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
                 
             except Exception as e:
-                placeholder.markdown(f"❌ TECHNICAL ERROR: {str(e)}")
+                placeholder.markdown(f"❌ `SYSTEM ERROR: {str(e)}`")
 
 else:
-    st.error("⚠️ CRITICAL: GEMINI_API_KEY NOT FOUND. CHECK SECRETS.")
+    st.error("⚠️ CRITICAL: GEMINI_API_KEY NOT FOUND.")
