@@ -6,21 +6,11 @@ from PIL import Image
 # पेज कॉन्फ़िगरेशन
 st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
 
-# डार्क थीम और नियॉन लेटर्स के लिए CSS
+# ✨ नया बिल्कुल क्लीन डार्क थीम और अपलोडर फिक्स CSS
 st.markdown("""
 <style>
 [data-testid="stAppViewContainer"] {
-    background: linear-gradient(rgba(10, 15, 25, 0.85), rgba(10, 15, 25, 0.85)), url("https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=1400&auto=format&fit=crop") !important;
-    background-size: cover !important;
-    background-position: center !important;
-    background-attachment: fixed !important;
-}
-[data-testid="stHeader"] {
-    background: transparent !important;
-}
-<style>
-[data-testid="stAppViewContainer"] {
-    background: linear-gradient(rgba(10, 15, 25, 0.85), rgba(10, 15, 25, 0.85)), url("https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=1400&auto=format&fit=crop") !important;
+    background: linear-gradient(rgba(10, 15, 25, 0.9), rgba(10, 15, 25, 0.9)), url("https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=1400&auto=format&fit=crop") !important;
     background-size: cover !important;
     background-position: center !important;
     background-attachment: fixed !important;
@@ -73,20 +63,24 @@ p, span, div, label {
     font-weight: bold;
     margin-top: 15px;
 }
-/* फाइल अपलोडर बॉक्स को साफ़ सुथरा रखना */
+/* 🛠️ अपलोडर बॉक्स और बटन को एकदम क्लीन लुक देने का फिक्स */
 [data-testid="stFileUploader"] {
     background-color: rgba(8, 20, 30, 0.6) !important;
     border: 1px dashed #00d2ff !important;
     border-radius: 10px !important;
     padding: 10px !important;
 }
-::-webkit-scrollbar {
-    width: 0px;
-    background: transparent;
+[data-testid="stFileUploader"] section {
+    padding: 10px !important;
 }
-</style>
-    color: #050a10 !important;
-    box-shadow: 0 0 15px #00ff66 !important;
+[data-testid="stFileUploader"] button {
+    background-color: #050a10 !important;
+    border: 1px solid #00d2ff !important;
+    color: #00d2ff !important;
+}
+[data-testid="stFileUploader"] button:hover {
+    background-color: #00d2ff !important;
+    color: black !important;
 }
 ::-webkit-scrollbar {
     width: 0px;
@@ -196,7 +190,7 @@ if prompt:
         button_text = "🔍 OPEN GOOGLE"
     elif "github" in clean_prompt or "गिटहब" in clean_prompt:
         url_to_open = "https://www.github.com"
-        assistant_reply = "बिल्कुल अनुराग भाई, गिटहब ओपन करने के लिए तैयार हूँ।"
+        assistant_reply = "बिल्कुल अनुराग भाई, गिटहब OPEN करने के लिए तैयार हूँ।"
         button_text = "🐙 OPEN GITHUB"
     elif "instagram" in clean_prompt or "इंस्टाग्राम" in clean_prompt:
         url_to_open = "https://www.instagram.com"
