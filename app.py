@@ -1,6 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
-import google.generativeai as genai
+import random
 
 # Page Configuration
 st.set_page_config(
@@ -84,21 +84,29 @@ else:
     query = st.text_input("⚡ How can I help you today, Boss?", placeholder="Type your command here...")
     
     if query:
-        with st.spinner("Accessing Core Memory..."):
-            # SECURE: Yeh line direct Streamlit Secrets se key legi (code me kuch nahi dikhega)
-            if "GEMINI_API_KEY" in st.secrets:
-                try:
-                    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-                    model = genai.GenerativeModel("gemini-1.5-flash")
-                    
-                    prompt = f"You are VEER AI, a loyal, highly advanced, and smart personal AI assistant for your boss/creator whose name is Veer. Keep your reply crisp, helpful, and address him respectfully as Boss or Sir. Here is his command: {query}"
-                    
-                    response = model.generate_content(prompt)
-                    ai_reply = response.text
-                except Exception as e:
-                    ai_reply = "Boss, API Key invalid lag rahi hai. Ek baar check karein."
+        with st.spinner("Processing command..."):
+            user_input = query.lower().strip()
+            
+            # Smart Local Responses (Bina kisi API key ke chalega)
+            if "hello" in user_input or "hii" in user_input or "hey" in user_input:
+                responses = [
+                    "Hello Boss! VEER AI is fully operational. Tell me your command.",
+                    "Greetings Sir. Secure mainframe link is stable. How can I assist you?",
+                    "Online and ready, Boss! What are we hacking into today?"
+                ]
+                ai_reply = random.choice(responses)
+                
+            elif "who are you" in user_input or "naam" in user_input:
+                ai_reply = "I am VEER AI, your highly advanced personal cyber assistant. Built exclusively to serve you, Boss."
+                
+            elif "who is your boss" in user_input or "owner" in user_input:
+                ai_reply = "My creator and absolute commander is Veer Sir. No one else has access privileges to my core."
+                
+            elif "status" in user_input or "system" in user_input:
+                ai_reply = "All systems nominal, Sir. Firewalls active, 3D Core Eye functional, and database secure."
+                
             else:
-                ai_reply = "Boss, mujhe dashboard ke Secrets panel me 'GEMINI_API_KEY' nahi mili."
+                ai_reply = f"Command received: '{query}'. System mainframe is executing this locally. I am analyzing the parameters for you, Boss!"
 
         # Response UI
         st.markdown(f"""
