@@ -4,13 +4,90 @@ import random
 
 # Page Configuration
 st.set_page_config(
-    page_title="VEER AI - Personal Assistant",
-    page_icon="👁️",
+    page_title="VEER AI - Hacker Terminal",
+    page_icon="⚡",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
 
-# Hide Sidebar & Headers
+# --- MATRIX HACKER BACKGROUND & VOICES (HTML/CSS/JS) ---
+# Isme Matrix Rain Background aur Speech Recognition dono integrated hain
+hacker_ui = """
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            opacity: 0.35; /* Hacker coding rain background opacity */
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix"></canvas>
+
+    <script>
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const katakana = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const alphabet = katakana.split('');
+
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+
+        const rainDrops = [];
+        for (let x = 0; x < columns; x++) {
+            rainDrops[x] = 1;
+        }
+
+        const draw = () => {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#0F0'; // Neon Green color
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < rainDrops.length; i++) {
+                const text = alphabet[Math.floor(Math.random() * alphabet.length)];
+                ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+
+                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    rainDrops[i] = 0;
+                }
+                rainDrops[i]++;
+            }
+        };
+
+        setInterval(draw, 30);
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
+"""
+
+# HTML Hacker Effect load karna
+components.html(hacker_ui, height=1, scrolling=False)
+
+# Custom Cyberpunk Styles for Streamlit
 st.markdown("""
     <style>
         [data-testid="stSidebar"], [data-testid="stSidebarCollapseButton"] {
@@ -19,104 +96,109 @@ st.markdown("""
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         header {visibility: hidden;}
-        .stApp {background-color: #05050a;}
         
+        /* Hacker Theme Colors */
+        .stApp {
+            background-color: #020205 !important;
+        }
+        h2, h3, p, span, label {
+            color: #00ff66 !important; /* Total Green */
+            font-family: 'Courier New', Courier, monospace !important;
+        }
         .stTextInput > div > div > input {
-            background-color: #111122 !important;
-            color: #00f2ff !important;
-            border: 1px solid #00f2ff !important;
-            border-radius: 10px !important;
+            background-color: #051a05 !important;
+            color: #00ff66 !important;
+            border: 1px solid #00ff66 !important;
+            font-family: 'Courier New', Courier, monospace !important;
+        }
+        .stButton>button {
+            background-color: #051a05 !important;
+            color: #00ff66 !important;
+            border: 1px solid #00ff66 !important;
+        }
+        .stButton>button:hover {
+            background-color: #00ff66 !important;
+            color: black !important;
         }
     </style>
 """, unsafe_allow_html=True)
 
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
+if "ai_response_text" not in st.session_state:
+    st.session_state.ai_response_text = ""
 
-# --- DYNAMIC 3D EYE GRAPHIC ---
-def render_eye(is_open):
-    color = "#00f2ff" if is_open else "#ff0055"
-    status = "open" if is_open else "closed"
-    html_code = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <style>
-            body {{ background-color: #05050a; display: flex; justify-content: center; align-items: center; height: 200px; margin: 0; overflow: hidden; }}
-            .eye-container {{ position: relative; width: 150px; height: 150px; display: flex; justify-content: center; align-items: center; }}
-            .radar-glow {{ position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 2px dashed {color}; animation: rotate 10s linear infinite; box-shadow: 0 0 20px rgba(0, 242, 255, 0.2); }}
-            .eye {{ position: relative; width: 120px; height: 75px; background: #000; border-radius: 50%; border: 3px solid {color}; overflow: hidden; box-shadow: 0 0 30px {color}; }}
-            .eye.closed {{ height: 4px; }}
-            .iris {{ position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 45px; height: 45px; background: radial-gradient(circle, #00f2ff 10%, #0055ff 60%, #000022 90%); border-radius: 50%; border: 2px solid #00f2ff; }}
-            .pupil {{ position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 18px; height: 18px; background: #000; border-radius: 50%; }}
-            @keyframes rotate {{ 100% {{ transform: rotate(360deg); }} }}
-        </style>
-    </head>
-    <body>
-        <div class="eye-container">
-            <div class="radar-glow"></div>
-            <div class="eye {status}">
-                <div class="iris"><div class="pupil"></div></div>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    components.html(html_code, height=210)
-
-# --- MAIN LOGIC ---
+# --- LOGIN PRIVILEGES ---
 if not st.session_state.logged_in:
-    render_eye(is_open=False)
-    st.markdown("<h2 style='text-align: center; color: #ff0055;'>VEER AI SECURE SYSTEM</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center;'>[ VEER MAINMAINFRAME ACCESS ]</h2>", unsafe_allow_html=True)
+    password = st.text_input("ENTER ACCESS ENCRYPTION KEY", type="password")
     
-    password = st.text_input("Enter Access Key", type="password")
-    if st.button("UNLOCK ACCESS", use_container_width=True):
+    if st.button("EXECUTE BYPASS"):
         if password == "veer123":
             st.session_state.logged_in = True
             st.rerun()
         else:
-            st.error("Access Denied")
+            st.error("ACCESS DENIED: FIREWALL BLOCK")
 else:
-    render_eye(is_open=True)
-    st.markdown("<h3 style='text-align: center; color: #00ff66;'>🔓 VEER ASSISTANT ONLINE</h3>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color: #00ff66;'>💻 VEER CYBER SYSTEM ONLINE</h2>", unsafe_allow_html=True)
     
-    st.write("---")
-    query = st.text_input("⚡ How can I help you today, Boss?", placeholder="Type your command here...")
-    
-    if query:
-        with st.spinner("Processing command..."):
-            user_input = query.lower().strip()
-            
-            # Smart Local Responses (Bina kisi API key ke chalega)
-            if "hello" in user_input or "hii" in user_input or "hey" in user_input:
-                responses = [
-                    "Hello Boss! VEER AI is fully operational. Tell me your command.",
-                    "Greetings Sir. Secure mainframe link is stable. How can I assist you?",
-                    "Online and ready, Boss! What are we hacking into today?"
-                ]
-                ai_reply = random.choice(responses)
-                
-            elif "who are you" in user_input or "naam" in user_input:
-                ai_reply = "I am VEER AI, your highly advanced personal cyber assistant. Built exclusively to serve you, Boss."
-                
-            elif "who is your boss" in user_input or "owner" in user_input:
-                ai_reply = "My creator and absolute commander is Veer Sir. No one else has access privileges to my core."
-                
-            elif "status" in user_input or "system" in user_input:
-                ai_reply = "All systems nominal, Sir. Firewalls active, 3D Core Eye functional, and database secure."
-                
-            else:
-                ai_reply = f"Command received: '{query}'. System mainframe is executing this locally. I am analyzing the parameters for you, Boss!"
+    # Text Input Command
+    query = st.text_input("⌨️ Terminal Command (or type below):", placeholder="Type here, Boss...")
 
-        # Response UI
+    # JavaScript integration for Voice (Sunne aur Bolne ke liye browser hooks)
+    voice_js = """
+    <script>
+    function startListening() {
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'en-US';
+        recognition.start();
+        
+        recognition.onresult = function(event) {
+            const speechToText = event.results[0][0].transcript;
+            // Send back to Streamlit input via prompt trick or alert
+            const inputEl = parent.document.querySelector('input[type="text"]');
+            if(inputEl) {
+                inputEl.value = speechToText;
+                inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+                inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+    }
+    </script>
+    <div style="display:flex; gap:10px;">
+        <button onclick="startListening()" style="background:#051a05; color:#00ff66; border:1px solid #00ff66; padding:10px; border-radius:5px; cursor:pointer;">🎙️ Tap to Speak (Suno)</button>
+    </div>
+    """
+    components.html(voice_js, height=50)
+
+    if query:
+        user_input = query.lower().strip()
+        
+        # Responses logic
+        if "hello" in user_input or "hii" in user_input or "hey" in user_input:
+            responses = [
+                "Hello Boss! VEER AI is fully operational. Systems are ready.",
+                "Greetings Sir. Mainframe link stable. How can I assist you?",
+                "Online and ready, Boss! Systems at 100 percent."
+            ]
+            st.session_state.ai_response_text = random.choice(responses)
+            
+        elif "who are you" in user_input or "naam" in user_input:
+            st.session_state.ai_response_text = "I am VEER A.I., your personal tactical hacker assistant. Built to serve you, Boss."
+            
+        elif "owner" in user_input or "boss" in user_input:
+            st.session_state.ai_response_text = "My creator and absolute commander is Veer Sir."
+            
+        else:
+            st.session_state.ai_response_text = f"Command '{query}' recognized. Mainframe execution complete, Boss!"
+
+        # Output Text
         st.markdown(f"""
-        <div style="background-color: #111122; padding: 15px; border-radius: 10px; border-left: 5px solid #00f2ff; margin-top: 15px;">
-            <p style="color: #888; margin: 0;"><b>You (Boss):</b> {query}</p>
-            <p style="color: #fff; margin-top: 10px;">🤖 <b>VEER AI:</b> {ai_reply}</p>
+        <div style="background-color: #051a05; padding: 15px; border-radius: 10px; border: 1px solid #00ff66; margin-top: 15px;">
+            <p style="color: #888; margin: 0;"><b>[COMMAND]:</b> {query}</p>
+            <p style="color: #00ff66; margin-top: 10px;">🤖 <b>[VEER AI]:</b> {st.session_state.ai_response_text}</p>
         </div>
         """, unsafe_allow_html=True)
-        
-    st.write("---")
-    if st.button("Lock System", type="secondary"):
-        st.session_state.logged_in = False
-        st.rerun()
+
+        # TTS (Text to speech) - AI ab bolega aapka response automatically!
+        if st.session_state.ai_response_text
