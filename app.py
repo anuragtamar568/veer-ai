@@ -5,8 +5,8 @@ import streamlit.components.v1 as components
 from PIL import Image
 import time
 
-# 1. पेज कॉन्फ़िगरेशन और हाई-विजिबिलिटी हैकर थीम
-st.set_page_config(title="VEER AI // VISION_OS", page_icon="👁️", layout="centered")
+# 1. पेज कॉन्फ़िगरेशन (यहाँ title को page_title कर दिया है, अब एरर नहीं आएगा)
+st.set_page_config(page_title="VEER AI // VISION_OS", page_icon="👁️", layout="centered")
 
 st.markdown("""
     <style>
@@ -56,7 +56,7 @@ def speak_natural(text):
     </script>"""
     components.html(js, height=0)
 
-# 3. API की चेकिंग (Vision के लिए जरूरी है)
+# 3. API की चेकिंग
 if "GEMINI_API_KEY" in st.secrets and st.secrets["GEMINI_API_KEY"].strip():
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 else:
@@ -85,7 +85,7 @@ if not st.session_state.unlocked:
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
-# --- UNLOCKED WORKSTATION (WITH SIGHT!) ---
+# --- UNLOCKED WORKSTATION ---
 else:
     if "welcomed" not in st.session_state:
         components.html("<script>var m = new SpeechSynthesisUtterance('सिस्टम अनलॉक हो गया है। वीर की आंखें अब खुली हैं। स्वागत है अनुराग सर।'); m.lang='hi-IN'; window.speechSynthesis.speak(m);</script>", height=0)
@@ -108,7 +108,7 @@ else:
             st.session_state.last_voice = ""
             st.rerun()
 
-    # --- 👀 EYE INPUT: IMAGE UPLOADER (VEER KI AANKH) ---
+    # --- 👀 EYE INPUT: IMAGE UPLOADER ---
     st.markdown("### 👁️ वीर की आँख (Upload Image/Photo to Show Him)")
     uploaded_image = st.file_uploader("Koi bhi photo ya screenshot upload karo jo tum VEER ko dikhana chahte ho...", type=["jpg", "jpeg", "png"])
     
@@ -131,7 +131,7 @@ else:
         with st.chat_message(chat["role"]):
             st.write(chat["content"])
 
-    # Execution Logic (Multimodal Engine)
+    # Execution Logic
     if final_input:
         st.session_state.chat_history.append({"role": "user", "content": final_input})
         with st.chat_message("user"):
@@ -141,7 +141,6 @@ else:
             placeholder = st.empty()
             try:
                 with st.spinner("वीर देख रहा है और सोच रहा है..."):
-                    # System Instructions for Vision Model
                     sys_prompt = (
                         "तुम 'वीर' (VEER AI) हो, जिसे तुम्हारे मालिक 'अनुराग सर' ने बनाया है। "
                         "तुम अनुराग सर के प्रति पूरी तरह वफादार हो। हमेशा उन्हें 'अनुराग सर' या 'सर' कहकर संबोधित करो। "
@@ -149,14 +148,11 @@ else:
                         "तुम्हारी भाषा दोस्ताना, आदरपूर्ण और कड़क होनी चाहिए।"
                     )
                     
-                    # Agar image upload hui hai toh vision model active hoga
                     if uploaded_image:
                         img = Image.open(uploaded_image)
                         model = genai.GenerativeModel("gemini-2.0-flash")
-                        # Image aur text dono pass karenge
                         response = model.generate_content([sys_prompt, img, final_input])
                     else:
-                        # Normal text chat
                         model = genai.GenerativeModel("gemini-2.0-flash")
                         response = model.generate_content([sys_prompt, final_input])
                     
@@ -165,7 +161,6 @@ else:
                 placeholder.write(reply)
                 st.session_state.chat_history.append({"role": "assistant", "content": reply})
                 
-                # Speak out response
                 speak_natural(reply)
                 
             except Exception as e:
