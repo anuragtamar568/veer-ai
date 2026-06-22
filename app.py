@@ -32,6 +32,22 @@ def speak_auto(text):
 # 4. ऐप सेटअप
 st.title("VEER AI 🤖")
 st.markdown("<div class='dev-text'>⚡ SPECIALIST WORKSTATION // 👤 CREATED BY ANURAG</div>", unsafe_allow_html=True)
+
+# 5. Session State Initialization
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# Clear Chat History Button (Stuck Cache Reset karne ke liye)
+if st.button("🗑️ Clear Chat History"):
+    st.session_state.messages = []
+    if "chat" in st.session_state:
+        del st.session_state["chat"]
+    if "last_processed_voice" in st.session_state:
+        del st.session_state["last_processed_voice"]
+    st.success("Chat history cleared successfully!")
+    time.sleep(1)
+    st.rerun()
+
 st.write("---")
 
 # API की चेकिंग
@@ -41,17 +57,16 @@ else:
     st.error("API KEY MISSING! 'Settings' -> 'Secrets' में जाकर GEMINI_API_KEY सेट करो।")
     st.stop()
 
-# Session State Initialization
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
 # Chat Session Setup
 if "chat" not in st.session_state:
-    model = genai.GenerativeModel(
-        "gemini-2.0-flash",
-        system_instruction="तुम 'वीर' हो। तुम्हें 'अनुराग' ने बनाया है। तुम अनुराग के सबसे अच्छे दोस्त हो। गर्व से बताओ कि तुम्हें अनुराग ने बनाया है।"
-    )
-    st.session_state.chat = model.start_chat(history=[])
+    try:
+        model = genai.GenerativeModel(
+            "gemini-2.0-flash",
+            system_instruction="तुम 'वीर' हो। तुम्हें 'अनुराग' ने बनाया है। तुम अनुराग के सबसे अच्छे दोस्त हो। गर्व से बताओ कि तुम्हें अनुराग ने बनाया है।"
+        )
+        st.session_state.chat = model.start_chat(history=[])
+    except Exception as e:
+        st.error(f"Model Init Error: {e}")
 
 # रिकॉर्डिंग बटन
 voice_prompt = speech_to_text(language='hi', use_container_width=True, key='mic')
@@ -61,7 +76,7 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# इनपुट ट्रैकिंग
+# इनपुट ट्रैकिंग और डुप्लीकेट प्रोटेक्शन
 prompt = None
 user_input = st.chat_input("COMMAND...")
 
@@ -81,7 +96,7 @@ if prompt:
     with st.chat_message("assistant"):
         placeholder = st.empty()
         try:
-            # Gemini Call
+            # Gemini Chat Call
             response = st.session_state.chat.send_message(prompt)
             
             # Response handling
@@ -89,13 +104,12 @@ if prompt:
             speak_auto(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
             
-            # Chat history ko clean refresh dena taaki mic loop na kare
+            # Page ko fresh state dena taaki mic spam na kare
             st.rerun()
             
         except Exception as e:
             if "429" in str(e):
-                placeholder.error("⏳ Aapka message save ho gaya hai, par Google Free API temporary block hai. Kripya 30 seconds wait karein aur page ko Refresh (F5) karke check karein!")
-                # Error status ko handle karne ke liye user message delete nahi karenge taaki history bani rahe
+                placeholder.error("⏳ Google Free API par thoda load hai. Kripya 15 seconds wait karein aur fir se try karein!")
                 time.sleep(2)
             else:
                 placeholder.error(f"Error: {e}")
