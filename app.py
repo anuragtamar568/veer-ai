@@ -1,267 +1,172 @@
 import streamlit as st
+import google.generativeai as genai
+from streamlit_mic_recorder import speech_to_text
 
-st.set_page_config(page_title="VEER AI Workstation", layout="centered")
+# पेज कॉन्फ़िगरेशन
+st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
 
-# Front-end design ko do parts me breakdown kiya hai taaki JS literals crash na ho
-html_part1 = """
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VEER AI - Specialist Workstation</title>
+# CSS - बैकग्राउंड, नियॉन टेक्स्ट और वॉयस रिकॉर्डर का फिक्स
+def local_css():
+    st.markdown("""
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Courier New', Courier, monospace;
-        }
+    [data-testid="stAppViewContainer"] {
+        background-color: transparent !important;
+    }
+    
+    .bg-img-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: -1;
+        overflow: hidden;
+    }
+    .bg-img-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: brightness(0.35) contrast(1.1);
+    }
+    
+    iframe[title="streamlit_mic_recorder.speech_to_text"] {
+        background: transparent !important;
+        background-color: transparent !important;
+    }
+    
+    h1 {
+        color: #6bf2ff !important;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+        font-weight: 300 !important;
+        text-transform: uppercase;
+        letter-spacing: 5px;
+        text-shadow: 0 0 10px rgba(107, 242, 255, 0.8), 0 0 25px rgba(107, 242, 255, 0.5);
+    }
+    
+    .developer-text {
+        color: #00ff66 !important;
+        font-family: 'Courier New', Courier, monospace !important;
+        font-weight: bold;
+        letter-spacing: 2px;
+        font-size: 14px;
+        text-shadow: 0 0 8px rgba(0, 255, 102, 0.6);
+    }
 
-        body {
-            background-color: #0b0f19;
-            color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 95vh;
-            padding: 10px;
-        }
+    div[data-testid="stChatMessage"] {
+        background-color: rgba(8, 20, 30, 0.85) !important;
+        border: 2px solid #00d2ff;
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+    }
 
-        .workstation-container {
-            width: 100%;
-            max-width: 800px;
-            background: #0d1321;
-            border: 1px solid #1e293b;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-        }
+    p, span, div, label {
+        color: #ffffff !important;
+    }
+    
+    .stChatInputContainer {
+        background-color: rgba(5, 10, 15, 0.95) !important;
+        border: 2px solid #00d2ff !important;
+        border-radius: 8px !important;
+    }
+    
+    .stChatInputContainer textarea {
+        color: #ffffff !important;
+    }
 
-        .header {
-            margin-bottom: 25px;
-            border-bottom: 1px solid #1e293b;
-            padding-bottom: 20px;
-        }
-
-        .brand-title {
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: #00ffff;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.2);
-            margin-bottom: 15px;
-        }
-
-        .meta-text {
-            font-size: 0.85rem;
-            color: #00ff66;
-            font-weight: bold;
-            letter-spacing: 1.5px;
-            line-height: 1.8;
-            text-transform: uppercase;
-        }
-
-        .chat-log {
-            height: 380px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-            padding-right: 10px;
-        }
-
-        .chat-log::-webkit-scrollbar {
-            width: 6px;
-        }
-        .chat-log::-webkit-scrollbar-thumb {
-            background: #1e293b;
-            border-radius: 4px;
-        }
-
-        .msg-card {
-            background: #161f30;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: flex-start;
-            gap: 15px;
-            border: 1px solid transparent;
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.05);
-        }
-
-        .msg-card.ai-card {
-            border-left: 4px solid #00d4ff;
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.15);
-        }
-
-        .msg-card.user-card {
-            border-left: 4px solid #94a3b8;
-        }
-
-        .avatar {
-            background: #1e293b;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 1.1rem;
-            border: 1px solid #334155;
-        }
-
-        .msg-content {
-            flex: 1;
-        }
-
-        .msg-text {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            color: #e2e8f0;
-            letter-spacing: 0.5px;
-        }
-
-        .controls-section {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .record-btn {
-            background: #161f30;
-            border: 1px solid #334155;
-            color: #94a3b8;
-            padding: 10px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.8rem;
-            letter-spacing: 1px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            width: fit-content;
-        }
-
-        .command-bar-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-            background: #161f30;
-            border: 1px solid #00d4ff;
-            border-radius: 8px;
-            padding: 5px 10px;
-        }
-
-        .command-input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: #ffffff;
-            font-size: 0.95rem;
-            padding: 12px;
-            letter-spacing: 1px;
-        }
-
-        .submit-btn {
-            background: #00d4ff;
-            border: none;
-            color: #0b0f19;
-            width: 36px;
-            height: 36px;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
+    button {
+        background-color: #050a10 !important;
+        border: 1px solid #00d2ff !important;
+        color: #00d2ff !important;
+    }
     </style>
-</head>
-<body>
+    """, unsafe_allow_html=True)
 
-    <div class="workstation-container">
-        <div class="header">
-            <h1 class="brand-title">VEER AI</h1>
-            <div class="meta-text">
-                SPECIALIST WORKSTATION<br>
-                DEVELOPER: ANURAG // SECURE CONNECTION
-            </div>
-        </div>
+local_css()
 
-        <div class="chat-log" id="chatLog">
-            <div class="msg-card user-card">
-                <div class="avatar">👤</div>
-                <div class="msg-content">
-                    <div class="msg-text">hii</div>
-                </div>
-            </div>
+# बैकग्राउंड इमेज
+st.markdown(
+    '<div class="bg-img-container"><img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1400&auto=format&fit=crop"></div>',
+    unsafe_allow_html=True
+)
 
-            <div class="msg-card ai-card">
-                <div class="avatar">🤖</div>
-                <div class="msg-content">
-                    <div class="msg-text">पिंग रिसीव्ड। वीर ऑनलाइन है, अनुराग। बताओ, क्या टास्क एक्जीक्यूट करना है? कोई कोड पैच करना है या डेटा सिंक?</div>
-                </div>
-            </div>
-        </div>
+# हेडर
+st.title("VEER AI")
+st.markdown("<div class='developer-text'>SPECIALIST WORKSTATION</div>", unsafe_allow_html=True)
+st.markdown("<div class='developer-text'>DEVELOPER: ANURAG // SECURE CONNECTION</div>", unsafe_allow_html=True)
+st.write("---")
 
-        <div class="controls-section">
-            <button class="record-btn" id="recordBtn">
-                <span>🎙️</span> START RECORDING
-            </button>
+# JavaScript से नई टैब खोलने का फंक्शन
+def open_website(url):
+    js = f"window.open('{url}', '_blank');"
+    st.components.v1.html(f"<script>{js}</script>", height=0, width=0)
 
-            <div class="command-bar-wrapper">
-                <input type="text" class="command-input" id="cmdInput" placeholder="ENTER COMMAND..." autocomplete="off">
-                <button class="submit-btn" id="sendBtn">▲</button>
-            </div>
-        </div>
-    </div>
+# API Configuration
+if "GEMINI_API_KEY" in st.secrets:
+    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+    
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
 
-    <script>
-        const chatLog = document.getElementById('chatLog');
-        const cmdInput = document.getElementById('cmdInput');
-        const sendBtn = document.getElementById('sendBtn');
+    for message in st.session_state.messages:
+        avatar = "👤" if message["role"] == "user" else "🤖"
+        with st.chat_message(message["role"], avatar=avatar):
+            st.markdown(message["content"])
 
-        function appendMessage(sender, text) {
-            const card = document.createElement('div');
-            card.className = "msg-card " + (sender === 'user' ? 'user-card' : 'ai-card');
-            
-            // Yahan string concatenation use kar liya taaki literal conflict khatam ho jaye
-            card.innerHTML = '<div class="avatar">' + (sender === 'user' ? '👤' : '🤖') + '</div>' +
-                             '<div class="msg-content">' +
-                                 '<div class="msg-text">' + text + '</div>' +
-                             '</div>';
-            
-            chatLog.appendChild(card);
-            chatLog.scrollTop = chatLog.scrollHeight;
-        }
+    # वॉयस इनपुट
+    st.markdown("<div style='font-family: monospace; font-weight: bold;'>🎙️ VOICE COMMAND // INTERACT:</div>", unsafe_allow_html=True)
+    voice_input = speech_to_text(start_prompt="START RECORDING", stop_prompt="STOP RECORDING", language='hi', key='speech')
 
-        function handleCommand() {
-            const query = cmdInput.value.trim();
-            if(!query) return;
+    text_input = st.chat_input("ENTER COMMAND...")
+    prompt = voice_input if voice_input else text_input
 
-            appendMessage('user', query);
-            cmdInput.value = '';
+    if prompt:
+        with st.chat_message("user", avatar="👤"):
+            st.markdown(prompt)
+        st.session_state.messages.append({"role": "user", "content": prompt})
 
-            setTimeout(() => {
-                let response = "कमांड समझ नहीं आई। क्या आप दोबारा स्पेसिफाई कर सकते हैं?";
+        # --- असिस्टेंट फीचर: कमांड चेक करना ---
+        clean_prompt = prompt.lower()
+        url_to_open = None
+        assistant_reply = ""
+
+        if "youtube" in clean_prompt or "यूट्यूब" in clean_prompt:
+            url_to_open = "https://www.youtube.com"
+            assistant_reply = "जी बॉस, आपके लिए यूट्यूब ओपन कर रहा हूँ।"
+        elif "google" in clean_prompt or "गूगल" in clean_prompt:
+            url_to_open = "https://www.google.com"
+            assistant_reply = "कमांड एक्जीक्यूटेड! गूगल सर्च इंजन ओपन किया जा रहा है।"
+        elif "github" in clean_prompt or "गिटहब" in clean_prompt:
+            url_to_open = "https://www.github.com"
+            assistant_reply = "बिल्कुल अनुराग, आपकी गिटहब रिपोजिटरी एक्सेस की जा रही है।"
+        elif "facebook" in clean_prompt or "फेसबुक" in clean_prompt:
+            url_to_open = "https://www.facebook.com"
+            assistant_reply = "फेसबुक पोर्टल खोला जा रहा है, बॉस।"
+        
+        # अगर कोई मैचिंग कमांड मिली, तो सीधे एक्शन लें
+        if url_to_open:
+            with st.chat_message("assistant", avatar="🤖"):
+                st.markdown(assistant_reply)
+            st.session_state.messages.append({"role": "assistant", "content": assistant_reply})
+            open_website(url_to_open)
+        else:
+            # अगर नॉर्मल बात है, तो Gemini AI से जवाब लें
+            with st.chat_message("assistant", avatar="🤖"):
+                placeholder = st.empty()
+                placeholder.markdown("`ANALYZING COMMAND...`")
                 
-                if(query.includes('2+2') || query.includes('2 + 2')) {
-                    response = "कैलकुलेशन कम्पलीट: 4। इसके लिए ज्यादा कोर प्रोसेसिंग की जरूरत नहीं पड़ी।";
-                } else if(query.toLowerCase() === 'hii' || query.toLowerCase() === 'hello') {
-                    response = "सिस्टम ऑनलाइन है। कमांड दीजिए, अनुराग।";
-                }
-                
-                appendMessage('ai', response);
-            }, 800);
-        }
-
-        sendBtn.addEventListener('click', handleCommand);
-        cmdInput.addEventListener('keypress', (e) => {
-            if(e.key === 'Enter') handleCommand();
-        });
-    </script>
-</body>
-</html>
-"""
-
-# HTML code render injection
-st.components.v1.html(html_part1, height=650, scrolling=True)
+                try:
+                    model = genai.GenerativeModel(
+                        "gemini-2.5-flash",
+                        system_instruction=(
+                            "तुम्हारा नाम 'वीर' है। तुम एक अत्यंत उन्नत और सुरक्षित हैकर एआई असिस्टेंट हो जिसे सिर्फ 'अनुराग' ने विकसित किया है। "
+                            "तुम अनुराग के प्रति पूरी तरह वفاदार हो। तुम्हारी भाषा टेक्निकल, सीक्रेट और कूल होनी चाहिए। "
+                            "जब भी कोई पूछे, हमेशा गर्व से बताना कि तुम्हारे क्रिएटर और बॉस अनुराग हैं।"
+                        )
+                    )
+                    response = model.generate_content(prompt)
+                    placeholder.markdown(response.text)
+                    st.session_state.messages.append({"role": "assistant", "content": response.text})
+                except Exception as e:
+                    placeholder.markdown(f"❌ `SYSTEM ERROR: {str(e)}`")
+else:
+    st.error("⚠️ CRITICAL: GEMINI_API_KEY NOT FOUND.")
