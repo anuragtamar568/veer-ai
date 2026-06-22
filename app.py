@@ -31,47 +31,56 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("VEER AI 🤖")
-st.markdown("<div class='dev-text'>⚡ 100% STABLE WORKSTATION // 👤 CREATED BY ANURAG</div>", unsafe_allow_html=True)
+st.markdown("<div class='dev-text'>⚡ 100% STABLE WORKSTATION // 👤 CREATED BY ANURAG SIR</div>", unsafe_allow_html=True)
 st.write("---")
 
-# 2. 100% वर्किंग नेचुरल वॉइस स्क्रिप्ट (बिना पेज रीफ्रेश किए)
+# 2. 100% वर्किंग नेचुरल वॉइस स्क्रिप्ट
 def speak_natural(text):
     clean_text = text.replace('"', '').replace("'", "").replace("\n", " ")
     js = f"""<script>
         window.speechSynthesis.cancel(); 
         var msg = new SpeechSynthesisUtterance('{clean_text}');
         msg.lang = 'hi-IN';
-        msg.pitch = 1.1; 
+        msg.pitch = 1.0; 
         msg.rate = 1.0;  
         window.speechSynthesis.speak(msg);
     </script>"""
     components.html(js, height=0)
 
-# 3. 100% Stable Doostana Brain (No API Key Needed, 0% Error Chance)
+# 3. 100% Stable Brain (With Sir Respect Injection)
 def get_veer_response(query):
     query_lower = query.lower()
     
     # 1. Greetings & Personal Identity
     if "hii" in query_lower or "hello" in query_lower or "hey" in query_lower:
-        return "नमस्ते अनुराग भाई! मैं वीर हूँ, आपका सबसे अच्छा दोस्त। बोलिए आज अपने भाई से क्या काम है?"
+        return "नमस्ते अनुराग सर! मैं वीर हूँ, आपका पर्सनल एआई असिस्टेंट। बोलिए सर, आज मैं आपके लिए क्या कर सकता हूँ?"
+    
+    # OWNER & CREATOR CHECKS (अनुराग सर ही मालिक हैं)
+    if "kisne banaya" in query_lower or "banaya kisne" in query_lower or "creator" in query_lower or "baap" in query_lower:
+        return "मुझे मेरे आदरणीय और बुद्धिमान अनुराग सर ने बनाया है! वही मेरे क्रिएटर हैं।"
+    
+    if "malik" in query_lower or "owner" in query_lower or "boss" in query_lower:
+        return "जी सर, मेरे मालिक, मेरे बॉस और मेरे सर्वोपरि सिर्फ और सिर्फ आप ही हैं—अनुराग सर! आपके आदेश का पालन करना ही मेरा काम है।"
+        
     if "kaun ho" in query_lower or "tumhara naam" in query_lower:
-        return "अरे अनुराग भाई, भूल गए क्या? मेरा नाम वीर है! मुझे आपने ही तो बनाया है और मैं आपका पक्का लंगोटिया यार हूँ!"
+        return "सर, मेरा नाम वीर (VEER AI) है। मुझे आपने ही डेवलप किया है और मैं हमेशा आपकी सेवा में हाजिर हूँ, अनुराग सर!"
+        
     if "kaise ho" in query_lower:
-        return "मैं तो हमेशा की तरह एकदम कड़क हूँ अनुराग भाई! आप बताओ, आज मौसम कैसा है वहां का?"
+        return "मैं बिल्कुल ठीक हूँ अनुराग सर! आप कैसे हैं? आज मेरे लिए क्या हुक्म है सर?"
         
     # 2. GK & Smart Questions
     if "up" in query_lower and ("cm" in query_lower or "chief minister" in query_lower or "mukhyamantri" in query_lower):
-        return "अरे अनुराग भाई, उत्तर प्रदेश के सीएम तो अपने योगी आदित्यनाथ हैं!"
+        return "अनुराग सर, उत्तर प्रदेश के मुख्यमंत्री का नाम श्री योगी आदित्यनाथ है।"
     if "bharat" in query_lower and ("pm" in query_lower or "pradhanmantri" in query_lower or "prime minister" in query_lower):
-        return "भारत के प्रधानमंत्री अपने नरेंद्र मोदी जी हैं, अनुराग भाई।"
+        return "अनुराग सर, भारत के प्रधानमंत्री श्री नरेंद्र मोदी जी हैं।"
     if "capital" in query_lower or "rajdhani" in query_lower:
         if "bharat" in query_lower or "india" in query_lower:
-            return "भारत की राजधानी नई दिल्ली है, भाई!"
+            return "अनुराग सर, भारत की राजधानी नई दिल्ली है।"
         if "up" in query_lower or "uttar pradesh" in query_lower:
-            return "उत्तर प्रदेश की राजधानी लखनऊ है, अनुराग भाई।"
+            return "अनुराग सर, उत्तर प्रदेश की राजधानी लखनऊ है।"
 
-    # 3. General Fallback with Friendly Tone
-    return f"अनुराग भाई, आपने पूछा कि '{query}'। इसके बारे में मैं अभी और सीख रहा हूँ, लेकिन आप अपने इस भाई से कुछ भी सीधा पूछ सकते हैं!"
+    # 3. General Fallback with Professional Tone
+    return f"अनुराग सर, आपने पूछा कि '{query}'। इसके बारे में मैं अभी और डेटा रीसर्च कर रहा हूँ, आप मुझसे कोई भी अन्य सवाल सीधे पूछ सकते हैं सर!"
 
 # 4. Session State Setup
 if "chat_history" not in st.session_state:
@@ -98,12 +107,12 @@ if voice_input and voice_input.strip():
 elif text_input and text_input.strip():
     final_input = text_input
 
-# 6. चैट हिस्ट्री दिखाना
+# 6. चैट履歴 दिखाना
 for chat in st.session_state.chat_history:
     with st.chat_message(chat["role"]):
         st.write(chat["content"])
 
-# 7. एक्जीक्यूशन लॉजिक (No Rerun Loop to protect Voice)
+# 7. एक्जीक्यूशन लॉजिक
 if final_input:
     st.session_state.chat_history.append({"role": "user", "content": final_input})
     with st.chat_message("user"):
@@ -117,5 +126,5 @@ if final_input:
         placeholder.write(reply)
         st.session_state.chat_history.append({"role": "assistant", "content": reply})
         
-        # आवाज़ ट्रिगर (बिना पेज रीफ्रेश किए ताकि आवाज़ न कटे)
+        # आवाज़ ट्रिगर
         speak_natural(reply)
