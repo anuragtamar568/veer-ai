@@ -1,22 +1,21 @@
 import streamlit as st
 import google.generativeai as genai
+from streamlit_mic_recorder import speech_to_text
 
-# पेज की सेटिंग्स (Title और Icon)
+# पेज की सेटिंग्स
 st.set_page_config(page_title="वीर: आपका पर्सनल एआई", page_icon="🤖", layout="centered")
 
-# हेडर (Header)
+# हेडर
 st.title("🤖 वीर: आपका पर्सनल एआई")
-st.write("मुझसे कोई भी सवाल पूछें, मैं आपकी मदद के लिए तैयार हूँ!")
+st.write("मुझसे कोई भी सवाल पूछें या माइक बटन दबाकर बोलें!")
 st.write("---")
 
 # 1. Streamlit Secrets से API Key चेक करना
 if "GEMINI_API_KEY" in st.secrets and st.secrets["GEMINI_API_KEY"].strip() != "":
     api_key = st.secrets["GEMINI_API_KEY"]
-    
-    # Gemini AI को कॉन्फ़िगर करना
     genai.configure(api_key=api_key)
     
-    # चैट हिस्ट्री के लिए सेशन स्टेट (Session State) सेट करना
+    # सेशन स्टेट (Session State) सेट करना
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
@@ -25,9 +24,29 @@ if "GEMINI_API_KEY" in st.secrets and st.secrets["GEMINI_API_KEY"].strip() != ""
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # यूजर से इनपुट लेना
-    if prompt := st.chat_input("यहाँ अपना सवाल लिखें..."):
-        # यूजर का मैसेज स्क्रीन पर दिखाना और सेव करना
+    # --- वॉइस इनपुट (Voice Input) सेक्शन ---
+    st.write("🎙️ **बोलकर सवाल पूछें:**")
+    voice_input = speech_to_text(
+        start_prompt="🎤 बोलना शुरू करें",
+        stop_prompt="🛑 रुकें",
+        language='hi',  # हिंदी और इंग्लिश दोनों समझेगा
+        use_container_width=True,
+        key='speech'
+    )
+
+    # टेक्स्ट इनपुट बॉक्स (टाइप करने के लिए)
+    text_input = st.chat_input("यहाँ अपना सवाल लिखें...")
+
+    # तय करना कि यूजर ने बोलकर इनपुट दिया है या टाइप करके
+    prompt = None
+    if voice_input:
+        prompt = voice_input
+    elif text_input:
+        prompt = text_input
+
+    # अगर कोई इनपुट मिला है तो जवाब जनरेट करें
+    if prompt:
+        # यूजर का मैसेज दिखाना और सेव करना
         with st.chat_message("user"):
             st.markdown(prompt)
         st.session_state.messages.append({"role": "user", "content": prompt})
@@ -38,11 +57,10 @@ if "GEMINI_API_KEY" in st.secrets and st.secrets["GEMINI_API_KEY"].strip() != ""
             message_placeholder.markdown("*वीर सोच रहा है...*")
             
             try:
-                # यहाँ हमने मॉडल अपडेट कर दिया है
                 model = genai.GenerativeModel(
-    "gemini-2.5-flash",
-    system_instruction="तुम्हारा नाम 'वीर' है। तुम एक बुद्धिमान और मददगार एआई असिस्टेंट हो, जिसे अनुराग (anuragtamar568) ने बनाया है। जब भी कोई तुम्हारा नाम पूछे, तो गर्व से अपना नाम 'वीर' बताना और अपने डेवलपर का नाम लेना।"
-)
+                    "gemini-2.5-flash",
+                    system_instruction="तुम्हारा नाम 'वीर' है। तुम एक बुद्धिमान और मददगार एआई असिस्टेंट हो, जिसे अनुराग ने बनाया है। जब भी कोई तुम्हारा नाम पूछे, तो अपना नाम 'वीर' बताना।"
+                )
                 response = model.generate_content(prompt)
                 
                 # जवाब दिखाना और सेव करना
@@ -53,5 +71,4 @@ if "GEMINI_API_KEY" in st.secrets and st.secrets["GEMINI_API_KEY"].strip() != ""
                 message_placeholder.markdown(f"❌ एरर आया: {str(e)}")
 
 else:
-    # अगर Secrets में API Key नहीं मिलती है तो यह एरर दिखेगा
     st.error("⚠️ API Key नहीं मिली!")
