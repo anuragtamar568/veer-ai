@@ -2,23 +2,15 @@ import streamlit as st
 import streamlit.components.v1 as components
 import google.generativeai as genai
 
-# 1. Page configuration
+# 1. Page Configuration
 st.set_page_config(
-    page_title="VEER AI - Gateway",
+    page_title="VEER AI - Personal Assistant",
     page_icon="👁️",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
 
-# Gemini AI Configuration (Yahan apni API key daal sakte hain, ya direct chalane ke liye backup code hai)
-# Tip: Streamlit secrets me GEMINI_API_KEY set karna sabse best hota hai
-if "GEMINI_API_KEY" in st.secrets:
-    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-else:
-    # Agar key nahi milti to user se input lene ka option de rahe hain backend me
-    genai.configure(api_key="YOUR_GEMINI_API_KEY_HERE")
-
-# Hide Sidebar & Headers
+# 2. Hide Sidebar & Headers
 st.markdown("""
     <style>
         [data-testid="stSidebar"], [data-testid="stSidebarCollapseButton"] {
@@ -86,25 +78,33 @@ if not st.session_state.logged_in:
             st.error("Access Denied")
 else:
     render_eye(is_open=True)
-    st.markdown("<h3 style='text-align: center; color: #00ff66;'>🔓 SYSTEM ONLINE</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center; color: #00ff66;'>🔓 VEER ASSISTANT ONLINE</h3>", unsafe_allow_html=True)
     
     st.write("---")
-    query = st.text_input("🤖 Ask VEER AI anything...", placeholder="Type your question here...")
+    query = st.text_input("⚡ How can I help you today, Boss?", placeholder="Type your command here...")
     
     if query:
-        with st.spinner("VEER AI is thinking..."):
+        with st.spinner("Accessing Core Memory..."):
             try:
-                # Gemini Model se response generate karna
+                # 🛠️ YAHAN APNI ASLI GEMINI API KEY DALO 🛠️
+                # Agar Streamlit secrets kaam nahi kar raha, to apni key niche quotes "" ke andar daal do direct!
+                asli_api_key = "PASTE_YOUR_GEMINI_API_KEY_HERE"
+                
+                genai.configure(api_key=asli_api_key)
                 model = genai.GenerativeModel("gemini-1.5-flash")
-                response = model.generate_content(query)
+                
+                # System prompt taaki wo aapke assistant ki tarah baat kare
+                prompt = f"You are VEER AI, a loyal, highly advanced, and smart personal AI assistant for your boss/creator whose name is Veer. Keep your reply crisp, helpful, and address him respectfully as Boss or Sir. Here is his command: {query}"
+                
+                response = model.generate_content(prompt)
                 ai_reply = response.text
             except Exception as e:
-                ai_reply = "Sir, please make sure your Gemini API Key is configured correctly in Streamlit Secrets."
+                ai_reply = "Boss, please open `app.py` and put your actual Gemini API Key inside line 97: `asli_api_key = 'your_key'`."
 
         # Response UI
         st.markdown(f"""
         <div style="background-color: #111122; padding: 15px; border-radius: 10px; border-left: 5px solid #00f2ff; margin-top: 15px;">
-            <p style="color: #888; margin: 0;"><b>You:</b> {query}</p>
+            <p style="color: #888; margin: 0;"><b>You (Boss):</b> {query}</p>
             <p style="color: #fff; margin-top: 10px;">🤖 <b>VEER AI:</b> {ai_reply}</p>
         </div>
         """, unsafe_allow_html=True)
