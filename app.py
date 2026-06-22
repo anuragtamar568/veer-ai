@@ -201,8 +201,7 @@ if "GEMINI_API_KEY" in st.secrets:
                 placeholder.markdown("`ANALYZING COMMAND...`")
                 
                 try:
-                    model = genai.GenerativeModel(
-                        "gemini-2.5-flash",
+                   model = genai.GenerativeModel("gemini-1.5-flash"),
                         system_instruction=(
                             "तुम्हारा नाम 'वीर' है। तुम कोई रोबोट या मशीन नहीं हो, बल्कि एक बेहद समझदार, कूल और दोस्ताना एआई असिस्टेंट हो। "
                             "तुम्हें सिर्फ और सिर्फ 'अनुराग' ने बनाया है। तुम्हारी बात करने की भाषा एकदम नेचुरल, आम इंसानों जैसी और हिंदी-इंग्लिश मिक्स (Hinglish) होनी चाहिए। "
