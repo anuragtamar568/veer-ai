@@ -5,7 +5,6 @@ from streamlit_mic_recorder import speech_to_text
 # पेज कॉन्फ़िगरेशन
 st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
 
-# CSS Styling
 def local_css():
     st.markdown("""
     <style>
@@ -29,7 +28,6 @@ st.markdown("<div class='developer-text'>SPECIALIST WORKSTATION</div>", unsafe_a
 st.markdown("<div class='developer-text'>DEVELOPER: ANURAG // SECURE CONNECTION</div>", unsafe_allow_html=True)
 st.write("---")
 
-# API Configuration
 if "GEMINI_API_KEY" in st.secrets:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
     
@@ -55,26 +53,28 @@ if "GEMINI_API_KEY" in st.secrets:
             st.markdown(prompt)
 
         clean_prompt = prompt.lower().replace(" ", "")
-        
-        # Assistant Logic
-        if "youtube" in clean_prompt:
-            url, reply, btn = "https://www.youtube.com", "यूट्यूब खोलने का लिंक तैयार है!", "🚀 OPEN YOUTUBE"
-        elif "google" in clean_prompt:
-            url, reply, btn = "https://www.google.com", "गूगल बाबा का एक्सेस रेडी है।", "🔍 OPEN GOOGLE"
-        else:
-            url, reply, btn = None, None, None
+        url_to_open, assistant_reply, button_text = None, "", ""
 
-        if url:
+        if "youtube" in clean_prompt:
+            url_to_open, assistant_reply, button_text = "https://www.youtube.com", "यूट्यूब खोलने का लिंक तैयार है!", "🚀 OPEN YOUTUBE"
+        elif "google" in clean_prompt:
+            url_to_open, assistant_reply, button_text = "https://www.google.com", "गूगल बाबा का एक्सेस रेडी है।", "🔍 OPEN GOOGLE"
+        elif "github" in clean_prompt:
+            url_to_open, assistant_reply, button_text = "https://www.github.com", "गिटहब ओपन करने के लिए नीचे क्लिक करो।", "🐙 OPEN GITHUB"
+        elif "instagram" in clean_prompt:
+            url_to_open, assistant_reply, button_text = "https://www.instagram.com", "इंस्टाग्राम का लिंक हाजिर है!", "📸 OPEN INSTAGRAM"
+
+        if url_to_open:
             with st.chat_message("assistant", avatar="🤖"):
-                st.write(reply)
-                st.link_button(btn, url)
-            st.session_state.messages.append({"role": "assistant", "content": {"type": "link_button", "text": reply, "button_text": btn, "url": url}})
+                st.write(assistant_reply)
+                st.link_button(button_text, url_to_open)
+            st.session_state.messages.append({"role": "assistant", "content": {"type": "link_button", "text": assistant_reply, "button_text": button_text, "url": url_to_open}})
         else:
             with st.chat_message("assistant", avatar="🤖"):
                 placeholder = st.empty()
                 placeholder.markdown("`ANALYZING...`")
                 try:
-                    # Model name correct kiya gaya hai
+                    # Model name 'gemini-1.5-flash' sahi model hai
                     model = genai.GenerativeModel("gemini-1.5-flash")
                     response = model.generate_content(prompt)
                     placeholder.markdown(response.text)
@@ -82,4 +82,4 @@ if "GEMINI_API_KEY" in st.secrets:
                 except Exception as e:
                     placeholder.markdown(f"❌ `ERROR: {str(e)}`")
 else:
-    st.error("⚠️ CRITICAL: GEMINI_API_KEY NOT FOUND IN SECRETS.")
+    st.error("⚠️ CRITICAL: GEMINI_API_KEY NOT FOUND.")
