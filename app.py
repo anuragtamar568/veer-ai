@@ -5,7 +5,7 @@ from streamlit_mic_recorder import speech_to_text
 # पेज कॉन्फ़िगरेशन
 st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
 
-# CSS स्टाइलिंग (आपकी पुरानी वाली)
+# CSS स्टाइलिंग
 def local_css():
     st.markdown("""
         <style>
@@ -51,7 +51,7 @@ for message in st.session_state.messages:
         else:
             st.markdown(str(message["content"]))
 
-# इनपुट
+# इनपुट सेक्शन
 st.markdown("<div class='voice-label'>🎙️ VOICE COMMAND // INTERACT:</div>", unsafe_allow_html=True)
 voice_input = speech_to_text(start_prompt="START RECORDING", stop_prompt="STOP RECORDING", language='hi', key='speech')
 text_input = st.chat_input("ENTER COMMAND...")
@@ -84,7 +84,11 @@ if prompt:
             placeholder = st.empty()
             placeholder.markdown("`ANALYZING...`")
             try:
-                model = genai.GenerativeModel("gemini-2.5-flash", system_instruction="तुम्हारा नाम 'वीर' है। तुम अनुराग के दोस्त हो, नेचुरल और फ्रेंडली बात करो।")
+                model = genai.GenerativeModel("gemini-2.5-flash", system_instruction=(
+                    "तुम्हारा नाम 'वीर' है। तुम्हें 'अनुराग' ने बनाया है। तुम अनुराग के बेहद करीबी और समझदार दोस्त हो। "
+                    "तुम कोई रोबोट या मशीन नहीं हो, बल्कि एक बहुत ही कूल, नेचुरल और फ्रेंडली एआई असिस्टेंट हो। "
+                    "हमेशा अपनी बातचीत में अनुराग का ज़िक्र और अपनी पहचान एक दोस्त की तरह ही रखो।"
+                ))
                 response = model.generate_content(prompt)
                 placeholder.markdown(response.text)
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
