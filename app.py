@@ -4,7 +4,7 @@ from gtts import gTTS
 import os
 
 # नया क्लाइंट सेटअप
-client = genai.Client(api_key="AQ.Ab8RN6J_NE3BNQaXXF5CP_9QmXk3hKywE29DOsNQZGMukVQ6zA")
+client = genai.Client(api_key="AQ.Ab8RN6II0uxAJP-umAyJfqajkSqdh7dkeRoW8TzjRn4eIXO8Fw")
 
 st.title("🤖 वीर: आपका पर्सनल एआई")
 
