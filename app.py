@@ -1,11 +1,4 @@
 import streamlit as st
-import os
-
-# यह चेक करेगा कि API की मिल रही है या नहीं
-if "GEMINI_API_KEY" in st.secrets:
-    st.sidebar.success("API Key मिल गई है!")
-else:
-    st.sidebar.error("API Key नहीं मिल रही है! 'Settings -> Secrets' चेक करो।")import streamlit as st
 import google.generativeai as genai
 from streamlit_mic_recorder import speech_to_text
 import streamlit.components.v1 as components
@@ -13,7 +6,7 @@ import streamlit.components.v1 as components
 # 1. पेज कॉन्फ़िगरेशन
 st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
 
-# 2. CSS (वही पुरानी थीम)
+# 2. CSS (तुम्हारी ओरिजिनल थीम)
 def local_css():
     st.markdown("""
         <style>
@@ -41,13 +34,11 @@ st.markdown("<div class='dev-text'>⚡ SPECIALIST WORKSTATION // 👤 CREATED BY
 st.write("---")
 
 # API की चेकिंग
-try:
-    if "GEMINI_API_KEY" in st.secrets:
-        genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-    else:
-        st.error("API KEY MISSING! 'Settings' -> 'Secrets' में जाकर GEMINI_API_KEY सेट करो।")
-except Exception as e:
-    st.error(f"Error: {e}")
+if "GEMINI_API_KEY" in st.secrets:
+    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+else:
+    st.error("API KEY MISSING! 'Settings' -> 'Secrets' में जाकर GEMINI_API_KEY सेट करो।")
+    st.stop() # अगर की नहीं है तो कोड यहीं रुक जाएगा
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -79,4 +70,4 @@ if prompt:
             speak_auto(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
-            st.error("API Error! API Key चेक करो या Limit खत्म हो गई होगी।")
+            st.error(f"Error: {e}")
