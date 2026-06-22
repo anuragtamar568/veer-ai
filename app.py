@@ -4,19 +4,32 @@ import google.generativeai as genai
 st.set_page_config(page_title="Veer AI", page_icon="🤖")
 st.title("🤖 Veer AI Assistant")
 
-# Hum secrets ko safe tarike se access karenge
-try:
-    # Pehle st.secrets check karein
-    if "GOOGLE_API_KEY" in st.secrets:
-        api_key = st.secrets["AQ.Ab8RN6LGFv3-HifsFLhY2VRwbxd6baWF2irmRzdfOAcxmWtB3g"]
-    else:
-        st.error("Error: 'GOOGLE_API_KEY' naam ki secret key nahi mili. Manage App > Settings > Secrets mein check karein.")
-        st.stop()
-        
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-1.5-flash")
-except Exception as e:
-    st.error(f"Error: {e}")
-    st.stop()
+# Hum yahan 'st.text_input' use kar rahe hain
+# Ye code wahan 'Secrets' wali error nahi dega
+api_key = st.text_input("Apni Google API Key yahan dalein:", type="password")
 
-# ... baki ka code jo pehle tha ...
+if api_key:
+    try:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
+
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+
+        if prompt := st.chat_input("Mujhse kuch puchiye..."):
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.markdown(prompt)
+
+            with st.chat_message("assistant"):
+                response = model.generate_content(f"Tum ek personal assistant ho jise Veer ne banaya hai. Sawaal: {prompt}")
+                st.markdown(response.text)
+                st.session_state.messages.append({"role": "assistant", "content": response.text})
+    except Exception as e:
+        st.error(f"Error: {e}")
+else:
+    st.info("Shuru karne ke liye upar apni Google API Key paste karein.")
