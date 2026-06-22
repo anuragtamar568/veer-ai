@@ -78,8 +78,8 @@ if "GEMINI_API_KEY" in st.secrets:
                 placeholder = st.empty()
                 placeholder.markdown("`ANALYZING...`")
                 try:
-                    # Model Change: gemini-1.5-flash jo ki valid model hai
-                    model = genai.GenerativeModel("gemini-1.5-flash")
+                    # Model Change: gemini-pro jo ki valid model hai
+                    model = genai.GenerativeModel("gemini-pro")
                     response = model.generate_content(prompt)
                     placeholder.markdown(response.text)
                     st.session_state.messages.append({"role": "assistant", "content": response.text})
