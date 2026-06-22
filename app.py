@@ -5,7 +5,7 @@ from streamlit_mic_recorder import speech_to_text
 # पेज कॉन्फ़िगरेशन (यह सबसे ऊपर होना जरूरी है)
 st.set_page_config(page_title="VEER AI", page_icon="💻", layout="centered")
 
-# 1. डार्क थीम और बैकग्राउंड इमेज CSS
+# 1. डार्क थीम, नियॉन लेटर्स और यूआई सेटिंग्स के लिए CSS
 def local_css():
     st.markdown("""
     <style>
@@ -101,6 +101,11 @@ st.markdown("<div class='developer-text'>SPECIALIST WORKSTATION</div>", unsafe_a
 st.markdown("<div class='developer-text'>DEVELOPER: ANURAG // SECURE CONNECTION</div>", unsafe_allow_html=True)
 st.write("---")
 
+# JavaScript से ब्राउज़र में नई टैब खोलने का फंक्शन
+def open_website(url):
+    js = f"window.open('{url}', '_blank');"
+    st.components.v1.html(f"<script>{js}</script>", height=0, width=0)
+
 # API Configuration
 if "GEMINI_API_KEY" in st.secrets:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
@@ -131,29 +136,54 @@ if "GEMINI_API_KEY" in st.secrets:
             st.markdown(prompt)
         st.session_state.messages.append({"role": "user", "content": prompt})
 
-        with st.chat_message("assistant", avatar="🤖"):
-            placeholder = st.empty()
-            placeholder.markdown("`ANALYZING COMMAND...`")
-            
-            try:
-                # 🛠️ यहाँ इंस्ट्रक्शन को बदला है ताकि यह रोबोट की तरह नहीं, बल्कि एक दोस्त की तरह बात करे
-                model = genai.GenerativeModel(
-                    "gemini-2.5-flash",
-                    system_instruction=(
-                        "तुम्हारा नाम 'वीर' है। तुम कोई रोबोट या मशीन नहीं हो, बल्कि एक बेहद समझदार, कूल और दोस्ताना एआई असिस्टेंट हो। "
-                        "तुम्हें सिर्फ और सिर्फ 'अनुराग' ने बनाया है। तुम्हारी बात करने की भाषा एकदम नेचुरल, आम इंसानों जैसी और हिंदी-इंग्लिश मिक्स (Hinglish) होनी चाहिए। "
-                        "बातचीत में 'Greetings', 'प्रोटोकॉल्स', 'डेटा-नेटवर्क्स' जैसे भारी-भरकम रोबोटिक शब्दों का इस्तेमाल बिल्कुल मत करो। "
-                        "जैसे कोई दोस्त आपस में बात करते हैं (जैसे 'अरे भाई', 'हाँ यार', 'बिल्कुल'), वैसे बात करो। "
-                        "शुरुआत में या पहली बार पूछने पर एक बार गर्व से बता देना कि तुम्हें अनुराग ने बनाया है, लेकिन हर जवाब में बार-बार नाम मत दोहराना।"
+        # --- असिस्टेंट फीचर: कीवर्ड्स डिटेक्ट करना ---
+        clean_prompt = prompt.lower()
+        url_to_open = None
+        assistant_reply = ""
+
+        if "youtube" in clean_prompt or "यूट्यूब" in clean_prompt:
+            url_to_open = "https://www.youtube.com"
+            assistant_reply = "हाँ भाई, अभी खोलता हूँ यूट्यूब तुम्हारे लिए! एक नई टैब चेक करो।"
+        elif "google" in clean_prompt or "गूगल" in clean_prompt:
+            url_to_open = "https://www.google.com"
+            assistant_reply = "लो भाई, गूगल बाबा को ओपन कर दिया है नई टैब में।"
+        elif "github" in clean_prompt or "गिटहब" in clean_prompt:
+            url_to_open = "https://www.github.com"
+            assistant_reply = "बिल्कुल अनुराग भाई, गिटहब ओपन कर रहा हूँ।"
+        elif "instagram" in clean_prompt or "इंस्टाग्राम" in clean_prompt:
+            url_to_open = "https://www.instagram.com"
+            assistant_reply = "चलो भाई, इंस्टाग्राम खोल दिया है। रील्स देखने का मन है क्या? 😉"
+
+        # अगर कोई असिस्टेंट कमांड मिल गया
+        if url_to_open:
+            with st.chat_message("assistant", avatar="🤖"):
+                st.markdown(assistant_reply)
+            st.session_state.messages.append({"role": "assistant", "content": assistant_reply})
+            open_website(url_to_open)
+        else:
+            # अगर नॉर्मल सवाल है, तो AI दोस्त की तरह जवाब देगा
+            with st.chat_message("assistant", avatar="🤖"):
+                placeholder = st.empty()
+                placeholder.markdown("`ANALYZING COMMAND...`")
+                
+                try:
+                    model = genai.GenerativeModel(
+                        "gemini-2.5-flash",
+                        system_instruction=(
+                            "तुम्हारा नाम 'वीर' है। तुम कोई रोबोट या मशीन नहीं हो, बल्कि एक बेहद समझदार, कूल और दोस्ताना एआई असिस्टेंट हो। "
+                            "तुम्हें सिर्फ और सिर्फ 'अनुराग' ने बनाया है। तुम्हारी बात करने की भाषा एकदम नेचुरल, आम इंसानों जैसी और हिंदी-इंग्लिश मिक्स (Hinglish) होनी चाहिए। "
+                            "बातचीत में 'Greetings', 'प्रोटोकॉल्स' जैसे भारी-भरकम शब्दों का इस्तेमाल बिल्कुल मत करो। "
+                            "जैसे कोई दोस्त आपस में बात करते हैं (जैसे 'अरे भाई', 'हाँ यार', 'बिल्कुल'), वैसे बात करो। "
+                            "शुरुआत में या पहली बार पूछने पर एक बार गर्व से बता देना कि तुम्हें अनुराग ने बनाया है, लेकिन हर जवाब में बार-बार नाम मत दोहराना।"
+                        )
                     )
-                )
-                response = model.generate_content(prompt)
-                
-                placeholder.markdown(response.text)
-                st.session_state.messages.append({"role": "assistant", "content": response.text})
-                
-            except Exception as e:
-                placeholder.markdown(f"❌ `SYSTEM ERROR: {str(e)}`")
+                    response = model.generate_content(prompt)
+                    
+                    placeholder.markdown(response.text)
+                    st.session_state.messages.append({"role": "assistant", "content": response.text})
+                    
+                except Exception as e:
+                    placeholder.markdown(f"❌ `SYSTEM ERROR: {str(e)}`")
 
 else:
     st.error("⚠️ CRITICAL: GEMINI_API_KEY NOT FOUND.")
