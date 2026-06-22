@@ -1,7 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# Page configuration (Yahan sidebar ko disabled rakha hai)
+# 1. Page configuration (Yahan sidebar ko disabled aur collapsed rakha hai)
 st.set_page_config(
     page_title="VEER AI - Gateway",
     page_icon="👁️",
@@ -9,9 +9,13 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# CSS se Streamlit ka default header aur menu chipana
+# 2. CSS se left side ka volume panel aur baaki faltu cheezein puri tarah hide karna
 st.markdown("""
     <style>
+        /* Sidebar aur navigation ko hatane ke liye */
+        [data-testid="stSidebar"], [data-testid="stSidebarCollapseButton"] {
+            display: none !important;
+        }
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         header {visibility: hidden;}
@@ -19,7 +23,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Session state login track karne ke liye
+# 3. Session state login track karne ke liye
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
@@ -49,7 +53,6 @@ def render_eye(is_open):
                 justify-content: center;
                 align-items: center;
             }}
-            /* Futuristic Cyber Glow */
             .radar-glow {{
                 position: absolute;
                 width: 100%;
@@ -70,7 +73,6 @@ def render_eye(is_open):
                 box-shadow: 0 0 30px rgba(0, 242, 255, 0.5);
                 transition: all 0.8s ease-in-out;
             }}
-            /* Eye State Logic */
             .eye.closed {{
                 height: 4px;
                 box-shadow: 0 0 15px #ff0055;
@@ -80,14 +82,13 @@ def render_eye(is_open):
                 position: absolute;
                 top: 50%;
                 left: 50%;
-                transform: translate(-30%, -50%);
+                transform: translate(-50%, -50%);
                 width: 65px;
                 height: 65px;
                 background: radial-gradient(circle, #00f2ff 10%, #0055ff 60%, #000022 90%);
                 border-radius: 50%;
                 border: 2px solid #00f2ff;
                 box-shadow: 0 0 20px #00f2ff;
-                animation: look around 4s infinite ease-in-out;
             }}
             .pupil {{
                 position: absolute;
@@ -98,7 +99,6 @@ def render_eye(is_open):
                 height: 25px;
                 background: #000;
                 border-radius: 50%;
-                box-shadow: inset 0 0 10px rgba(0,242,255,0.8);
             }}
             @keyframes rotate {{ 100% {{ transform: rotate(360deg); }} }}
         </style>
@@ -117,6 +117,32 @@ def render_eye(is_open):
     """
     components.html(html_code, height=290)
 
-# --- APP INTERFACE ---
+# --- APP MAIN LOGIC ---
 
-if not st.session_state.
+if not st.session_state.logged_in:
+    # Password nahi dala to band aankh (Red shadow) dikhao
+    render_eye(is_open=False)
+    
+    st.markdown("<h2 style='text-align: center; color: #00f2ff;'>VEER AI SECURE SYSTEM</h2>", unsafe_allow_html=True)
+    
+    # Password Field
+    password = st.text_input("Enter Access Key", type="password")
+    
+    if st.button("UNLOCK ACCESS", use_container_width=True):
+        if password == "veer123":
+            st.session_state.logged_in = True
+            st.jwt_token = "auth" # Simple state track
+            st.rerun()
+        else:
+            st.error("Access Denied: Incorrect Password")
+
+else:
+    # Password sahi hone par 3D Eye khul jayegi (Blue glow)
+    render_eye(is_open=True)
+    
+    st.markdown("<h2 style='text-align: center; color: #00ff66;'>🔓 ACCESS GRANTED</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #888;'>Welcome back, Veer. System Mainframe is now Online.</p>", unsafe_allow_html=True)
+    
+    if st.button("Lock System", type="secondary"):
+        st.session_state.logged_in = False
+        st.rerun()
