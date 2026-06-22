@@ -194,12 +194,13 @@ if "GEMINI_API_KEY" in st.secrets:
                 "role": "assistant", 
                 "content": {"type": "link_button", "text": assistant_reply, "button_text": button_text, "url": url_to_open}
             })
-        else:
-        # यहाँ 4 स्पेस का गैप होना चाहिए
+       else:
+        # यहाँ 'with' वाली लाइन 'else' से अंदर है (4 spaces)
         with st.chat_message("assistant", avatar="🤖"):
             placeholder = st.empty()
             placeholder.markdown("`ANALYZING COMMAND...`")
             
+            # यहाँ 'try' और उसके अंदर का कोड और भी अंदर होना चाहिए (8 spaces)
             try:
                 model = genai.GenerativeModel("gemini-2.5-flash", system_instruction=(
                     "तुम्हारा नाम 'वीर' है। तुम कोई रोबोट या मशीन नहीं हो, बल्कि एक बेहद समझदार, कूल और दोस्ताना एआई असिस्टेंट हो। "
@@ -207,11 +208,11 @@ if "GEMINI_API_KEY" in st.secrets:
                     "बातचीत में 'Greetings', 'प्रोटोकॉल्स' जैसे भारी-भरकम शब्दों का इस्तेमाल बिल्कुल मत करो। "
                     "जैसे कोई दोस्त आपस में बात करते हैं (जैसे 'अरे भाई', 'हाँ यार', 'बिल्कुल'), वैसे बात करो।"
                 ))
-                
                 response = model.generate_content(prompt)
                 placeholder.markdown(response.text)
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
-                
+            
+            # यहाँ 'except' भी 'try' के बराबर में होना चाहिए (8 spaces)
             except Exception as e:
                 error_message = "अरे यार, कुछ गड़बड़ हो गई। लगता है मेरा दिमाग थोड़ा हैंग हो गया है। एक बार फिर से कोशिश करो ना?"
                 placeholder.markdown(error_message)
