@@ -45,38 +45,37 @@ else:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# OPTIMIZATION: Chat Session ko ek hi baar start karna setup instructions ke sath
+# Chat Session setup
 if "chat" not in st.session_state:
     model = genai.GenerativeModel(
         "gemini-2.0-flash",
         system_instruction="तुम 'वीर' हो। तुम्हें 'अनुराग' ने बनाया है। तुम अनुराग के सबसे अच्छे दोस्त हो। गर्व से बताओ कि तुम्हें अनुराग ने बनाया है।"
     )
-    # Yeh aapki chat history aur connection ko hold karke rakhega
     st.session_state.chat = model.start_chat(history=[])
 
-# रिकॉर्डिंग बटन (Key 'mic' lagayi hai jo session state sambhalegi)
+# रिकॉर्डिंग बटन
 voice_prompt = speech_to_text(language='hi', use_container_width=True, key='mic')
 
-# चैट हिस्ट्री दिखाना
+# चैट हिस्ट्री दिखाना (Duplicate messages filter karne ke liye unique tracking)
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# इनपुट को ट्रैक करने के लिए variables
-user_input = st.chat_input("COMMAND...")
+# इनपुट कैप्चर और डुप्लीकेट प्रोटेक्शन लॉजिक
 prompt = None
+user_input = st.chat_input("COMMAND...")
 
-# STRICT CHECK: Ensure prompt text valid ho aur repeat na ho
 if voice_prompt and voice_prompt.strip():
-    # Agar voice prompt naya hai tabhi chalega
-    if "last_voice" not in st.session_state or st.session_state.last_voice != voice_prompt:
+    # Mic se input mila, check karein ki kya ye wahi purana text toh nahi jo rerun ho raha hai
+    if "last_processed_voice" not in st.session_state or st.session_state.last_processed_voice != voice_prompt:
         prompt = voice_prompt
-        st.session_state.last_voice = voice_prompt
+        st.session_state.last_processed_voice = voice_prompt  # Mark as processed
 elif user_input and user_input.strip():
     prompt = user_input
 
-# मुख्य लॉजिक (Jab valid prompt mile)
+# मुख्य लॉजिक (Sirf tabhi chalega jab real naya prompt ho)
 if prompt:
+    # Double check to prevent automated reload spam
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.write(prompt)
@@ -84,17 +83,20 @@ if prompt:
     with st.chat_message("assistant"):
         placeholder = st.empty()
         try:
-            # Model response call use karne ke liye chat session ka istemal
+            # Gemini Call
             response = st.session_state.chat.send_message(prompt)
             
-            # Output handler
+            # Output & Speech
             placeholder.write(response.text)
             speak_auto(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
             
+            # Response aane ke baad page ko clean refresh kar do taaki mic ka purana data session se udd jaye
+            st.rerun()
+            
         except Exception as e:
             if "429" in str(e):
                 placeholder.error("⏳ Google Free Tier ki RPM (Requests Per Minute) limit hit hui hai. Kripya 15-20 seconds rukiye aur page refresh karke try kijiye!")
-                time.sleep(5)
+                time.sleep(3)
             else:
                 placeholder.error(f"Error: {e}")
