@@ -1,51 +1,34 @@
 import streamlit as st
-import google.generativeai as genai
-import streamlit.components.v1 as components
 
-# ================= PAGE CONFIG =================
+# ================= PAGE CONFIG ================= #
 
 st.set_page_config(
-    page_title="VEER AI CYBER CORE",
+    page_title="VEER AI // CYBER CORE",
     page_icon="💻",
     layout="wide"
 )
 
-# ================= GEMINI =================
-
-try:
-    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-
-    # अगर यह model काम न करे तो अपना working model डालें
-    model = genai.GenerativeModel("gemini-2.5-flash")
-
-except Exception as e:
-    st.error(f"Gemini Error: {e}")
-    st.stop()
-
-# ================= SESSION =================
-
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-if "voice" not in st.session_state:
-    st.session_state.voice = True
-
-# ================= HACKER CSS =================
+# ================= HACKER CSS ================= #
 
 st.markdown("""
 <style>
 
+/* Main Background */
+
 .stApp{
     background:
-    radial-gradient(circle at top,#002200,#000000 60%);
+    radial-gradient(circle at top,#012401,#000000 70%);
 }
 
-/* Hide Header */
-header{visibility:hidden;}
+/* Hide Streamlit Header */
 
-/* Main Title */
+header{
+    visibility:hidden;
+}
 
-.hacker-title{
+/* Neon Title */
+
+.cyber-title{
 
     text-align:center;
     font-size:70px;
@@ -59,33 +42,50 @@ header{visibility:hidden;}
     0 0 40px #00ff41,
     0 0 80px #00ff41;
 
+    border-right:4px solid #00ff41;
+
     overflow:hidden;
     white-space:nowrap;
 
-    border-right:4px solid #00ff41;
-
-    width:100%;
-
-    animation: blink .7s infinite;
+    animation: blink .8s infinite;
 }
 
 @keyframes blink{
-50%{
-border-color:transparent;
-}
+    50%{
+        border-color:transparent;
+    }
 }
 
 /* Sidebar */
 
 [data-testid="stSidebar"]{
-
-    background:#010101;
-
+    background:#020202;
     border-right:2px solid #00ff41;
 }
 
 [data-testid="stSidebar"] *{
     color:#00ff41 !important;
+}
+
+/* Cards */
+
+.cyber-card{
+
+    background:rgba(0,255,65,.05);
+
+    border:1px solid #00ff41;
+
+    border-radius:20px;
+
+    padding:20px;
+
+    margin-bottom:20px;
+
+    box-shadow:
+    0 0 10px #00ff41,
+    inset 0 0 15px rgba(0,255,65,.2);
+
+    backdrop-filter: blur(15px);
 }
 
 /* Chat */
@@ -101,19 +101,6 @@ border-color:transparent;
     box-shadow:
     0 0 10px #00ff41,
     inset 0 0 15px rgba(0,255,65,.2);
-
-    color:#00ff41;
-}
-
-/* Input */
-
-[data-testid="stChatInput"]{
-
-    border:1px solid #00ff41;
-
-    border-radius:15px;
-
-    box-shadow:0 0 20px #00ff41;
 }
 
 /* Buttons */
@@ -128,11 +115,11 @@ border-color:transparent;
 
     border:1px solid #00ff41;
 
-    border-radius:15px;
-
-    box-shadow:0 0 10px #00ff41;
+    border-radius:12px;
 
     font-weight:bold;
+
+    box-shadow:0 0 10px #00ff41;
 }
 
 .stButton button:hover{
@@ -146,53 +133,63 @@ border-color:transparent;
     0 0 40px #00ff41;
 }
 
-/* Metric Cards */
+/* Metrics */
 
 [data-testid="metric-container"]{
 
-    background:rgba(0,0,0,.5);
+    background:rgba(0,255,65,.05);
 
     border:1px solid #00ff41;
-
-    padding:15px;
 
     border-radius:15px;
 
     box-shadow:0 0 10px #00ff41;
 }
 
-/* Text */
+/* Input */
 
-p,span,div,label,h1,h2,h3{
-    color:#00ff41 !important;
-    font-family:Consolas, monospace !important;
-}
-
-/* Glass */
-
-.glass{
-
-    background:rgba(0,255,65,.04);
+[data-testid="stChatInput"]{
 
     border:1px solid #00ff41;
 
-    border-radius:20px;
+    border-radius:15px;
 
-    padding:25px;
+    box-shadow:0 0 15px #00ff41;
+}
 
-    box-shadow:0 0 20px rgba(0,255,65,.3);
+/* Text */
+
+p,span,div,label,h1,h2,h3,h4{
+    color:#00ff41 !important;
+    font-family:Consolas, monospace !important;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# ================= SIDEBAR =================
+# ================= SIDEBAR ================= #
 
 with st.sidebar:
 
-    st.markdown("# 💻 VEER AI")
+    st.markdown("# ⚡ VEER AI")
 
     st.success("🟢 SYSTEM ONLINE")
+
+    st.markdown("""
+    <div class="cyber-card">
+
+    <h3>👤 facehi</h3>
+
+    </div>
+
+    <div class="cyber-card">
+
+    <h3>🤖 smart_bot</h3>
+
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("---")
 
     mode = st.selectbox(
         "🧠 AI MODE",
@@ -204,212 +201,114 @@ with st.sidebar:
         ]
     )
 
-    st.session_state.voice = st.toggle(
-        "🔊 VOICE REPLY",
-        value=st.session_state.voice
-    )
+    st.toggle("🔊 VOICE REPLY", True)
 
     st.markdown("---")
 
-    st.markdown("""
-    ### ⚡ MODULES
+    st.button("🗑 NEW CHAT")
+    st.button("📥 DOWNLOAD CHAT")
 
-    🤖 Smart Chat
-
-    💻 Coding
-
-    📚 Learning
-
-    🌐 Research
-
-    🔐 Cyber Security
-    """)
-
-    if st.button("🗑 NEW CHAT"):
-        st.session_state.messages = []
-        st.rerun()
-
-    chat_text = ""
-
-    for m in st.session_state.messages:
-        chat_text += f"{m['role']} : {m['content']}\n\n"
-
-    st.download_button(
-        "📥 DOWNLOAD CHAT",
-        chat_text,
-        "veer_chat.txt"
-    )
-
-# ================= TITLE =================
+# ================= TITLE ================= #
 
 st.markdown("""
-<h1 class='hacker-title'>
+<h1 class='cyber-title'>
 ⚡ VEER AI // CYBER CORE ⚡
 </h1>
 """, unsafe_allow_html=True)
 
-# ================= DASHBOARD =================
+# ================= SYSTEM CARD ================= #
 
 st.markdown("""
-<div class='glass'>
+<div class='cyber-card'>
 
-## 🟢 SYSTEM STATUS : ONLINE
+<h2>🟢 SYSTEM STATUS : ONLINE</h2>
 
-👤 USER : ANURAG SIR
+<h3>👤 USER : ANURAG SIR</h3>
 
-🧠 AI ENGINE : GEMINI
+<h3>🧠 AI ENGINE : GEMINI</h3>
 
-🛡 SECURITY : ACTIVE
+<h3>🛡 SECURITY : ACTIVE</h3>
 
-⚡ MODE : CYBER INTELLIGENCE
+<h3>⚡ MODE : CYBER INTELLIGENCE</h3>
 
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("### 📊 SYSTEM DASHBOARD")
+# ================= DASHBOARD ================= #
+
+st.markdown("## 📊 SYSTEM DASHBOARD")
 
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
-    st.metric("💬 CHATS", len(st.session_state.messages))
+    st.metric("💬 CHATS", "12")
 
 with c2:
     st.metric("🧠 MODE", mode)
 
 with c3:
-    st.metric(
-        "🔊 VOICE",
-        "ON" if st.session_state.voice else "OFF"
-    )
+    st.metric("🔊 VOICE", "ON")
 
 with c4:
     st.metric("⚡ STATUS", "ONLINE")
 
-# ================= VOICE =================
+# ================= FEATURE CARDS ================= #
 
-def speak(text):
+a, b, c = st.columns(3)
 
-    if not st.session_state.voice:
-        return
+with a:
+    st.markdown("""
+    <div class='cyber-card'>
+    <h3>💻 CODING CORE</h3>
+    <p>Advanced coding assistance.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    text = text.replace("\n", " ")
-    text = text.replace("'", "")
-    text = text.replace('"', "")
+with b:
+    st.markdown("""
+    <div class='cyber-card'>
+    <h3>🌐 RESEARCH CORE</h3>
+    <p>Internet knowledge & analysis.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    js = f"""
-    <script>
+with c:
+    st.markdown("""
+    <div class='cyber-card'>
+    <h3>🔐 SECURITY CORE</h3>
+    <p>Cyber intelligence module.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    window.speechSynthesis.cancel();
+# ================= CHAT ================= #
 
-    let msg = new SpeechSynthesisUtterance(`{text}`);
+st.markdown("## 💬 CYBER CHAT")
 
-    msg.lang='hi-IN';
-
-    window.speechSynthesis.speak(msg);
-
-    </script>
-    """
-
-    components.html(js, height=0)
-
-# ================= HISTORY =================
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
 for msg in st.session_state.messages:
-
     with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
+        st.write(msg["content"])
 
-# ================= CHAT =================
-
-prompt = st.chat_input(
-    ">>> ENTER COMMAND..."
-)
+prompt = st.chat_input(">>> ENTER COMMAND")
 
 if prompt:
 
-    st.session_state.messages.append(
-        {
-            "role":"user",
-            "content":prompt
-        }
-    )
+    st.session_state.messages.append({
+        "role":"user",
+        "content":prompt
+    })
 
     with st.chat_message("user"):
-        st.markdown(prompt)
+        st.write(prompt)
 
-    if mode == "JARVIS":
-
-        personality = """
-        You are JARVIS.
-        Talk in futuristic style.
-        Always call user Anurag Sir.
-        """
-
-    elif mode == "TEACHER":
-
-        personality = """
-        You are an expert teacher.
-        Explain simply.
-        Always call user Anurag Sir.
-        """
-
-    elif mode == "CODER":
-
-        personality = """
-        You are a senior software engineer.
-        Give professional coding answers.
-        Always call user Anurag Sir.
-        """
-
-    else:
-
-        personality = """
-        You are VEER AI.
-
-        User name is Anurag Sir.
-
-        Always call user Anurag Sir.
-
-        Always answer in Hindi.
-
-        If asked who created you,
-        answer:
-
-        "अनुराग सर, मुझे आपने बनाया है।"
-        """
+    reply = f"⚡ Command Received: {prompt}"
 
     with st.chat_message("assistant"):
+        st.write(reply)
 
-        with st.spinner("⚡ ACCESSING CYBER CORE..."):
-
-            try:
-
-                response = model.generate_content(
-                    f"{personality}\n\nUser:{prompt}"
-                )
-
-                reply = response.text
-
-            except Exception as e:
-
-                if "429" in str(e):
-                    reply = """
-🚫 API LIMIT EXCEEDED
-
-Free Gemini quota खत्म हो गई है।
-
-कृपया थोड़ी देर बाद पुनः प्रयास करें।
-"""
-                else:
-                    reply = f"❌ ERROR : {e}"
-
-            st.markdown(reply)
-
-            st.session_state.messages.append(
-                {
-                    "role":"assistant",
-                    "content":reply
-                }
-            )
-
-            speak(reply)
+    st.session_state.messages.append({
+        "role":"assistant",
+        "content":reply
+    })
