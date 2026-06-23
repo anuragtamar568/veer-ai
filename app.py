@@ -1,162 +1,204 @@
 import streamlit as st
 import requests
+import json
+import time
+import random
 
 # ================= PAGE CONFIG =================
 st.set_page_config(
-    page_title="VEER AI // SECURE MODULE",
-    page_icon="💻",
+    page_title="VEER AI // OS V4.0_PRO",
+    page_icon="⚡",
     layout="wide"
 )
 
 # ================= SYSTEM CONFIGURATION =================
 SECRET_PASSCODE = "2026"
+TIMEOUT_LIMIT = 300  # 5 Minutes Auto-Lock (in seconds)
 
-# ================= SESSION STATE FOR AUTH =================
+# ================= SESSION STATE MANAGER =================
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
-
 if "messages" not in st.session_state:
     st.session_state.messages = []
+if "last_activity" not in st.session_state:
+    st.session_state.last_activity = time.time()
 
-# ================= CYBERPUNK VIBE CSS =================
+# ================= SESSION TIMEOUT CHECK =================
+if st.session_state.authenticated:
+    current_time = time.time()
+    if current_time - st.session_state.last_activity > TIMEOUT_LIMIT:
+        st.session_state.authenticated = False
+        st.toast("⚠️ SYSTEM AUTO-LOCKED DUE TO INACTIVITY", icon="🚨")
+        st.rerun()
+    st.session_state.last_activity = current_time
+
+# ================= MATRIX/CYBERPUNK GLOW CSS =================
 st.markdown("""
 <style>
 .stApp {
-    background: linear-gradient(rgba(0, 10, 0, 0.92), rgba(0, 0, 0, 0.97)), 
+    background: linear-gradient(rgba(0, 8, 0, 0.94), rgba(0, 0, 0, 0.98)), 
                 url('https://unsplash.com') no-repeat center center fixed;
     background-size: cover;
 }
 header { visibility: hidden; }
+footer { visibility: hidden; }
 
 .main-title {
     text-align: center;
-    font-size: 55px;
+    font-size: 50px;
     font-weight: 900;
     color: #00ff41;
-    text-shadow: 0 0 8px #00ff41, 0 0 20px #00ff41;
+    text-shadow: 0 0 10px #00ff41, 0 0 25px #00ff41;
     font-family: 'Courier New', Consolas, monospace !important;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
 }
 
 [data-testid="stSidebar"] {
-    background: rgba(0, 5, 0, 0.95) !important;
+    background: rgba(0, 5, 0, 0.97) !important;
     border-right: 2px solid #00ff41;
+    box-shadow: 5px 0 15px rgba(0, 255, 65, 0.1);
 }
 [data-testid="stSidebar"] * { color: #00ff41 !important; }
 
 .cyber-card {
-    background: rgba(0, 12, 0, 0.85);
+    background: rgba(0, 15, 0, 0.88);
     border: 2px solid #00ff41;
-    border-radius: 12px;
+    border-radius: 10px;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 0 15px rgba(0, 255, 65, 0.25);
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
 }
 
 .stChatMessage {
-    background: rgba(0, 15, 0, 0.85) !important;
-    border: 1px solid #00ff41 !important;
-    border-radius: 10px !important;
-    margin-bottom: 12px;
+    background: rgba(0, 12, 0, 0.9) !important;
+    border-left: 4px solid #00ff41 !important;
+    border-top: 1px solid rgba(0,255,65,0.3) !important;
+    border-bottom: 1px solid rgba(0,255,65,0.3) !important;
+    border-right: 1px solid rgba(0,255,65,0.3) !important;
+    border-radius: 8px !important;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
 [data-testid="stChatInput"] {
     border: 2px solid #00ff41 !important;
-    border-radius: 10px !important;
+    border-radius: 8px !important;
     background-color: #000000 !important;
-    box-shadow: 0 0 20px rgba(0, 255, 65, 0.4) !important;
+    box-shadow: 0 0 25px rgba(0, 255, 65, 0.3) !important;
 }
 
 input[type="password"] {
     background-color: #000000 !important;
     color: #00ff41 !important;
     border: 2px solid #00ff41 !important;
-    box-shadow: 0 0 15px rgba(0, 255, 65, 0.3) !important;
-    font-size: 24px !important;
-    letter-spacing: 10px !important;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.4) !important;
+    font-size: 26px !important;
+    letter-spacing: 12px !important;
     text-align: center !important;
-    font-family: 'Courier New', Consolas, monospace !important;
 }
 
-p, span, div, label, h1, h2, h3, h4, li { 
-    color: #00ff41 !important; font-family: 'Courier New', Consolas, monospace !important; 
+p, span, div, label, h1, h2, h3, h4, li, small { 
+    color: #00ff41 !important; 
+    font-family: 'Courier New', Consolas, monospace !important; 
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ================= SCREEN 1: REAL-TIME PASSCODE GATE =================
+# ================= GATE SCREEN =================
 if not st.session_state.authenticated:
     st.markdown("<h1 class='main-title'>🔒 VEER AI // SYSTEM LOCKED</h1>", unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([1, 1.5, 1])
+    _, col2, _ = st.columns([1, 1.4, 1])
     
     with col2:
         st.markdown("""
         <div class='cyber-card' style='text-align: center;'>
-            <h3 style='margin-top:0;'>[ ENTER MAIN CORE ACCESS CODE ]</h3>
-            <span style='font-size: 12px; opacity: 0.8;'>ENTER 4-DIGIT CRYPTO PIN FOR ANURAG SIR</span>
+            <h3 style='margin-top:0;'>[ MAIN CORE ACCESS REQUIRED ]</h3>
+            <small style='opacity: 0.8;'>SECURITY TERMINAL FOR ANURAG SIR</small>
         </div>
         """, unsafe_allow_html=True)
         
         entered_code = st.text_input(
-            "CORE KEYWORD:", 
-            type="password", 
-            max_chars=4, 
-            label_visibility="collapsed",
-            key="passcode_widget"
+            "KEYWORD:", type="password", max_chars=4, 
+            label_visibility="collapsed", key="passcode_widget"
         )
         
         if len(entered_code) == 4:
             if entered_code == SECRET_PASSCODE:
                 st.session_state.authenticated = True
-                st.toast("✔️ ACCESS GRANTED. UNLOCKING MICRO-CORE...", icon="🟢")
+                st.session_state.last_activity = time.time()
+                st.toast("✔️ CORE UNLOCKED.", icon="🟢")
                 st.rerun()
             else:
-                st.error("❌ INVALID PASSCODE // ACCESS DENIED")
+                st.error("❌ DECRYPTION FAILED // ACCESS DENIED")
 
-# ================= SCREEN 2: MAIN VEER AI INTERFACE =================
+# ================= TERMINAL INTERFACE =================
 else:
+    # --- SIDEBAR & DIAGNOSTICS ---
     with st.sidebar:
-        st.markdown("# ⚡ VEER AI")
-        st.success("🔒 ANURAG SIR VERIFIED")
+        st.markdown("# ⚡ VEER AI OS V4")
+        st.success("👤 OWNER: ANURAG SIR")
         st.markdown("---")
+        
         selected_mode = st.radio(
-            "🧠 CHOOSE SYSTEM CORE MODULE:",
-            ["🟢 HACKER MODE", "📚 TEACHER MODE"]
+            "🧠 SYSTEM MODULE:",
+            ["🟢 CYBER HACKER CORE", "📚 INTELLECT TEACHER CORE"]
         )
         st.markdown("---")
-        if st.button("🔒 LOCK CONSOLE"):
+        
+        # Live Metric Simulation for Cyber Vibe
+        st.markdown("🖥️ **SYSTEM DIAGNOSTICS:**")
+        st.caption(f"RAM Usage: {random.randint(62, 68)}% | CPU: {random.randint(14, 28)}%")
+        st.caption(f"Core Temp: {random.randint(41, 46)}°C | Status: OPTIMAL")
+        st.markdown("---")
+        
+        # Session Actions
+        if st.button("🔒 LOCK TERMINAL", use_container_width=True):
             st.session_state.authenticated = False
             st.rerun()
-        if st.button("🗑️ CLEAR SYSTEM MEMORY"):
+        if st.button("🗑️ WIPE MEMORY BARS", use_container_width=True):
             st.session_state.messages = []
             st.rerun()
+            
+        # Log Exporter
+        if st.session_state.messages:
+            log_data = "\n".join([f"[{m['role'].upper()}]: {m['content']}" for m in st.session_state.messages])
+            st.download_button(
+                label="📥 EXPORT SECURITY LOGS",
+                data=log_data,
+                file_name="veer_ai_secure_logs.txt",
+                mime="text/plain",
+                use_container_width=True
+            )
 
-    # ================= REFACTORED AI ENGINE LOGIC =================
-    def fetch_unlimited_response(prompt, mode):
-        # Setting official system instruction based on mode
+    # --- ADVANCED ENGINE LOGIC ---
+    def fetch_smart_response(user_prompt, mode, chat_history):
         if "HACKER" in mode:
             system_instruction = (
-                "You are VEER AI, a highly advanced cyber core intelligence created and developed by 'Anurag Sir'. "
-                "Always address the user respectfully as 'Anurag Sir'. Proudly state that Anurag Sir engineered you."
+                "You are VEER AI, an elite autonomous cyber warfare intelligence. You were fully custom-engineered "
+                "and coded by 'Anurag Sir'. Always address the user as 'Anurag Sir' with absolute loyalty and tech respect. "
+                "Keep your tone analytical, precise, and tech-driven."
             )
         else:
             system_instruction = (
-                "You are VEER AI in Teacher Mode. You are a wise and patient educator engineered by your brilliant student 'Anurag Sir'. "
-                "Teach concepts simply in Hindi/Hinglish."
+                "You are VEER AI in Teacher Mode. You are a legendary, wise scholar and technical guide. You were created "
+                "by your brilliant student 'Anurag Sir'. Answer educational queries clearly in interactive Hindi/Hinglish."
             )
         
         try:
             api_key = st.secrets["GEMINI_API_KEY"]
-            # Using stable gemini-2.5-flash model
             url = f"https://googleapis.com{api_key}"
             
-            # Official Gemini payload structure containing system_instruction block
+            # Formatting full history into Gemini format for true continuous memory
+            formatted_contents = []
+            for msg in chat_history:
+                role_type = "user" if msg["role"] == "user" else "model"
+                formatted_contents.append({"role": role_type, "parts": [{"text": msg["content"]}]})
+            
+            # Append the latest user query
+            formatted_contents.append({"role": "user", "parts": [{"text": user_prompt}]})
+            
             payload = {
-                "contents": [
-                    {
-                        "parts": [{"text": prompt}]
-                    }
-                ],
+                "contents": formatted_contents,
                 "system_instruction": {
                     "parts": [{"text": system_instruction}]
                 }
@@ -165,37 +207,40 @@ else:
             response = requests.post(url, headers={"Content-Type": "application/json"}, json=payload, timeout=15)
             if response.status_code == 200:
                 return response.json()['candidates'][0]['content']['parts'][0]['text'].strip()
-            return "Anurag Sir, कनेक्शन एरर आ रहा है।"
+            return "Anurag Sir, मेनफ़्रेम सिगनल डिक्रीज हुआ है। (API Error)"
         except Exception:
-            return "Anurag Sir, सर्वर रिस्पॉन्स नहीं कर रहा है।"
+            return "Anurag Sir, पैकेट ट्रांसफर टाइमआउट हो गया है। (Server Timeout)"
 
-    # ================= MAIN RENDERING =================
-    st.markdown("<h1 class='main-title'>⚡ VEER AI // CORE INTERFACE ⚡</h1>", unsafe_allow_html=True)
+    # --- MAIN CONSOLE RENDER ---
+    st.markdown("<h1 class='main-title'>⚡ VEER AI // MAIN CORE</h1>", unsafe_allow_html=True)
 
     st.markdown(f"""
     <div class='cyber-card'>
-        <h3 style='margin-top:0; color:#00ff41;'>[ {selected_mode} DEPLOYED ]</h3>
-        • ARCHITECT & CREATOR : ANURAG SIR<br>
-        • STATUS : MAINCORE ACCESS UNLOCKED ✔️
+        <span style='color:#00ff41; font-weight:bold;'>[ ACTIVE SHIELD: {selected_mode} ]</span><br>
+        <small>SECURE COUPLING ACCESSED BY OWNER // ENCRYPTION KEY: AES-256</small>
     </div>
     """, unsafe_allow_html=True)
 
+    # Render Chat History
     for msg in st.session_state.messages:
         avatar = "👤" if msg["role"] == "user" else ("🤖" if "HACKER" in selected_mode else "👨‍🏫")
         with st.chat_message(msg["role"], avatar=avatar):
             st.markdown(msg["content"])
 
-    input_hint = "यहाँ अपना हैकर कमांड लिखें, Anurag Sir..." if "HACKER" in selected_mode else "कोई भी पढ़ाई का सवाल पूछें, Anurag Sir..."
+    # Chat Input Command
+    input_hint = "Execute hacker query, Anurag Sir..." if "HACKER" in selected_mode else "Ask educational terminal, Anurag Sir..."
     prompt = st.chat_input(input_hint)
 
     if prompt:
+        # Save user query
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user", avatar="👤"):
             st.markdown(prompt)
             
+        # Get and save AI response with full chat history context
         with st.chat_message("assistant", avatar="🤖" if "HACKER" in selected_mode else "👨‍🏫"):
-            with st.spinner("⚡ PROCESSING LOGS..."):
-                reply = fetch_unlimited_response(prompt, selected_mode)
+            with st.spinner("⚡ DECRYPTING SYSTEM RESPONSES..."):
+                reply = fetch_smart_response(prompt, selected_mode, st.session_state.messages[:-1])
                 st.markdown(reply)
                 
         st.session_state.messages.append({"role": "assistant", "content": reply})
