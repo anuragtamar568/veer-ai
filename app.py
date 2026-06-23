@@ -63,7 +63,6 @@ if "last_voice" not in st.session_state:
 
 # --- 💻 QUANTUM MAINFRAME WORKSTATION (DIRECT ACCESS) ---
 if "welcomed" not in st.session_state:
-    # यहाँ स्पेलिंग बिल्कुल ठीक कर दी है (SpeechSynthesisUtterance)
     components.html("<script>var m = new SpeechSynthesisUtterance('स्वागत है अनुराग सर। वीर ओ एस सक्रिय है।'); m.lang='hi-IN'; window.speechSynthesis.speak(m);</script>", height=0)
     st.session_state.welcomed = True
 
@@ -104,10 +103,11 @@ if voice_input and voice_input.strip() and voice_input != st.session_state.last_
 elif text_input and text_input.strip():
     final_input = text_input
 
-# चैट रेंडरर
+# चैट रेंडरर (सुरक्षित एरर-फ्री लूप)
 for chat in st.session_state.chat_history:
-    with st.chat_message(chat["role"]):
-        st.write(chat["content"])
+    if "role" in chat and "content" in chat:
+        with st.chat_message(chat["role"]):
+            st.write(chat["content"])
 
 # जेमिनी सुपर कोर लॉजिक
 if final_input:
@@ -134,40 +134,7 @@ if final_input:
                 reply = response.text
                 
         except Exception as e:
-            reply = f"अनुराग सर, सर्वर पर थोड़ा लोड है, लेकिन मैं आपके साथ हूँ। आपने पूछा: '{final_input}'"
-                
-        placeholder.write(reply)
-        st.session_state.chat_history.append({"role": "assistant", "content": reply})
-        speak_natural(reply)
-    with st.chat_message(chat["role"]):
-        st.write(chat["content"])
-
-# जेमिनी सुपर कोर लॉजिक
-if final_input:
-    st.session_state.chat_history.append({"role": "user", "content": final_input})
-    with st.chat_message("user"):
-        st.write(final_input)
-
-    with st.chat_message("assistant"):
-        placeholder = st.empty()
-        try:
-            with st.spinner("वीर सोच रहा है..."):
-                sys_prompt = (
-                    "तुम 'वीर' (VEER AI) हो, जिसे तुम्हारे मालिक 'अनुراق सर' ने बनाया है। "
-                    "तुम अनुराग सर के प्रति पूरी तरह वफादार हो। हमेशा उन्हें 'अनुराग सर' या 'सर' कहकर संबोधित करो। "
-                    "अगर कोई इमेज दी गई है, तो उसे ध्यान से देखो और अनुराग सर को उसका सटीक और देसी हिंदी में जवाब दो।"
-                )
-                
-                model = genai.GenerativeModel("gemini-2.0-flash")
-                if active_image:
-                    response = model.generate_content([sys_prompt, active_image, final_input])
-                else:
-                    response = model.generate_content([sys_prompt, final_input])
-                
-                reply = response.text
-                
-        except Exception as e:
-            reply = f"अनुराग सर, सर्वर पर थोड़ा लोड है, लेकिन मैं आपके साथ हूँ। आपने पूछा: '{final_input}'"
+            reply = f"अनुराग सर, सर्वर कनेक्ट करने में थोड़ा समय लग रहा है। आपने पूछा था: '{final_input}'"
                 
         placeholder.write(reply)
         st.session_state.chat_history.append({"role": "assistant", "content": reply})
