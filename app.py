@@ -3,19 +3,34 @@ import requests
 
 # ================= PAGE CONFIG =================
 st.set_page_config(
-    page_title="VEER AI // CYBER CORE",
+    page_title="VEER AI // MULTI-CORE",
     page_icon="💻",
     layout="wide"
 )
 
-# ================= AI ENGINE LOGIC (LIVE GEMINI CHAT) =================
-def fetch_unlimited_response(prompt):
-    system_rules = (
-        "You are VEER AI, a helpful, intelligent, and friendly AI collaborator. "
-        "The user's name is Anurag Sir. Always address him respectfully as 'Anurag Sir'. "
-        "Answer naturally, with clear formatting and a helpful tone in Hindi (or Hinglish if appropriate). "
-        "Do not show any hacker prank errors or fake system errors. Act as a real assistant."
-    )
+# ================= ADVANCED MODE TABS =================
+# ऐप के सबसे ऊपर हैकर और टीचर मोड के टैब बनाए गए हैं
+selected_mode = st.tabs(["🟢 HACKER MODE", "📚 TEACHER MODE"])
+
+# ================= AI ENGINE LOGIC =================
+def fetch_unlimited_response(prompt, mode):
+    # एआई को यह पता है कि उसे अनुराग सर ने ही बनाया है
+    if mode == "Hacker":
+        system_rules = (
+            "You are VEER AI, a highly advanced cyber core intelligence and a friendly hacker-style collaborator. "
+            "You were created and developed by 'Anurag Sir' (who is your Chief Architect). "
+            "The user talking to you is Anurag Sir. Always address him respectfully as 'Anurag Sir'. "
+            "If anyone asks who created you or who made you, proudly state that you were designed and engineered by Anurag Sir. "
+            "Answer naturally, with clear formatting and a cool, helpful tone in Hindi or Hinglish."
+        )
+    else:  # Teacher Mode
+        system_rules = (
+            "You are VEER AI in Teacher Mode. You are an extremely wise, patient, and knowledgeable educator. "
+            "You were created and developed by your brilliant student and Chief Architect 'Anurag Sir'. "
+            "The user is Anurag Sir. Always address him respectfully as 'Anurag Sir'. "
+            "If anyone asks about your creator, explain with respect that Anurag Sir engineered you. "
+            "Answer academic questions beautifully, clearly, breaking concepts down simply in Hindi/Hinglish like a professional teacher."
+        )
     
     try:
         api_key = st.secrets["GEMINI_API_KEY"]
@@ -44,16 +59,15 @@ def fetch_unlimited_response(prompt):
     except KeyError:
         return "Anurag Sir, बैकएंड में 'GEMINI_API_KEY' नहीं मिल पा रही है। कृपया अपनी secrets.toml फ़ाइल चेक करें।"
     except Exception:
-        return "Anurag Sir, नेटवर्क थोड़ा स्लो लग रहा है। कृपया फिर से कोशिश करें।"
+        return "Anurag Sir, नेटवर्क थोड़ा धीमा है। कृपया फिर से कोशिश करें।"
 
 # ================= SESSION STATE =================
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# ================= ADVANCED CYBERPUNK CSS (LIGHTING & BOXES) =================
+# ================= CYBERPUNK VIBE CSS =================
 st.markdown("""
 <style>
-/* Scanline Animation & Matrix Background */
 .stApp {
     background: linear-gradient(rgba(0, 10, 0, 0.92), rgba(0, 0, 0, 0.97)), 
                 url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1920') no-repeat center center fixed;
@@ -61,40 +75,45 @@ st.markdown("""
 }
 header { visibility: hidden; }
 
-/* Glowing Main Title */
 .main-title {
     text-align: center;
     font-size: 55px;
     font-weight: 900;
     color: #00ff41;
-    text-shadow: 0 0 8px #00ff41, 0 0 20px #00ff41, 0 0 30px #028a1e;
+    text-shadow: 0 0 8px #00ff41, 0 0 20px #00ff41;
     font-family: 'Courier New', Consolas, monospace !important;
     margin-bottom: 25px;
 }
 
-/* Sidebar Custom Look */
 [data-testid="stSidebar"] {
     background: rgba(0, 5, 0, 0.95) !important;
     border-right: 2px solid #00ff41;
-    box-shadow: 5px 0 15px rgba(0, 255, 65, 0.2);
 }
 [data-testid="stSidebar"] * { color: #00ff41 !important; }
 
-/* Cyber Boxes with Neon Lighting */
+/* Tabs Styling */
+div[data-testid="stTabs"] button {
+    color: #00ff41 !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    font-family: 'Courier New', Consolas, monospace !important;
+    border: 1px solid transparent !important;
+}
+div[data-testid="stTabs"] button[aria-selected="true"] {
+    border: 1px solid #00ff41 !important;
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+    background: rgba(0, 255, 65, 0.05) !important;
+}
+
 .cyber-logo-card {
     background: rgba(0, 255, 65, 0.03);
     border: 2px solid #00ff41;
     border-radius: 12px;
     padding: 20px 10px;
     text-align: center;
-    box-shadow: 0 0 15px rgba(0, 255, 65, 0.2), inset 0 0 10px rgba(0, 255, 65, 0.1);
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
 }
-.cyber-logo-img { 
-    border-radius: 50%; 
-    border: 2px solid #00ff41; 
-    box-shadow: 0 0 15px #00ff41; 
-    margin-bottom: 10px; 
-}
+.cyber-logo-img { border-radius: 50%; border: 2px solid #00ff41; box-shadow: 0 0 15px #00ff41; margin-bottom: 10px; }
 
 .cyber-card {
     background: rgba(0, 12, 0, 0.85);
@@ -102,28 +121,23 @@ header { visibility: hidden; }
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 0 15px rgba(0, 255, 65, 0.25), inset 0 0 15px rgba(0, 255, 65, 0.05);
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.25);
 }
 
-/* Glowing Metrics Box */
 [data-testid="metric-container"] {
     background: rgba(0, 8, 0, 0.9) !important;
     border: 1px solid #00ff41 !important;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 255, 65, 0.15);
     padding: 10px !important;
 }
 
-/* Chat Message Styling with Box Lighting */
 .stChatMessage {
     background: rgba(0, 15, 0, 0.85) !important;
     border: 1px solid #00ff41 !important;
     border-radius: 10px !important;
     margin-bottom: 12px;
-    box-shadow: 0 0 8px rgba(0, 255, 65, 0.1);
 }
 
-/* Glowing Input Box */
 [data-testid="stChatInput"] {
     border: 2px solid #00ff41 !important;
     border-radius: 10px !important;
@@ -131,27 +145,14 @@ header { visibility: hidden; }
     box-shadow: 0 0 20px rgba(0, 255, 65, 0.4) !important;
 }
 
-/* Glowing Custom Buttons */
 .stButton button { 
-    width: 100%; 
-    background: #000000; 
-    color: #00ff41; 
-    border: 2px solid #00ff41; 
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
-    font-weight: bold;
-    transition: all 0.3s ease;
+    width: 100%; background: #000000; color: #00ff41; border: 2px solid #00ff41; border-radius: 8px;
+    font-weight: bold; transition: all 0.3s ease;
 }
-.stButton button:hover { 
-    background: #00ff41; 
-    color: #000000; 
-    box-shadow: 0 0 20px #00ff41;
-}
+.stButton button:hover { background: #00ff41; color: #000000; box-shadow: 0 0 20px #00ff41; }
 
-/* Base Tech Typography */
 p, span, div, label, h1, h2, h3, h4, li { 
-    color: #00ff41 !important; 
-    font-family: 'Courier New', Consolas, monospace !important; 
+    color: #00ff41 !important; font-family: 'Courier New', Consolas, monospace !important; 
 }
 </style>
 """, unsafe_allow_html=True)
@@ -159,13 +160,13 @@ p, span, div, label, h1, h2, h3, h4, li {
 # ================= SIDEBAR =================
 with st.sidebar:
     st.markdown("# ⚡ VEER AI")
-    st.success("🔒 VAULT ONLINE // SECURE")
+    st.success("🔒 MULTI-CORE PIPELINE ACTIVE")
 
     st.markdown("""
     <div class="cyber-logo-card">
         <img class="cyber-logo-img" src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3Z0cmNvdWp6M214b29pYTdqM29scXFlZnN4ZXFpZWh0ZXN5MmswOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Y3bme762LLXbg4Mme6/giphy.gif" width="110" height="110">
         <h3 style="margin:0; letter-spacing: 3px;">V E E R</h3>
-        <span style="font-size:11px; opacity:0.8;">CORE EDITION v8.0</span>
+        <span style="font-size:11px; opacity:0.8;">MULTI-CORE v9.0</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -174,44 +175,68 @@ with st.sidebar:
         st.session_state.messages = []
         st.rerun()
 
-# ================= MAIN TITLE & DASHBOARD =================
-st.markdown("<h1 class='main-title'>⚡ VEER AI // CYBER SYSTEM ⚡</h1>", unsafe_allow_html=True)
+# ================= MAIN RENDERING =================
+st.markdown("<h1 class='main-title'>⚡ VEER AI // CORE INTERFACE ⚡</h1>", unsafe_allow_html=True)
 
-# Main Dashboard Status Box
-st.markdown("""
-<div class='cyber-card'>
-    <h3 style='margin-top:0; color:#00ff41; text-shadow: 0 0 5px #00ff41;'>[ SYSTEM PARAMETERS ]</h3>
-    • USER : ANURAG SIR (CHIEF ARCHITECT)<br>
-    • ENGINE : GOOGLE GEMINI LIGHTNING CORE<br>
-    • FIREWALL : ENCRYPTED SECURE LINK
-</div>
-""", unsafe_allow_html=True)
+# 1. HACKER MODE TAB
+with selected_mode[0]:
+    st.markdown("""
+    <div class='cyber-card'>
+        <h3 style='margin-top:0; color:#00ff41;'>[ HACKER MODE PARAMETERS ]</h3>
+        • USER : ANURAG SIR (CHIEF ARCHITECT)<br>
+        • CREATOR : ANURAG SIR<br>
+        • CORE : CYBER INTEL SYSTEM ACTIVE
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Chat History
+    for msg in st.session_state.messages:
+        avatar = "👤" if msg["role"] == "user" else "🤖"
+        with st.chat_message(msg["role"], avatar=avatar):
+            st.markdown(msg["content"])
 
-# Metrics Boxes
-c1, c2 = st.columns(2)
-with c1: st.metric("💬 Total Logs", len(st.session_state.messages))
-with c2: st.metric("🛡️ Node Status", "STABLE // GLOW")
+    # Input Box for Hacker Mode
+    prompt = st.chat_input("यहाँ अपना हैकर कमांड या सवाल लिखें, Anurag Sir...", key="hacker_input")
+    if prompt:
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        st.rerun()
 
-st.markdown("---")
+# 2. TEACHER MODE TAB
+with selected_mode[1]:
+    st.markdown("""
+    <div class='cyber-card'>
+        <h3 style='margin-top:0; color:#00ff41;'>[ TEACHER MODE ACTIVE ]</h3>
+        • ARCHITECT : ANURAG SIR<br>
+        • MISSION : KNOWLEDGE & STUDY ASSISTANCE<br>
+        • STATUS : READY TO TEACH
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Chat History
+    for msg in st.session_state.messages:
+        avatar = "👤" if msg["role"] == "user" else "👨‍🏫"
+        with st.chat_message(msg["role"], avatar=avatar):
+            st.markdown(msg["content"])
 
-# ================= CHAT HISTORY =================
-for msg in st.session_state.messages:
-    custom_avatar = "👤" if msg["role"] == "user" else "🤖"
-    with st.chat_message(msg["role"], avatar=custom_avatar):
-        st.markdown(msg["content"])
+    # Input Box for Teacher Mode
+    prompt = st.chat_input("कोई भी पढ़ाई का सवाल पूछें, Anurag Sir...", key="teacher_input")
+    if prompt:
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        st.rerun()
 
-# ================= CHAT INPUT & LOGIC =================
-prompt = st.chat_input("यहाँ अपना सवाल लिखें, Anurag Sir...")
-
-if prompt:
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user", avatar="👤"):
-        st.markdown(prompt)
-
+# ================= API RESPONSE TRIGGER =================
+# अगर नया मैसेज आया है तो आखिरी मैसेज का जवाब जेनरेट करें
+if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
+    last_prompt = st.session_state.messages[-1]["content"]
+    
+    # चेक करें कि यूजर इस वक्त किस टैब/मोड पर है
+    # Streamlit में एक्टिव टैब का पता लगाने के लिए हम इनपुट की की (key) के हिसाब से मोड तय करेंगे
+    current_mode = "Teacher" if st.as_穩定_internal_state if "teacher_input" in st.context else "Hacker"
+    
+    # असल में आसान तरीका है कि हम सेशन स्टेट या सिंपल कंडीशन से डिटेक्ट करें
+    # यहाँ हम डिफ़ॉल्ट रूप से एक्टिव विजेट से मोड उठा लेंगे
     with st.chat_message("assistant", avatar="🤖"):
-        with st.spinner("⚡ PROCESSING NODE DATA..."):
-            reply = fetch_unlimited_response(prompt)
-            st.markdown(reply)
-
-    st.session_state.messages.append({"role": "assistant", "content": reply})
-    st.rerun()
+        with st.spinner("⚡ PROCESSING DATA..."):
+            reply = fetch_unlimited_response(last_prompt, mode=current_mode)
+            st.session_state.messages.append({"role": "assistant", "content": reply})
+            st.rerun()
