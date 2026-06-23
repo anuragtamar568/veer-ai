@@ -12,7 +12,6 @@ st.set_page_config(
 try:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
     
-    # मॉडल इंस्ट्रक्शन बिल्कुल परफेक्ट सेट कर दी है
     model = genai.GenerativeModel(
         "gemini-2.5-flash",
         system_instruction=(
@@ -30,25 +29,28 @@ except Exception as e:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# ================= CYBERPUNK CSS =================
+# ================= CYBERPUNK & HACKER BACKGROUND CSS =================
 st.markdown("""
 <style>
+/* हैकर / रोबोट वाली बैकग्राउंड इमेज और डार्क ओवरले */
 .stApp {
-    background: radial-gradient(circle at top, #003300, #000000 70%);
+    background: linear-gradient(rgba(0, 20, 0, 0.85), rgba(0, 0, 0, 0.95)), 
+                url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1920') no-repeat center center fixed;
+    background-size: cover;
 }
 header {
     visibility: hidden;
 }
 .main-title {
     text-align: center;
-    font-size: 65px;
+    font-size: 60px;
     font-weight: 900;
     color: #00ff41;
     text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41, 0 0 40px #00ff41;
 }
-/* Sidebar CSS Fix */
+/* Sidebar Fix */
 [data-testid="stSidebar"] {
-    background: #000000;
+    background: rgba(0, 0, 0, 0.9) !important;
     border-right: 2px solid #00ff41;
 }
 [data-testid="stSidebar"] p, [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h3, [data-testid="stSidebar"] span {
@@ -59,43 +61,46 @@ header {
     background: rgba(0, 255, 65, 0.05);
     border: 2px dashed #00ff41;
     border-radius: 18px;
-    padding: 25px 10px;
+    padding: 15px 10px;
     margin-bottom: 20px;
     text-align: center;
     box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
 }
-.cyber-logo-text {
-    font-size: 65px;
-    line-height: 1;
+.cyber-logo-img {
+    border-radius: 50%;
+    border: 2px solid #00ff41;
+    box-shadow: 0 0 15px #00ff41;
     margin-bottom: 10px;
 }
 /* Cards */
 .cyber-card {
-    background: rgba(0, 255, 65, 0.05);
+    background: rgba(0, 15, 0, 0.75);
     border: 1px solid #00ff41;
     border-radius: 18px;
     padding: 18px;
     margin-bottom: 15px;
-    box-shadow: 0 0 8px #00ff41, inset 0 0 8px rgba(0, 255, 65, 0.3);
+    box-shadow: 0 0 12px rgba(0, 255, 65, 0.4);
+    backdrop-filter: blur(5px);
 }
 /* Chat Boxes */
 .stChatMessage {
-    background: rgba(0, 255, 65, 0.04) !important;
+    background: rgba(0, 10, 0, 0.8) !important;
     border: 1px solid #00ff41 !important;
     border-radius: 18px !important;
-    box-shadow: 0 0 8px #00ff41 !important;
+    box-shadow: 0 0 8px rgba(0, 255, 65, 0.3) !important;
     margin-bottom: 10px;
+    backdrop-filter: blur(3px);
 }
 /* Input Box Fix */
 [data-testid="stChatInput"] {
     border: 1px solid #00ff41 !important;
     border-radius: 15px !important;
-    box-shadow: 0 0 10px #00ff41 !important;
+    box-shadow: 0 0 15px #00ff41 !important;
     background-color: black !important;
 }
 /* Metrics */
 [data-testid="metric-container"] {
-    background: rgba(0, 255, 65, 0.05);
+    background: rgba(0, 20, 0, 0.8);
     border: 1px solid #00ff41;
     border-radius: 15px;
     box-shadow: 0 0 10px #00ff41;
@@ -126,12 +131,12 @@ with st.sidebar:
     st.markdown("# ⚡ VEER AI")
     st.success("🟢 CYBER CORE ONLINE")
 
-    # एनिमेटेड रोबोट लोगो कार्ड
+    # साइडबार में शानदार लाइव एनिमेटेड हैकर/रोबोट गिफ (GIF) इमेज
     st.markdown("""
     <div class="cyber-logo-card">
-        <div class="cyber-logo-text">🤖</div>
+        <img class="cyber-logo-img" src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3Z0cmNvdWp6M214b29pYTdqM29scXFlZnN4ZXFpZWh0ZXN5MmswOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Y3bme762LLXbg4Mme6/giphy.gif" width="120" height="120">
         <h3 style="margin:0; letter-spacing: 2px;">V E E R</h3>
-        <span style="font-size:11px; opacity:0.8;">LIVE CORE v2.5</span>
+        <span style="font-size:11px; opacity:0.8;">HACKER MODE v3.5</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -161,11 +166,11 @@ st.markdown("""
 # ================= DASHBOARD =================
 st.markdown("""
 <div class='cyber-card'>
-## 🟢 SYSTEM STATUS : ONLINE<br>
-👤 USER : ANURAG SIR<br>
-🧠 AI ENGINE : GEMINI PRO<br>
-🛡 SECURITY : ACTIVE<br>
-⚡ MODE : CYBER INTELLIGENCE
+## 🟢 SYSTEM STATUS : SECURE<br>
+👤 USER : ANURAG SIR (CHIEF ARCHITECT)<br>
+🧠 AI ENGINE : GEMINI PRO INFRASTRUCTURE<br>
+🛡 FIREWALL : MAXIMUM PRIVACY<br>
+⚡ MODE : HACKER INTELLIGENCE RENDERED
 </div>
 """, unsafe_allow_html=True)
 
@@ -175,12 +180,11 @@ with c1:
 with c2:
     st.metric("🧠 AI Core", "LIVE")
 with c3:
-    st.metric("⚡ Status", "ACTIVE")
+    st.metric("⚡ Status", "CONNECTED")
 
 st.markdown("---")
 
 # ================= CHAT HISTORY DISPLAY =================
-# यहाँ avatar पैरामीटर जोड़कर टेक्स्ट लेबल्स को इमोजी में बदल दिया गया है
 for msg in st.session_state.messages:
     custom_avatar = "👤" if msg["role"] == "user" else "🤖"
     with st.chat_message(msg["role"], avatar=custom_avatar):
@@ -195,9 +199,8 @@ if prompt:
         st.markdown(prompt)
 
     with st.chat_message("assistant", avatar="🤖"):
-        with st.spinner("⚡ ACCESSING CYBER CORE..."):
+        with st.spinner("⚡ DECRYPTING QUANTUM DATA..."):
             try:
-                # सीधे लाइव जेमिनी इंजन से वास्तविक जवाब मंगाया जा रहा है
                 response = model.generate_content(prompt)
                 reply = response.text
             except Exception as e:
