@@ -44,33 +44,33 @@ header{
     color:#00ff41;
     text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41, 0 0 40px #00ff41, 0 0 80px #00ff41;
 }
-/* Sidebar */
+/* Sidebar CSS Fix */
 [data-testid="stSidebar"]{
     background:#000000;
     border-right:2px solid #00ff41;
 }
-[data-testid="stSidebar"] *{
+[data-testid="stSidebar"] p, [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h3, [data-testid="stSidebar"] span {
     color:#00ff41 !important;
 }
 /* Cyber Logo Card */
 .cyber-logo-card {
-    background: rgba(0, 255, 65, 0.02);
+    background: rgba(0, 255, 65, 0.05);
     border: 2px dashed #00ff41;
     border-radius: 18px;
-    padding: 30px 10px;
-    margin-bottom: 25px;
+    padding: 25px 10px;
+    margin-bottom: 20px;
     text-align: center;
-    box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
 }
 .cyber-logo-text {
-    font-size: 75px;
+    font-size: 65px;
     line-height: 1;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     animation: pulse 2s infinite alternate;
 }
 @keyframes pulse {
     0% { transform: scale(1); filter: drop-shadow(0 0 2px #00ff41); }
-    100% { transform: scale(1.05); filter: drop-shadow(0 0 15px #00ff41); }
+    100% { transform: scale(1.05); filter: drop-shadow(0 0 12px #00ff41); }
 }
 /* Cards */
 .cyber-card{
@@ -81,18 +81,20 @@ header{
     margin-bottom:15px;
     box-shadow: 0 0 8px #00ff41, inset 0 0 8px rgba(0,255,65,.3);
 }
-/* Chat */
+/* Chat Boxes */
 .stChatMessage{
-    background:rgba(0,255,65,.04);
-    border:1px solid #00ff41;
-    border-radius:18px;
-    box-shadow: 0 0 8px #00ff41;
+    background:rgba(0,255,65,.04) !important;
+    border:1px solid #00ff41 !important;
+    border-radius:18px !important;
+    box-shadow: 0 0 8px #00ff41 !important;
+    margin-bottom: 10px;
 }
-/* Input */
+/* Input Box Fix */
 [data-testid="stChatInput"]{
-    border:1px solid #00ff41;
-    border-radius:15px;
-    box-shadow:0 0 10px #00ff41;
+    border:1px solid #00ff41 !important;
+    border-radius:15px !important;
+    box-shadow: 0 0 10px #00ff41 !important;
+    background-color: black !important;
 }
 /* Metrics */
 [data-testid="metric-container"]{
@@ -105,6 +107,109 @@ header{
 .stButton button{
     width:100%;
     background:black;
+    color:#00ff41;
+    border:1px solid #00ff41;
+    border-radius:12px;
+    box-shadow:0 0 10px #00ff41;
+}
+.stButton button:hover{
+    background:#00ff41;
+    color:black;
+}
+/* Text Global Overrides */
+p, span, div, label, h1, h2, h3, h4 {
+    color: #00ff41 !important;
+    font-family: Consolas, monospace !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ================= SIDEBAR =================
+with st.sidebar:
+    st.markdown("# ⚡ VEER AI")
+    st.success("🟢 SYSTEM ONLINE")
+
+    # पुराने सारे कार्ड्स हटाकर यहाँ नया एनिमेटेड रोबोट लोगो सेट कर दिया गया है
+    st.markdown("""
+    <div class="cyber-logo-card">
+        <div class="cyber-logo-text">🤖</div>
+        <h3 style="margin:0; letter-spacing: 2px;">V E E R</h3>
+        <span style="font-size:11px; opacity:0.8;">CORE v2.5</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    if st.button("🗑️ NEW CHAT"):
+        st.session_state.messages = []
+        st.rerun()
+
+    chat_text = ""
+    for m in st.session_state.messages:
+        chat_text += f"{m['role'].upper()} : {m['content']}\n\n"
+
+    st.download_button(
+        "📥 DOWNLOAD CHAT",
+        chat_text,
+        file_name="veer_chat.txt"
+    )
+
+# ================= MAIN TITLE =================
+st.markdown("""
+<h1 class='main-title'>
+⚡ VEER AI // CYBER CORE ⚡
+</h1>
+""", unsafe_allow_html=True)
+
+# ================= DASHBOARD =================
+st.markdown("""
+<div class='cyber-card'>
+## 🟢 SYSTEM STATUS : ONLINE<br>
+👤 USER : ANURAG SIR<br>
+🧠 AI ENGINE : GEMINI<br>
+🛡 SECURITY : ACTIVE<br>
+⚡ MODE : CYBER INTELLIGENCE
+</div>
+""", unsafe_allow_html=True)
+
+c1, c2, c3 = st.columns(3)
+with c1:
+    st.metric("💬 Messages", len(st.session_state.messages))
+with c2:
+    st.metric("🧠 AI", "ONLINE")
+with c3:
+    st.metric("⚡ Status", "ACTIVE")
+
+st.markdown("---")
+
+# ================= CHAT HISTORY DISPLAY =================
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+
+# ================= CHAT INPUT & LOGIC =================
+prompt = st.chat_input(">>> ENTER COMMAND")
+
+if prompt:
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with st.chat_message("assistant"):
+        with st.spinner("⚡ ACCESSING CYBER CORE..."):
+            try:
+                response = model.generate_content(prompt)
+                reply = response.text
+            except Exception as e:
+                if "429" in str(e):
+                    reply = "🚫 API LIMIT EXCEEDED\n\nGemini free quota समाप्त हो गई है।\n\nकृपया कुछ समय बाद पुनः प्रयास करें।"
+                else:
+                    reply = f"❌ Error: {e}"
+            
+            st.markdown(reply)
+
+    st.session_state.messages.append({"role": "assistant", "content": reply})
+    st.rerun()
     color:#00ff41;
     border:1px solid #00ff41;
     border-radius:12px;
