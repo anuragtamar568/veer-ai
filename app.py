@@ -10,7 +10,6 @@ st.set_page_config(
 
 # ================= AI ENGINE LOGIC (LIVE GEMINI CHAT) =================
 def fetch_unlimited_response(prompt):
-    # अब यह AI आपके साथ बिल्कुल नॉर्मल, स्मार्ट और मददगार दोस्त की तरह बात करेगा
     system_rules = (
         "You are VEER AI, a helpful, intelligent, and friendly AI collaborator. "
         "The user's name is Anurag Sir. Always address him respectfully as 'Anurag Sir'. "
@@ -19,17 +18,10 @@ def fetch_unlimited_response(prompt):
     )
     
     try:
-        # 🔒 Vault से सुरक्षित तरीके से की (Key) उठाना
         api_key = st.secrets["GEMINI_API_KEY"]
-        
-        # Gemini API End Point (gemini-2.5-flash मॉडल सबसे तेज़ और बेस्ट है)
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
         
-        headers = {
-            "Content-Type": "application/json"
-        }
-        
-        # Gemini का ऑफिशियल स्ट्रक्चर्ड पेलोड
+        headers = {"Content-Type": "application/json"}
         payload = {
             "contents": [
                 {
@@ -44,112 +36,161 @@ def fetch_unlimited_response(prompt):
         
         if response.status_code == 200:
             data = response.json()
-            # Gemini के रिस्पॉन्स से टेक्स्ट को निकालना
             ai_reply = data['candidates'][0]['content']['parts'][0]['text']
             return ai_reply.strip()
         else:
-            return f"Anurag Sir, कनेक्शन में थोड़ी दिक्कत आ रही है (Error Code: {response.status_code})। कृपया एक बार बैकएंड सेटिंग्स या API Key चेक कर लें।"
+            return f"Anurag Sir, कनेक्शन में थोड़ी दिक्कत आ रही है (Error Code: {response.status_code})।"
             
     except KeyError:
         return "Anurag Sir, बैकएंड में 'GEMINI_API_KEY' नहीं मिल पा रही है। कृपया अपनी secrets.toml फ़ाइल चेक करें।"
     except Exception:
-        return "Anurag Sir, नेटवर्क थोड़ा स्लो लग रहा है। कृपया एक बार फिर कोशिश करें।"
+        return "Anurag Sir, नेटवर्क थोड़ा स्लो लग रहा है। कृपया फिर से कोशिश करें।"
 
 # ================= SESSION STATE =================
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# ================= CYBERPUNK CSS (HACKER VIBE ONLY) =================
+# ================= ADVANCED CYBERPUNK CSS (LIGHTING & BOXES) =================
 st.markdown("""
 <style>
+/* Scanline Animation & Matrix Background */
 .stApp {
-    background: linear-gradient(rgba(0, 15, 0, 0.9), rgba(0, 0, 0, 0.95)), 
+    background: linear-gradient(rgba(0, 10, 0, 0.92), rgba(0, 0, 0, 0.97)), 
                 url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1920') no-repeat center center fixed;
     background-size: cover;
 }
 header { visibility: hidden; }
+
+/* Glowing Main Title */
 .main-title {
     text-align: center;
-    font-size: 50px;
+    font-size: 55px;
     font-weight: 900;
     color: #00ff41;
-    text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41;
-    font-family: Consolas, monospace !important;
+    text-shadow: 0 0 8px #00ff41, 0 0 20px #00ff41, 0 0 30px #028a1e;
+    font-family: 'Courier New', Consolas, monospace !important;
+    margin-bottom: 25px;
 }
+
+/* Sidebar Custom Look */
 [data-testid="stSidebar"] {
-    background: rgba(0, 0, 0, 0.95) !important;
+    background: rgba(0, 5, 0, 0.95) !important;
     border-right: 2px solid #00ff41;
+    box-shadow: 5px 0 15px rgba(0, 255, 65, 0.2);
 }
 [data-testid="stSidebar"] * { color: #00ff41 !important; }
+
+/* Cyber Boxes with Neon Lighting */
 .cyber-logo-card {
-    background: rgba(0, 255, 65, 0.05);
-    border: 1px solid #00ff41;
+    background: rgba(0, 255, 65, 0.03);
+    border: 2px solid #00ff41;
     border-radius: 12px;
-    padding: 15px 10px;
+    padding: 20px 10px;
     text-align: center;
-    box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.2), inset 0 0 10px rgba(0, 255, 65, 0.1);
 }
-.cyber-logo-img { border-radius: 50%; border: 1px solid #00ff41; margin-bottom: 10px; }
+.cyber-logo-img { 
+    border-radius: 50%; 
+    border: 2px solid #00ff41; 
+    box-shadow: 0 0 15px #00ff41; 
+    margin-bottom: 10px; 
+}
+
 .cyber-card {
-    background: rgba(0, 10, 0, 0.8);
-    border: 1px solid #00ff41;
+    background: rgba(0, 12, 0, 0.85);
+    border: 2px solid #00ff41;
     border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.25), inset 0 0 15px rgba(0, 255, 65, 0.05);
 }
-.stChatMessage {
-    background: rgba(0, 10, 0, 0.85) !important;
-    border: 1px solid #00ff41 !important;
-    border-radius: 12px !important;
-    margin-bottom: 10px;
-}
-[data-testid="stChatInput"] {
-    border: 1px solid #00ff41 !important;
-    border-radius: 12px !important;
-    background-color: black !important;
-}
+
+/* Glowing Metrics Box */
 [data-testid="metric-container"] {
-    background: rgba(0, 15, 0, 0.8);
-    border: 1px solid #00ff41;
-    border-radius: 12px;
+    background: rgba(0, 8, 0, 0.9) !important;
+    border: 1px solid #00ff41 !important;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.15);
+    padding: 10px !important;
 }
-.stButton button { width: 100%; background: black; color: #00ff41; border: 1px solid #00ff41; border-radius: 8px; }
-.stButton button:hover { background: #00ff41; color: black; }
-p, span, div, label, h1, h2, h3, h4, li { color: #00ff41 !important; font-family: Consolas, monospace !important; }
+
+/* Chat Message Styling with Box Lighting */
+.stChatMessage {
+    background: rgba(0, 15, 0, 0.85) !important;
+    border: 1px solid #00ff41 !important;
+    border-radius: 10px !important;
+    margin-bottom: 12px;
+    box-shadow: 0 0 8px rgba(0, 255, 65, 0.1);
+}
+
+/* Glowing Input Box */
+[data-testid="stChatInput"] {
+    border: 2px solid #00ff41 !important;
+    border-radius: 10px !important;
+    background-color: #000000 !important;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.4) !important;
+}
+
+/* Glowing Custom Buttons */
+.stButton button { 
+    width: 100%; 
+    background: #000000; 
+    color: #00ff41; 
+    border: 2px solid #00ff41; 
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+.stButton button:hover { 
+    background: #00ff41; 
+    color: #000000; 
+    box-shadow: 0 0 20px #00ff41;
+}
+
+/* Base Tech Typography */
+p, span, div, label, h1, h2, h3, h4, li { 
+    color: #00ff41 !important; 
+    font-family: 'Courier New', Consolas, monospace !important; 
+}
 </style>
 """, unsafe_allow_html=True)
 
 # ================= SIDEBAR =================
 with st.sidebar:
     st.markdown("# ⚡ VEER AI")
-    st.success("🔒 GEMINI SECURE ONLINE")
+    st.success("🔒 VAULT ONLINE // SECURE")
 
     st.markdown("""
     <div class="cyber-logo-card">
-        <img class="cyber-logo-img" src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3Z0cmNvdWp6M214b29pYTdqM29scXFlZnN4ZXFpZWh0ZXN5MmswOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Y3bme762LLXbg4Mme6/giphy.gif" width="100" height="100">
-        <h3 style="margin:0; letter-spacing: 2px;">V E E R</h3>
-        <span style="font-size:11px; opacity:0.8;">GEMINI CORE v7.5</span>
+        <img class="cyber-logo-img" src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3Z0cmNvdWp6M214b29pYTdqM29scXFlZnN4ZXFpZWh0ZXN5MmswOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Y3bme762LLXbg4Mme6/giphy.gif" width="110" height="110">
+        <h3 style="margin:0; letter-spacing: 3px;">V E E R</h3>
+        <span style="font-size:11px; opacity:0.8;">CORE EDITION v8.0</span>
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("---")
-    if st.button("🗑️ CLEAR CHAT"):
+    if st.button("🗑️ CLEAR SYSTEM MEMORY"):
         st.session_state.messages = []
         st.rerun()
 
 # ================= MAIN TITLE & DASHBOARD =================
-st.markdown("<h1 class='main-title'>⚡ VEER AI // LIVE GATEWAY ⚡</h1>", unsafe_allow_html=True)
+st.markdown("<h1 class='main-title'>⚡ VEER AI // CYBER SYSTEM ⚡</h1>", unsafe_allow_html=True)
+
+# Main Dashboard Status Box
 st.markdown("""
 <div class='cyber-card'>
-## 🟢 SYSTEM STATUS : ONLINE<br>
-👤 USER : ANURAG SIR (CHIEF ARCHITECT)<br>
-🧠 ENGINE : GOOGLE GEMINI INTELLIGENCE (REAL CHAT ACTIVE)
+    <h3 style='margin-top:0; color:#00ff41; text-shadow: 0 0 5px #00ff41;'>[ SYSTEM PARAMETERS ]</h3>
+    • USER : ANURAG SIR (CHIEF ARCHITECT)<br>
+    • ENGINE : GOOGLE GEMINI LIGHTNING CORE<br>
+    • FIREWALL : ENCRYPTED SECURE LINK
 </div>
 """, unsafe_allow_html=True)
 
+# Metrics Boxes
 c1, c2 = st.columns(2)
-with c1: st.metric("💬 Total Chats", len(st.session_state.messages))
-with c2: st.metric("🛡️ Gateway Status", "AUTHENTICATED 🔒")
+with c1: st.metric("💬 Total Logs", len(st.session_state.messages))
+with c2: st.metric("🛡️ Node Status", "STABLE // GLOW")
 
 st.markdown("---")
 
@@ -168,7 +209,7 @@ if prompt:
         st.markdown(prompt)
 
     with st.chat_message("assistant", avatar="🤖"):
-        with st.spinner("⚡ सोच रहा हूँ..."):
+        with st.spinner("⚡ PROCESSING NODE DATA..."):
             reply = fetch_unlimited_response(prompt)
             st.markdown(reply)
 
