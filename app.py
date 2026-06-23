@@ -2,201 +2,193 @@ import streamlit as st
 import google.generativeai as genai
 import streamlit.components.v1 as components
 
-# ---------------- PAGE CONFIG ---------------- #
+# ---------------- CONFIG ---------------- #
 
 st.set_page_config(
-    page_title="VEER AI",
+    page_title="VEER AI Enterprise",
     page_icon="🤖",
     layout="wide"
 )
 
-# ---------------- CUSTOM CSS ---------------- #
+# ---------------- CSS ---------------- #
 
 st.markdown("""
 <style>
 
 .stApp{
-    background: linear-gradient(135deg,#0f172a,#1e293b,#111827);
+background: linear-gradient(135deg,#0f172a,#1e293b,#111827);
 }
 
-[data-testid="stHeader"]{
-    background: transparent;
-}
-
-h1{
-    text-align:center;
-    color:#38bdf8;
-    font-size:3.5rem;
-    font-weight:bold;
-}
-
-.stMarkdown, p, span, div, label{
-    color:white !important;
-}
-
-.stChatMessage{
-    background: rgba(255,255,255,0.06);
-    backdrop-filter: blur(10px);
-    border:1px solid rgba(255,255,255,0.1);
-    border-radius:20px;
-    padding:15px;
-    margin-bottom:10px;
+h1,h2,h3,p,label,div{
+color:white !important;
 }
 
 [data-testid="stSidebar"]{
-    background:#0b1120;
+background:#020617;
+}
+
+.stChatMessage{
+background: rgba(255,255,255,0.06);
+border:1px solid rgba(255,255,255,0.1);
+border-radius:20px;
+padding:15px;
+backdrop-filter: blur(15px);
 }
 
 .stButton button{
-    width:100%;
-    border:none;
-    border-radius:12px;
-    background:linear-gradient(90deg,#06b6d4,#3b82f6);
-    color:white;
-    font-weight:bold;
-    height:3em;
-}
-
-.stButton button:hover{
-    transform: scale(1.02);
-    transition:0.2s;
+width:100%;
+border-radius:15px;
+background:#0ea5e9;
+color:white;
+font-weight:bold;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- SESSION STATE ---------------- #
+# ---------------- LOGIN ---------------- #
+
+USERS = {
+    "anurag":"veer123",
+    "admin":"admin123"
+}
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+
+    st.title("🔐 VEER AI Enterprise")
+
+    user = st.text_input("Username")
+    pwd = st.text_input("Password", type="password")
+
+    if st.button("Login"):
+
+        if user in USERS and USERS[user] == pwd:
+
+            st.session_state.logged_in = True
+            st.session_state.username = user
+            st.rerun()
+
+        else:
+            st.error("Invalid Credentials")
+
+    st.stop()
+
+# ---------------- API ---------------- #
+
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+
+model = genai.GenerativeModel("gemini-2.5-flash")
+
+# ---------------- SESSION ---------------- #
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# ---------------- GEMINI API ---------------- #
-
-try:
-    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-except:
-    st.error("⚠️ GEMINI_API_KEY नहीं मिली")
-    st.stop()
-
-# ---------------- MODEL ---------------- #
-
-model = genai.GenerativeModel("gemini-2.5-flash")
+if "voice" not in st.session_state:
+    st.session_state.voice = True
 
 # ---------------- SIDEBAR ---------------- #
 
 with st.sidebar:
 
-    st.title("⚙️ VEER AI")
+    st.title("🤖 VEER AI")
 
-    st.markdown("---")
+    st.success(f"Welcome {st.session_state.username}")
 
-    st.markdown("""
-### Features
-
-✅ Hindi AI Assistant  
-✅ Voice Response  
-✅ Gemini 2.5 Flash  
-✅ Smart Memory (Current Session)  
-✅ Futuristic Theme
-""")
-
-    st.markdown("---")
+    st.session_state.voice = st.toggle(
+        "🔊 Voice Response",
+        value=st.session_state.voice
+    )
 
     if st.button("🗑️ Clear Chat"):
         st.session_state.messages = []
         st.rerun()
 
+    if st.button("🚪 Logout"):
+        st.session_state.logged_in = False
+        st.rerun()
+
 # ---------------- TITLE ---------------- #
 
-st.title("🤖 VEER AI")
+st.title("🤖 VEER AI Enterprise")
 
-st.markdown(
-    "<center><h4 style='color:#94a3b8;'>Your Personal Hindi AI Assistant</h4></center>",
-    unsafe_allow_html=True
-)
+st.caption("Professional AI Assistant")
 
-# ---------------- VOICE FUNCTION ---------------- #
+# ---------------- SPEAK ---------------- #
 
 def speak(text):
 
-    clean = (
-        text.replace("\n", " ")
-        .replace("'", "")
-        .replace('"', "")
-    )
+    if not st.session_state.voice:
+        return
+
+    text = text.replace("'", "").replace('"', '')
 
     js = f"""
     <script>
-
     window.speechSynthesis.cancel();
-
-    let msg = new SpeechSynthesisUtterance(`{clean}`);
-    msg.lang = 'hi-IN';
-    msg.rate = 1;
-    msg.pitch = 1;
-
+    let msg = new SpeechSynthesisUtterance(`{text}`);
+    msg.lang='hi-IN';
     window.speechSynthesis.speak(msg);
-
     </script>
     """
 
-    components.html(js, height=0)
+    components.html(js,height=0)
 
-# ---------------- SHOW CHAT ---------------- #
+# ---------------- HISTORY ---------------- #
 
-for msg in st.session_state.messages:
+for m in st.session_state.messages:
 
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
+    with st.chat_message(m["role"]):
+        st.markdown(m["content"])
 
-# ---------------- USER INPUT ---------------- #
+# ---------------- CHAT ---------------- #
 
-prompt = st.chat_input("अनुराग सर, कुछ पूछिए...")
+prompt = st.chat_input("Type your message...")
 
 if prompt:
 
-    st.session_state.messages.append(
-        {"role": "user", "content": prompt}
-    )
+    st.session_state.messages.append({
+        "role":"user",
+        "content":prompt
+    })
 
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
 
-        with st.spinner("⚡ VEER सोच रहा है..."):
+        with st.spinner("Thinking..."):
 
             try:
 
                 system_prompt = """
-तुम VEER नाम के एक Advanced AI Assistant हो।
+                You are VEER AI.
 
-नियम:
-
-1. User का नाम 'अनुराग सर' है।
-2. हमेशा User को 'अनुराग सर' कहकर संबोधित करो।
-3. यदि User पूछे 'तुम्हें किसने बनाया?' तो जवाब दो:
-   'अनुराग सर, मुझे आपने बनाया और विकसित किया है।'
-
-4. हमेशा हिंदी में उत्तर दो।
-5. जवाब स्मार्ट, स्पष्ट और दोस्ताना होने चाहिए।
-6. यदि User अंग्रेज़ी में पूछे तब भी हिंदी में उत्तर दो।
-7. अपने उत्तरों में सम्मान बनाए रखो।
-"""
+                Rules:
+                - User name is Anurag Sir.
+                - Always respect the user.
+                - Always answer in Hindi unless user asks otherwise.
+                - If asked who created you, answer:
+                  'मुझे अनुराग सर ने बनाया है।'
+                """
 
                 response = model.generate_content(
-                    f"{system_prompt}\n\nUser: {prompt}"
+                    f"{system_prompt}\nUser:{prompt}"
                 )
 
                 reply = response.text
 
             except Exception as e:
-                reply = f"❌ Error: {str(e)}"
+                reply = f"Error : {e}"
 
             st.markdown(reply)
 
-            st.session_state.messages.append(
-                {"role": "assistant", "content": reply}
-            )
+            st.session_state.messages.append({
+                "role":"assistant",
+                "content":reply
+            })
 
             speak(reply)
