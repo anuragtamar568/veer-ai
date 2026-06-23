@@ -1,6 +1,5 @@
 import streamlit as st
 import requests
-import streamlit.components.v1 as components
 
 # ================= PAGE CONFIG =================
 st.set_page_config(
@@ -8,6 +7,10 @@ st.set_page_config(
     page_icon="💻",
     layout="wide"
 )
+
+# ================= SYSTEM CONFIGURATION =================
+# 🔑 अनुराग सर, यहाँ आप अपना मनपसंद 4-डिजिट का कोड बदल सकते हैं
+SECRET_PASSCODE = "2026"
 
 # ================= SESSION STATE FOR AUTH =================
 if "authenticated" not in st.session_state:
@@ -25,6 +28,7 @@ st.markdown("""
     background-size: cover;
 }
 header { visibility: hidden; }
+
 .main-title {
     text-align: center;
     font-size: 55px;
@@ -34,11 +38,13 @@ header { visibility: hidden; }
     font-family: 'Courier New', Consolas, monospace !important;
     margin-bottom: 25px;
 }
+
 [data-testid="stSidebar"] {
     background: rgba(0, 5, 0, 0.95) !important;
     border-right: 2px solid #00ff41;
 }
 [data-testid="stSidebar"] * { color: #00ff41 !important; }
+
 .cyber-card {
     background: rgba(0, 12, 0, 0.85);
     border: 2px solid #00ff41;
@@ -47,18 +53,33 @@ header { visibility: hidden; }
     margin-bottom: 20px;
     box-shadow: 0 0 15px rgba(0, 255, 65, 0.25);
 }
+
 .stChatMessage {
     background: rgba(0, 15, 0, 0.85) !important;
     border: 1px solid #00ff41 !important;
     border-radius: 10px !important;
     margin-bottom: 12px;
 }
+
 [data-testid="stChatInput"] {
     border: 2px solid #00ff41 !important;
     border-radius: 10px !important;
     background-color: #000000 !important;
     box-shadow: 0 0 20px rgba(0, 255, 65, 0.4) !important;
 }
+
+/* Password Input Field Custom Styling */
+input[type="password"] {
+    background-color: #000000 !important;
+    color: #00ff41 !important;
+    border: 2px solid #00ff41 !important;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.3) !important;
+    font-size: 24px !important;
+    letter-spacing: 10px !important;
+    text-align: center !important;
+    font-family: 'Courier New', Consolas, monospace !important;
+}
+
 p, span, div, label, h1, h2, h3, h4, li { 
     color: #00ff41 !important; font-family: 'Courier New', Consolas, monospace !important; 
 }
@@ -66,144 +87,46 @@ p, span, div, label, h1, h2, h3, h4, li {
 """, unsafe_allow_html=True)
 
 
-# ================= SCREEN 1: 3D CYBER PATTERN LOCK =================
+# ================= SCREEN 1: REAL-TIME PASSCODE GATE =================
 if not st.session_state.authenticated:
-    st.markdown("<h1 class='main-title'>🔒 VEER AI // NODE LOCKED</h1>", unsafe_allow_html=True)
-    st.markdown("<h3 style='text-align:center; color:#00ff41;'>ANURAG SIR, PLEASE DRAW THE PATTERN TO UNLOCK MICRO-CORE</h3>", unsafe_allow_html=True)
+    st.markdown("<h1 class='main-title'>🔒 VEER AI // SYSTEM LOCKED</h1>", unsafe_allow_html=True)
     
-    # 3D Pattern Component (HTML/JS Canvas with Neon Effects)
-    pattern_html = """
-    <div id="pattern-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 450px; background: rgba(0,10,0,0.4); border: 2px solid #00ff41; border-radius: 15px; box-shadow: 0 0 30px rgba(0,255,65,0.3); transform: perspective(800px) rotateX(10deg);">
-        <canvas id="lockCanvas" width="300" height="300" style="cursor: pointer;"></canvas>
-        <div id="status" style="color: #00ff41; font-family: monospace; margin-top: 15px; font-size: 16px; text-shadow: 0 0 5px #00ff41;">[ WAITING FOR BIOMETRIC PATTERN ]</div>
-    </div>
-
-    <script>
-    const canvas = document.getElementById('lockCanvas');
-    const ctx = canvas.getContext('2d');
-    const status = document.getElementById('status');
+    # सेंटर अलाइन बॉक्स के लिए कॉलम्स
+    col1, col2, col3 = st.columns([1, 1.5, 1])
     
-    const rows = 3, cols = 3;
-    const r = 15;
-    const dots = [];
-    let isDrawing = false;
-    let selectedDots = [];
-
-    // Create 3x3 Dot Matrix
-    for(let i=0; i<rows; i++) {
-        for(let j=0; j<cols; j++) {
-            dots.push({
-                id: (i*cols + j + 1),
-                x: 60 + j * 90,
-                y: 60 + i * 90
-            });
-        }
-    }
-
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    with col2:
+        st.markdown("""
+        <div class='cyber-card' style='text-align: center;'>
+            <h3 style='margin-top:0;'>[ ENTER MAIN CORE ACCESS CODE ]</h3>
+            <span style='font-size: 12px; opacity: 0.8;'>ENTER 4-DIGIT CRYPTO PIN FOR ANURAG SIR</span>
+        </div>
+        """, unsafe_allow_html=True)
         
-        // Draw Lines
-        if (selectedDots.length > 0) {
-            ctx.beginPath();
-            ctx.strokeStyle = '#00ff41';
-            ctx.lineWidth = 5;
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = '#00ff41';
-            ctx.moveTo(selectedDots[0].x, selectedDots[0].y);
-            for(let i=1; i<selectedDots.length; i++) {
-                ctx.lineTo(selectedDots[i].x, selectedDots[i].y);
-            }
-            ctx.stroke();
-        }
-
-        // Draw Nodes
-        dots.forEach(dot => {
-            ctx.beginPath();
-            let isSelected = selectedDots.some(d => d.id === dot.id);
-            ctx.arc(dot.x, dot.y, isSelected ? r + 3 : r, 0, Math.PI * 2);
-            ctx.fillStyle = isSelected ? '#00ff41' : '#003300';
-            ctx.strokeStyle = '#00ff41';
-            ctx.lineWidth = 2;
-            ctx.shadowBlur = isSelected ? 20 : 5;
-            ctx.shadowColor = '#00ff41';
-            ctx.fill();
-            ctx.stroke();
-        });
-    }
-
-    function getMousePos(e) {
-        const rect = canvas.getBoundingClientRect();
-        return {
-            x: (e.clientX || e.touches[0].clientX) - rect.left,
-            y: (e.clientY || e.touches[0].clientY) - rect.top
-        };
-    }
-
-    function startDraw(e) {
-        isDrawing = true;
-        selectedDots = [];
-        status.innerText = "[ DRAWING COMMAND VECTOR... ]";
-        handleMove(e);
-    }
-
-    function handleMove(e) {
-        if (!isDrawing) return;
-        const pos = getMousePos(e);
-        dots.forEach(dot => {
-            const dist = Math.hypot(dot.x - pos.x, dot.y - pos.y);
-            if (dist < r + 10) {
-                if (!selectedDots.some(d => d.id === dot.id)) {
-                    selectedDots.push(dot);
-                }
-            }
-        });
-        draw();
-    }
-
-    function endDraw() {
-        if (!isDrawing) return;
-        isDrawing = false;
-        const patternCode = selectedDots.map(d => d.id).join('');
+        # टेक्स्ट इनपुट जो टाइप करते ही वैल्यू ट्रैक करता है
+        entered_code = st.text_input(
+            "CORE KEYWORD:", 
+            type="password", 
+            max_chars=4, 
+            label_visibility="collapsed",
+            key="passcode_widget"
+        )
         
-        // मास्टर की चेक (कम से कम 3 डॉट्स कनेक्ट होने चाहिए टेस्टिंग को आसान रखने के लिए)
-        if (patternCode.length >= 3) {
-            status.innerHTML = "<span style='color:#00ff41;'>ACCESS GRANTED. BOOTING CORE...</span>";
-            // Streamlit को सीक्रेट सिग्नल भेजना
-            window.parent.postMessage({type: 'streamlit:setComponentValue', value: 'SYSTEM_UNLOCKED'}, '*');
-        } else {
-            status.innerHTML = "<span style='color:#ff0000;'>ACCESS DENIED // PATTERN TOO SHORT</span>";
-            selectedDots = [];
-            setTimeout(draw, 1000);
-        }
-    }
+        # ⚡ रियल-टाइम वेरिफिकेशन लॉजिक (बिना किसी सबमिट बटन के)
+        if len(entered_code) == 4:
+            if entered_code == SECRET_PASSCODE:
+                st.session_state.authenticated = True
+                st.toast("✔️ ACCESS GRANTED. UNLOCKING MICRO-CORE...", icon="🟢")
+                st.rerun()
+            else:
+                st.error("❌ INVALID PASSCODE // ACCESS DENIED")
 
-    canvas.addEventListener('mousedown', startDraw);
-    canvas.addEventListener('mousemove', handleMove);
-    window.addEventListener('mouseup', endDraw);
-
-    canvas.addEventListener('touchstart', startDraw);
-    canvas.addEventListener('touchmove', handleMove);
-    window.addEventListener('touchend', endDraw);
-
-    draw();
-    </script>
-    """
-    
-    # Custom Trigger Receiver
-    response_trigger = components.html(pattern_html, height=480)
-    
-    # सीक्रेट पैटर्न बाईपास बटन (सिर्फ बैकअप के लिए)
-    if st.button("⌨️ EMERGENCY ACCESS CODE OVERRIDE"):
-        st.session_state.authenticated = True
-        st.rerun()
 
 # ================= SCREEN 2: MAIN VEER AI INTERFACE =================
 else:
     # ================= SIDEBAR (CORE CONTROL) =================
     with st.sidebar:
         st.markdown("# ⚡ VEER AI")
-        st.success("🔒 ANURAG SIR AUTHENTICATED")
+        st.success("🔒 ANURAG SIR VERIFIED")
 
         st.markdown("---")
         selected_mode = st.radio(
