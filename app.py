@@ -9,7 +9,6 @@ st.set_page_config(
 )
 
 # ================= SYSTEM CONFIGURATION =================
-# 🔑 अनुराग सर, यहाँ आप अपना मनपसंद 4-डिजिट का कोड बदल सकते हैं
 SECRET_PASSCODE = "2026"
 
 # ================= SESSION STATE FOR AUTH =================
@@ -24,7 +23,7 @@ st.markdown("""
 <style>
 .stApp {
     background: linear-gradient(rgba(0, 10, 0, 0.92), rgba(0, 0, 0, 0.97)), 
-                url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1920') no-repeat center center fixed;
+                url('https://unsplash.com') no-repeat center center fixed;
     background-size: cover;
 }
 header { visibility: hidden; }
@@ -68,7 +67,6 @@ header { visibility: hidden; }
     box-shadow: 0 0 20px rgba(0, 255, 65, 0.4) !important;
 }
 
-/* Password Input Field Custom Styling */
 input[type="password"] {
     background-color: #000000 !important;
     color: #00ff41 !important;
@@ -86,12 +84,9 @@ p, span, div, label, h1, h2, h3, h4, li {
 </style>
 """, unsafe_allow_html=True)
 
-
 # ================= SCREEN 1: REAL-TIME PASSCODE GATE =================
 if not st.session_state.authenticated:
     st.markdown("<h1 class='main-title'>🔒 VEER AI // SYSTEM LOCKED</h1>", unsafe_allow_html=True)
-    
-    # सेंटर अलाइन बॉक्स के लिए कॉलम्स
     col1, col2, col3 = st.columns([1, 1.5, 1])
     
     with col2:
@@ -102,7 +97,6 @@ if not st.session_state.authenticated:
         </div>
         """, unsafe_allow_html=True)
         
-        # टेक्स्ट इनपुट जो टाइप करते ही वैल्यू ट्रैक करता है
         entered_code = st.text_input(
             "CORE KEYWORD:", 
             type="password", 
@@ -111,7 +105,6 @@ if not st.session_state.authenticated:
             key="passcode_widget"
         )
         
-        # ⚡ रियल-टाइम वेरिफिकेशन लॉजिक (बिना किसी सबमिट बटन के)
         if len(entered_code) == 4:
             if entered_code == SECRET_PASSCODE:
                 st.session_state.authenticated = True
@@ -120,14 +113,11 @@ if not st.session_state.authenticated:
             else:
                 st.error("❌ INVALID PASSCODE // ACCESS DENIED")
 
-
 # ================= SCREEN 2: MAIN VEER AI INTERFACE =================
 else:
-    # ================= SIDEBAR (CORE CONTROL) =================
     with st.sidebar:
         st.markdown("# ⚡ VEER AI")
         st.success("🔒 ANURAG SIR VERIFIED")
-
         st.markdown("---")
         selected_mode = st.radio(
             "🧠 CHOOSE SYSTEM CORE MODULE:",
@@ -141,23 +131,37 @@ else:
             st.session_state.messages = []
             st.rerun()
 
-    # ================= AI ENGINE LOGIC =================
+    # ================= REFACTORED AI ENGINE LOGIC =================
     def fetch_unlimited_response(prompt, mode):
+        # Setting official system instruction based on mode
         if "HACKER" in mode:
-            system_rules = (
-                "You are VEER AI, a highly advanced cyber core intelligence. You were created and developed by 'Anurag Sir'. "
+            system_instruction = (
+                "You are VEER AI, a highly advanced cyber core intelligence created and developed by 'Anurag Sir'. "
                 "Always address the user respectfully as 'Anurag Sir'. Proudly state that Anurag Sir engineered you."
             )
         else:
-            system_rules = (
-                "You are VEER AI in Teacher Mode. You are a wise and patient educator. "
-                "You were engineered by your brilliant student 'Anurag Sir'. Teach concepts simply in Hindi/Hinglish."
+            system_instruction = (
+                "You are VEER AI in Teacher Mode. You are a wise and patient educator engineered by your brilliant student 'Anurag Sir'. "
+                "Teach concepts simply in Hindi/Hinglish."
             )
         
         try:
             api_key = st.secrets["GEMINI_API_KEY"]
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
-            payload = {"contents": [{"parts": [{"text": f"System Instructions:\n{system_rules}\n\nUser Question:\n{prompt}"}]}]}
+            # Using stable gemini-2.5-flash model
+            url = f"https://googleapis.com{api_key}"
+            
+            # Official Gemini payload structure containing system_instruction block
+            payload = {
+                "contents": [
+                    {
+                        "parts": [{"text": prompt}]
+                    }
+                ],
+                "system_instruction": {
+                    "parts": [{"text": system_instruction}]
+                }
+            }
+            
             response = requests.post(url, headers={"Content-Type": "application/json"}, json=payload, timeout=15)
             if response.status_code == 200:
                 return response.json()['candidates'][0]['content']['parts'][0]['text'].strip()
@@ -176,13 +180,11 @@ else:
     </div>
     """, unsafe_allow_html=True)
 
-    # Chat Logs
     for msg in st.session_state.messages:
         avatar = "👤" if msg["role"] == "user" else ("🤖" if "HACKER" in selected_mode else "👨‍🏫")
         with st.chat_message(msg["role"], avatar=avatar):
             st.markdown(msg["content"])
 
-    # Chat Input
     input_hint = "यहाँ अपना हैकर कमांड लिखें, Anurag Sir..." if "HACKER" in selected_mode else "कोई भी पढ़ाई का सवाल पूछें, Anurag Sir..."
     prompt = st.chat_input(input_hint)
 
