@@ -8,53 +8,51 @@ st.set_page_config(
     layout="wide"
 )
 
-# ================= API CONFIGURATION =================
-# 🔑 अपनी असली Gemini API Key यहाँ नीचे पेस्ट करें:
-GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE"
-
-# ================= AI ENGINE LOGIC (WITH YOUR API KEY) =================
+# ================= AI ENGINE LOGIC (WITH SECURE OPENAI API) =================
 def fetch_unlimited_response(prompt):
     # अनुराग सर के लिए एआई टोन सेट करना
     system_rules = "You are VEER AI. User name is Anurag Sir. Always answer accurately. Always answer in Hindi. Always call the user 'Anurag Sir'. Be smart, professional, and act as a highly advanced cyber core intelligence."
     
-    # Gemini API End Point
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
-    
-    headers = {
-        "Content-Type": "application/json"
-    }
-    
-    # स्ट्रक्चर्ड पेलोड (System Prompt + User Prompt)
-    payload = {
-        "contents": [
-            {
-                "parts": [
-                    {"text": f"System Instructions:\n{system_rules}\n\nUser Question:\n{prompt}"}
-                ]
-            }
-        ]
-    }
-    
     try:
+        # 🔒 st.secrets से की (Key) को सुरक्षित तरीके से लोड करना
+        api_key = st.secrets["OPENAI_API_KEY"]
+        
+        # OpenAI Chat Completions End Point
+        url = "https://api.openai.com/v1/chat/completions"
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+        
+        # OpenAI के स्टैंडर्ड फॉर्मेट में पेलोड
+        payload = {
+            "model": "gpt-4o-mini",  # आप अपनी पसंद का मॉडल (जैसे gpt-4o) यहाँ बदल सकते हैं
+            "messages": [
+                {"role": "system", "content": system_rules},
+                {"role": "user", "content": prompt}
+            ],
+            "temperature": 0.7
+        }
+        
         response = requests.post(url, headers=headers, json=payload, timeout=15)
         
         if response.status_code == 200:
             data = response.json()
-            # Gemini के रिस्पॉन्स से टेक्स्ट निकालना
-            ai_reply = data['candidates'][0]['content']['parts'][0]['text']
+            ai_reply = data['choices'][0]['message']['content']
             return ai_reply.strip()
         else:
-            # अगर API Key गलत हो या कोई एरर आए
-            return f"Anurag Sir, API एरर कोड {response.status_code} रिसीव हुआ है। कृपया अपनी API Key जांचें।"
+            return f"Anurag Sir, API एरर कोड {response.status_code} रिसीव हुआ है। कृपया बैकएंड कॉन्फ़िगरेशन या बिलिंग जांचें।"
             
-    except Exception as e:
+    except KeyError:
+        return "Anurag Sir, 'OPENAI_API_KEY' आपकी secrets.toml फ़ाइल में नहीं मिली। कृपया फ़ाइल स्ट्रक्चर चेक करें।"
+    except Exception:
         pass
         
     # ================= FAILSAFE MODE =================
-    # अगर इंटरनेट या सर्वर बिल्कुल काम न करे तो लोकल बैकअप
     prompt_clean = prompt.lower()
     if "kedarnath" in prompt_clean or "केदारनाथ" in prompt:
-        return "Anurag Sir, केदारनाथ भारत के运行 उत्तराखंड राज्य के रुद्रप्रयाग जिले में स्थित एक बेहद पवित्र और प्रसिद्ध तीर्थस्थल है।"
+        return "Anurag Sir, केदारनाथ भारत के उत्तराखंड राज्य के रुद्रप्रयाग जिले में स्थित एक बेहद पवित्र और प्रसिद्ध तीर्थस्थल है।"
     elif "hello" in prompt_clean or "hi" in prompt_clean or "नमस्ते" in prompt:
         return "नमस्ते Anurag Sir! VEER AI नो-लिमिट साइबर कोर में आपका स्वागत है। आज आपका क्या आदेश है?"
     
@@ -129,13 +127,13 @@ p, span, div, label, h1, h2, h3, h4 { color: #00ff41 !important; font-family: Co
 # ================= SIDEBAR =================
 with st.sidebar:
     st.markdown("# ⚡ VEER AI")
-    st.success("🟢 SECURE PRIVATE API ACTIVE")
+    st.success("🔒 VAULT KEY SECURED & HIDDEN")
 
     st.markdown("""
     <div class="cyber-logo-card">
         <img class="cyber-logo-img" src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3Z0cmNvdWp6M214b29pYTdqM29scXFlZnN4ZXFpZWh0ZXN5MmswOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Y3bme762LLXbg4Mme6/giphy.gif" width="120" height="120">
         <h3 style="margin:0; letter-spacing: 2px;">V E E R</h3>
-        <span style="font-size:11px; opacity:0.8;">INFINITY CORE v5.5</span>
+        <span style="font-size:11px; opacity:0.8;">INFINITY CORE v6.0</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -148,16 +146,16 @@ with st.sidebar:
 st.markdown("<h1 class='main-title'>⚡ VEER AI // CYBER CORE ⚡</h1>", unsafe_allow_html=True)
 st.markdown("""
 <div class='cyber-card'>
-## 🟢 SYSTEM STATUS : PRIVATE KEY SECURED<br>
+## 🟢 SYSTEM STATUS : VAULT ENCRYPTED (SAFE)<br>
 👤 USER : ANURAG SIR (CHIEF ARCHITECT)<br>
-🧠 AI ENGINE : PRIVATE EXPERT GATEWAY (STABLE MODE)<br>
-🛡️ FIREWALL : ACTIVE // DECRYPTION PIPELINE ONLINE
+🧠 AI ENGINE : ENCRYPTED PRIVATE GATEWAY (SECRETS ROUTED)<br>
+🛡️ FIREWALL : ACTIVE // STEALTH MODE ONLINE
 </div>
 """, unsafe_allow_html=True)
 
 c1, c2, c3 = st.columns(3)
 with c1: st.metric("💬 Total Chats", len(st.session_state.messages))
-with c2: st.metric("🧠 API Key Status", "AUTHENTICATED 🟢")
+with c2: st.metric("🧠 API Key Status", "HIDDEN IN VAULT 🔒")
 with c3: st.metric("⚡ Server Quota", "STABLE")
 
 st.markdown("---")
@@ -177,7 +175,7 @@ if prompt:
         st.markdown(prompt)
 
     with st.chat_message("assistant", avatar="🤖"):
-        with st.spinner("⚡ PROCESSING THROUGH SECURE GATEWAY..."):
+        with st.spinner("⚡ PROCESSING THROUGH ENCRYPTED STREAM..."):
             reply = fetch_unlimited_response(prompt)
             st.markdown(reply)
 
