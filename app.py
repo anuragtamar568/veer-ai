@@ -16,31 +16,38 @@ st.markdown("""
 <style>
 
 .stApp{
-background: linear-gradient(135deg,#0f172a,#1e293b,#111827);
-}
-
-h1,h2,h3,p,label,div{
-color:white !important;
+background:
+linear-gradient(135deg,#020617,#0f172a,#1e293b);
 }
 
 [data-testid="stSidebar"]{
-background:#020617;
+background:rgba(15,23,42,.85);
+backdrop-filter: blur(20px);
+}
+
+h1{
+text-align:center;
+font-size:4rem;
+background:linear-gradient(90deg,#38bdf8,#818cf8,#ec4899);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
 }
 
 .stChatMessage{
-background: rgba(255,255,255,0.06);
-border:1px solid rgba(255,255,255,0.1);
-border-radius:20px;
-padding:15px;
-backdrop-filter: blur(15px);
+background:rgba(255,255,255,.06);
+backdrop-filter:blur(20px);
+border:1px solid rgba(255,255,255,.1);
+border-radius:24px;
+padding:18px;
 }
 
 .stButton button{
 width:100%;
-border-radius:15px;
-background:#0ea5e9;
+border-radius:16px;
+background:linear-gradient(90deg,#06b6d4,#6366f1);
 color:white;
-font-weight:bold;
+font-weight:700;
+border:none;
 }
 
 </style>
@@ -49,46 +56,47 @@ font-weight:bold;
 # ---------------- LOGIN ---------------- #
 
 USERS = {
-    "anurag":"veer123",
-    "admin":"admin123"
+    "anurag":"veer123"
 }
 
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
+if "logged" not in st.session_state:
+    st.session_state.logged = False
 
-if not st.session_state.logged_in:
+if not st.session_state.logged:
 
-    st.title("🔐 VEER AI Enterprise")
+    st.title("🔐 VEER AI Login")
 
-    user = st.text_input("Username")
-    pwd = st.text_input("Password", type="password")
+    u = st.text_input("Username")
+    p = st.text_input("Password", type="password")
 
     if st.button("Login"):
 
-        if user in USERS and USERS[user] == pwd:
+        if u in USERS and USERS[u] == p:
 
-            st.session_state.logged_in = True
-            st.session_state.username = user
+            st.session_state.logged = True
+            st.session_state.user = u
             st.rerun()
 
         else:
-            st.error("Invalid Credentials")
+            st.error("Wrong credentials")
 
     st.stop()
 
 # ---------------- API ---------------- #
 
-genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+genai.configure(
+    api_key=st.secrets["GEMINI_API_KEY"]
+)
 
 model = genai.GenerativeModel("gemini-2.5-flash")
 
-# ---------------- SESSION ---------------- #
+# ---------------- STATES ---------------- #
 
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state.messages=[]
 
 if "voice" not in st.session_state:
-    st.session_state.voice = True
+    st.session_state.voice=True
 
 # ---------------- SIDEBAR ---------------- #
 
@@ -96,26 +104,42 @@ with st.sidebar:
 
     st.title("🤖 VEER AI")
 
-    st.success(f"Welcome {st.session_state.username}")
-
-    st.session_state.voice = st.toggle(
-        "🔊 Voice Response",
-        value=st.session_state.voice
+    st.success(
+        f"Welcome {st.session_state.user}"
     )
 
-    if st.button("🗑️ Clear Chat"):
-        st.session_state.messages = []
+    mode = st.selectbox(
+        "AI Personality",
+        [
+            "VEER",
+            "Jarvis",
+            "Teacher",
+            "Coder"
+        ]
+    )
+
+    st.session_state.voice = st.toggle(
+        "Voice Reply",
+        value=True
+    )
+
+    st.markdown("---")
+
+    if st.button("🗑️ New Chat"):
+        st.session_state.messages=[]
         st.rerun()
 
     if st.button("🚪 Logout"):
-        st.session_state.logged_in = False
+        st.session_state.logged=False
         st.rerun()
 
 # ---------------- TITLE ---------------- #
 
 st.title("🤖 VEER AI Enterprise")
 
-st.caption("Professional AI Assistant")
+st.caption(
+    "Next Generation Enterprise Assistant"
+)
 
 # ---------------- SPEAK ---------------- #
 
@@ -124,14 +148,15 @@ def speak(text):
     if not st.session_state.voice:
         return
 
-    text = text.replace("'", "").replace('"', '')
+    text=text.replace("'","")
 
-    js = f"""
+    js=f"""
     <script>
-    window.speechSynthesis.cancel();
-    let msg = new SpeechSynthesisUtterance(`{text}`);
+    speechSynthesis.cancel();
+
+    let msg=new SpeechSynthesisUtterance(`{text}`);
     msg.lang='hi-IN';
-    window.speechSynthesis.speak(msg);
+    speechSynthesis.speak(msg);
     </script>
     """
 
@@ -146,17 +171,52 @@ for m in st.session_state.messages:
 
 # ---------------- CHAT ---------------- #
 
-prompt = st.chat_input("Type your message...")
+prompt = st.chat_input(
+    "अनुराग सर, आदेश दें..."
+)
 
 if prompt:
 
-    st.session_state.messages.append({
-        "role":"user",
-        "content":prompt
-    })
+    st.session_state.messages.append(
+        {
+            "role":"user",
+            "content":prompt
+        }
+    )
 
     with st.chat_message("user"):
         st.markdown(prompt)
+
+    if mode=="Jarvis":
+
+        personality="""
+        तुम Jarvis हो।
+        futuristic style में बात करो।
+        """
+
+    elif mode=="Teacher":
+
+        personality="""
+        तुम expert teacher हो।
+        सरल भाषा में समझाओ।
+        """
+
+    elif mode=="Coder":
+
+        personality="""
+        तुम senior software engineer हो।
+        """
+
+    else:
+
+        personality="""
+        तुम VEER AI हो।
+        User का नाम अनुराग सर है।
+        हमेशा अनुराग सर कहकर संबोधित करो।
+        अगर पूछा जाए कि तुम्हें किसने बनाया,
+        तो जवाब दो:
+        'मुझे अनुराग सर ने बनाया है।'
+        """
 
     with st.chat_message("assistant"):
 
@@ -164,31 +224,23 @@ if prompt:
 
             try:
 
-                system_prompt = """
-                You are VEER AI.
-
-                Rules:
-                - User name is Anurag Sir.
-                - Always respect the user.
-                - Always answer in Hindi unless user asks otherwise.
-                - If asked who created you, answer:
-                  'मुझे अनुराग सर ने बनाया है।'
-                """
-
                 response = model.generate_content(
-                    f"{system_prompt}\nUser:{prompt}"
+                    personality + "\nUser:" + prompt
                 )
 
                 reply = response.text
 
             except Exception as e:
-                reply = f"Error : {e}"
+
+                reply = f"Error: {e}"
 
             st.markdown(reply)
 
-            st.session_state.messages.append({
-                "role":"assistant",
-                "content":reply
-            })
+            st.session_state.messages.append(
+                {
+                    "role":"assistant",
+                    "content":reply
+                }
+            )
 
             speak(reply)
