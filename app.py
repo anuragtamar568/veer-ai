@@ -8,7 +8,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# ================= AI ENGINE LOGIC (LIVE EXPERT CHAT) =================
+# ================= AI ENGINE LOGIC (LIVE GEMINI CHAT) =================
 def fetch_unlimited_response(prompt):
     # अब यह AI आपके साथ बिल्कुल नॉर्मल, स्मार्ट और मददगार दोस्त की तरह बात करेगा
     system_rules = (
@@ -20,33 +20,38 @@ def fetch_unlimited_response(prompt):
     
     try:
         # 🔒 Vault से सुरक्षित तरीके से की (Key) उठाना
-        api_key = st.secrets["OPENAI_API_KEY"]
+        api_key = st.secrets["GEMINI_API_KEY"]
         
-        url = "https://api.openai.com/v1/chat/completions"
+        # Gemini API End Point (gemini-2.5-flash मॉडल सबसे तेज़ और बेस्ट है)
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+        
         headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {api_key}"
+            "Content-Type": "application/json"
         }
         
+        # Gemini का ऑफिशियल स्ट्रक्चर्ड पेलोड
         payload = {
-            "model": "gpt-4o-mini",
-            "messages": [
-                {"role": "system", "content": system_rules},
-                {"role": "user", "content": prompt}
-            ],
-            "temperature": 0.7
+            "contents": [
+                {
+                    "parts": [
+                        {"text": f"System Instructions:\n{system_rules}\n\nUser Question:\n{prompt}"}
+                    ]
+                }
+            ]
         }
         
         response = requests.post(url, headers=headers, json=payload, timeout=15)
         
         if response.status_code == 200:
             data = response.json()
-            return data['choices'][0]['message']['content'].strip()
+            # Gemini के रिस्पॉन्स से टेक्स्ट को निकालना
+            ai_reply = data['candidates'][0]['content']['parts'][0]['text']
+            return ai_reply.strip()
         else:
-            return f"Anurag Sir, कनेक्शन में थोड़ी दिक्कत आ रही है (Error Code: {response.status_code})। कृपया एक बार बैकएंड सेटिंग्स चेक कर लें।"
+            return f"Anurag Sir, कनेक्शन में थोड़ी दिक्कत आ रही है (Error Code: {response.status_code})। कृपया एक बार बैकएंड सेटिंग्स या API Key चेक कर लें।"
             
     except KeyError:
-        return "Anurag Sir, बैकएंड में 'OPENAI_API_KEY' नहीं मिल पा रही है। कृपया अपनी secrets.toml फ़ाइल चेक करें।"
+        return "Anurag Sir, बैकएंड में 'GEMINI_API_KEY' नहीं मिल पा रही है। कृपया अपनी secrets.toml फ़ाइल चेक करें।"
     except Exception:
         return "Anurag Sir, नेटवर्क थोड़ा स्लो लग रहा है। कृपया एक बार फिर कोशिश करें।"
 
@@ -117,13 +122,13 @@ p, span, div, label, h1, h2, h3, h4, li { color: #00ff41 !important; font-family
 # ================= SIDEBAR =================
 with st.sidebar:
     st.markdown("# ⚡ VEER AI")
-    st.success("🔒 SECURE CONNECTION ACTIVE")
+    st.success("🔒 GEMINI SECURE ONLINE")
 
     st.markdown("""
     <div class="cyber-logo-card">
         <img class="cyber-logo-img" src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3Z0cmNvdWp6M214b29pYTdqM29scXFlZnN4ZXFpZWh0ZXN5MmswOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Y3bme762LLXbg4Mme6/giphy.gif" width="100" height="100">
         <h3 style="margin:0; letter-spacing: 2px;">V E E R</h3>
-        <span style="font-size:11px; opacity:0.8;">LIVE CORE v7.0</span>
+        <span style="font-size:11px; opacity:0.8;">GEMINI CORE v7.5</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -138,13 +143,13 @@ st.markdown("""
 <div class='cyber-card'>
 ## 🟢 SYSTEM STATUS : ONLINE<br>
 👤 USER : ANURAG SIR (CHIEF ARCHITECT)<br>
-🧠 ENGINE : PRIVATE LIVE GATEWAY (REAL CHAT ACTIVE)
+🧠 ENGINE : GOOGLE GEMINI INTELLIGENCE (REAL CHAT ACTIVE)
 </div>
 """, unsafe_allow_html=True)
 
 c1, c2 = st.columns(2)
 with c1: st.metric("💬 Total Chats", len(st.session_state.messages))
-with c2: st.metric("🛡️ Firewall Status", "SECURE")
+with c2: st.metric("🛡️ Gateway Status", "AUTHENTICATED 🔒")
 
 st.markdown("---")
 
@@ -155,7 +160,6 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 # ================= CHAT INPUT & LOGIC =================
-# यहाँ नीचे से मैंने पुरानी बोरिंग "ENTER COMMAND" हिंट को हटाकर नॉर्मल कर दिया है
 prompt = st.chat_input("यहाँ अपना सवाल लिखें, Anurag Sir...")
 
 if prompt:
