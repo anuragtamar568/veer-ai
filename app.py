@@ -1,110 +1,118 @@
 import streamlit as st
 import google.generativeai as genai
-from streamlit_mic_recorder import speech_to_text
 import streamlit.components.v1 as components
 from PIL import Image
-import numpy as np
-import cv2
-import os
-import time
 
-# 1. 🟢 MATRIX HACKER TERMINAL THEME CONFIGURATION
-st.set_page_config(page_title="VEER_OS // CORE_KERNEL", page_icon="🥷", layout="centered")
+# 1. ✨ CLEAN AND LIGHT PROFESSIONAL THEME
+st.set_page_config(page_title="VEER AI // ASSISTANT", page_icon="🤖", layout="centered")
 
 st.markdown("""
     <style>
-    /* पूरे बैकग्राउंड को डिजिटल मैट्रिक्स और डार्क हैकर थीम में बदलना */
-    [data-testid="stAppViewContainer"] {
-        background: linear-gradient(rgba(0, 5, 2, 0.94), rgba(0, 10, 5, 0.98)), 
-                    url("https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1400&auto=format&fit=crop") !important; 
-        background-size: cover !important; 
-        background-position: center !important; 
-        background-attachment: fixed !important;
+    /* पूरी तरह से साफ सफेद बैकग्राउंड */
+    .stApp {
+        background-color: #ffffff !important;
     }
-    
-    /* हैकर फोंट्स और ग्लोइंग इफेक्ट्स */
-    h1, h2, h3, p, span, label {
-        font-family: 'Courier New', Courier, monospace !important;
-    }
-    
     h1 {
-        color: #00ff66 !important; 
-        text-transform: uppercase; 
-        letter-spacing: 5px; 
-        text-shadow: 0 0 20px #00ff66, 0 0 40px #003311;
+        color: #2c3e50 !important;
         text-align: center;
+        font-family: sans-serif !important;
+        font-weight: 700;
     }
-    
-    .kernel-text {
-        color: #00d2ff !important; 
-        font-weight: bold; 
-        letter-spacing: 2px;
-        text-shadow: 0 0 10px #00d2ff;
-    }
-    
-    /* लॉक स्क्रीन टर्मिनल बॉक्स */
-    .lock-box { 
-        text-align: center; 
-        margin-top: 20px; 
-        padding: 25px;
-        border: 2px dashed #00ff66;
-        background-color: rgba(0, 15, 5, 0.85);
-        border-radius: 8px;
-        box-shadow: 0 0 30px rgba(0, 255, 102, 0.2);
-    }
-    
-    .status-alert { 
-        color: #ff3333 !important; 
-        font-size: 18px !important; 
-        font-weight: bold; 
-        letter-spacing: 3px; 
-        text-shadow: 0 0 10px #ff3333;
-        margin-bottom: 20px; 
-    }
-    
-    .status-success { 
-        color: #00ff66 !important; 
-        font-size: 18px !important; 
-        font-weight: bold; 
-        letter-spacing: 3px; 
-        text-shadow: 0 0 10px #00ff66;
-        margin-bottom: 20px; 
-    }
-
-    /* चैट मैसेजेस को टर्मिनल प्रॉम्प्ट जैसा बनाना */
-    div[data-testid="stChatMessage"] {
-        background-color: rgba(0, 10, 3, 0.9) !important; 
-        border: 1px solid #00ff66 !important; 
-        border-radius: 4px !important;
-        box-shadow: 0 0 10px rgba(0, 255, 102, 0.1);
-    }
-    div[data-testid="stChatMessage"] p, div[data-testid="stAppViewContainer"] p {
-        color: #00ff66 !important; 
-        font-size: 15px !important;
-    }
-    
-    /* बटन स्टाइलिंग */
-    .stButton>button {
-        background-color: transparent !important;
-        color: #00ff66 !important;
-        border: 1px solid #00ff66 !important;
-        border-radius: 4px !important;
-        transition: all 0.3s ease;
-    }
-    .stButton>button:hover {
-        background-color: #00ff66 !important;
+    .stChatMessage {
+        background-color: #f8f9fa !important;
+        border: 1px solid #dee2e6 !important;
+        border-radius: 10px !important;
         color: #000000 !important;
-        box-shadow: 0 0 15px #00ff66;
+    }
+    .stButton>button {
+        background-color: #007bff !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 6px;
+    }
+    p, span, label {
+        color: #2c3e50 !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# 2. डिजिटल वॉइस सिंथेसाइज़र
+# वॉइस इंजन (नेचुरल हिंदी स्पीच)
 def speak_natural(text):
     clean_text = text.replace('"', '').replace("'", "").replace("\n", " ")
-    js = f"""<script>
-        window.speechSynthesis.cancel(); 
-        var msg = new SpeechSynthesisUtterance('{clean_text}');
+    js = f"<script>window.speechSynthesis.cancel(); var msg = new SpeechSynthesisUtterance('{clean_text}'); msg.lang = 'hi-IN'; window.speechSynthesis.speak(msg);</script>"
+    components.html(js, height=0)
+
+# API कॉन्फ़िगरेशन Check
+if "GEMINI_API_KEY" in st.secrets and st.secrets["GEMINI_API_KEY"].strip():
+    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+else:
+    st.error("API Key नहीं मिली। कृपया Streamlit Cloud के Secrets में GEMINI_API_KEY जोड़ें।")
+    st.stop()
+
+# Session State की शुरुआत
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
+st.title("🤖 वीर AI असिस्टेंट")
+
+# चैट क्लियर करने का बटन
+if st.button("🗑️ क्लियर चैट"):
+    st.session_state.chat_history = []
+    st.rerun()
+
+# --- कैमरा और फाइल इनपुट सेक्शन (सिर्फ ऑब्जेक्ट एनालिसिस के लिए) ---
+st.write("### 👁️ वीर की आँख (ऑब्जेक्ट डिटेक्शन)")
+input_mode = st.radio("इनपुट का तरीका चुनें:", ["📷 लाइव कैमरा", "📁 फोटो अपलोड करें"])
+active_image = None
+
+if input_mode == "📷 लाइव कैमरा":
+    cam_shot = st.camera_input("कैमरे के सामने टारगेट ऑब्जेक्ट लाएं और कैप्चर करें सर:")
+    if cam_shot:
+        active_image = Image.open(cam_shot)
+else:
+    uploaded_image = st.file_uploader("गैलरी से फोटो चुनें...", type=["jpg", "jpeg", "png"])
+    if uploaded_image:
+        active_image = Image.open(uploaded_image)
+
+# --- चैट इनपुट बॉक्स ---
+text_input = st.chat_input("अनुराग सर, यहाँ अपना सवाल लिखें...")
+
+# पहले की चैट स्क्रीन पर दिखाना
+for chat in st.session_state.chat_history:
+    if "role" in chat and "content" in chat:
+        with st.chat_message(chat["role"]):
+            st.write(chat["content"])
+
+# जेमिनी रिस्पॉन्स लॉजिक
+if text_input:
+    # यूजर का सवाल चैट में जोड़ें
+    st.session_state.chat_history.append({"role": "user", "content": text_input})
+    with st.chat_message("user"):
+        st.write(text_input)
+
+    # वीर (AI) का जवाब
+    with st.chat_message("assistant"):
+        with st.spinner("वीर सोच रहा है..."):
+            try:
+                model = genai.GenerativeModel("gemini-2.0-flash")
+                sys_prompt = "तुम वीर (VEER AI) हो, जिसे तुम्हारे मालिक अनुराग सर ने बनाया है। हमेशा अनुराग सर को सम्मान देते हुए हिंदी में संक्षिप्त और सटीक जवाब दो।"
+                
+                if active_image:
+                    response = model.generate_content([sys_prompt, active_image, text_input])
+                else:
+                    response = model.generate_content([sys_prompt, text_input])
+                
+                reply = response.text
+                st.write(reply)
+                
+                # चैट हिस्ट्री अपडेट करें
+                st.session_state.chat_history.append({"role": "assistant", "content": reply})
+                
+                # आवाज चालू करें
+                speak_natural(reply)
+                
+            except Exception as e:
+                st.write("क्षमा करें अनुराग सर, सर्वर से जुड़ने में कोई दिक्कत आई है।")
         msg.lang = 'hi-IN';
         msg.pitch = 0.9; /* थोड़ी भारी, रोबोटिक हैकर आवाज़ के लिए */
         msg.rate = 1.0;
