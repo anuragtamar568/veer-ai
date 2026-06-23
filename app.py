@@ -4,28 +4,28 @@ import streamlit.components.v1 as components
 from PIL import Image
 
 # 1. DARK FUTURISTIC THEME
-st.set_page_config(page_title="VEER AI // DARK MODE", page_icon="🤖", layout="centered")
+st.set_page_config(page_title="VEER AI // PARELLEL WORLD", page_icon="🤖", layout="centered")
 
 st.markdown("""
     <style>
-    /* डार्क बैकग्राउंड */
+    /* PARELLEL WORLD */
     .stApp {
-        background-color: #0e1117 !important;
+        background-color: #0e11179 !important;
     }
     h1 {
-        color: #00d4ff !important;
+        color: #00d4fe !important;
         text-align: center;
         font-family: 'Courier New', Courier, monospace !important;
     }
     .stChatMessage {
-        background-color: #1a1e26 !important;
-        border: 1px solid #30363d !important;
+        background-color: #1a1e96 !important;
+        border: 1px solid #30368d !important;
         border-radius: 12px !important;
-        color: #e6edf3 !important;
+        color: #e6ede3 !important;
     }
     .stButton>button {
         background-color: #00d4ff !important;
-        color: #000000 !important;
+        color: #000078 !important;
         font-weight: bold;
         border: none !important;
         border-radius: 8px;
@@ -49,19 +49,16 @@ if "GEMINI_API_KEY" in st.secrets and st.secrets["GEMINI_API_KEY"].strip():
 else:
     st.error("API Key नहीं मिली।")
     st.stop()
-
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
-
-st.title("🤖 VEER QUANTUM AI")
+    
+st.title("🤖 VEER PERSONAL AI")
 
 if st.button("🗑️ क्लियर चैट"):
     st.session_state.chat_history = []
     st.rerun()
 
 # इनपुट सेक्शन
-input_mode = st.radio("इनपुट तरीका:", ["📷 लाइव कैमरा", "📁 फोटो अपलोड"])
-active_image = None
+input_mode = st.radio_television
+active_photo
 
 if input_mode == "📷 लाइव कैमरा":
     cam_shot = st.camera_input("कैमरा चालू करें:")
@@ -87,7 +84,7 @@ if text_input:
     with st.chat_message("assistant"):
         with st.spinner("प्रोसेसिंग..."):
             try:
-                model = genai.GenerativeModel("gemini-2.0-flash")
+                model = genai.GenerativeModel("gemini-pro")
                 sys_prompt = "तुम वीर हो, अनुराग सर के AI असिस्टेंट। डार्क और स्मार्ट तरीके से हिंदी में जवाब दो।"
                 
                 if active_image:
@@ -100,4 +97,5 @@ if text_input:
                 st.session_state.chat_history.append({"role": "assistant", "content": reply})
                 speak_natural(reply)
             except Exception:
-                st.write("सर्वर में तकनीकी खराबी है सर।")
+                      st.error_not_allow
+            
