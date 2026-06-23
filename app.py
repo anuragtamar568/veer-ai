@@ -8,59 +8,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# ================= ADVANCED MODE TABS =================
-# ऐप के सबसे ऊपर हैकर और टीचर मोड के टैब बनाए गए हैं
-selected_mode = st.tabs(["🟢 HACKER MODE", "📚 TEACHER MODE"])
-
-# ================= AI ENGINE LOGIC =================
-def fetch_unlimited_response(prompt, mode):
-    # एआई को यह पता है कि उसे अनुराग सर ने ही बनाया है
-    if mode == "Hacker":
-        system_rules = (
-            "You are VEER AI, a highly advanced cyber core intelligence and a friendly hacker-style collaborator. "
-            "You were created and developed by 'Anurag Sir' (who is your Chief Architect). "
-            "The user talking to you is Anurag Sir. Always address him respectfully as 'Anurag Sir'. "
-            "If anyone asks who created you or who made you, proudly state that you were designed and engineered by Anurag Sir. "
-            "Answer naturally, with clear formatting and a cool, helpful tone in Hindi or Hinglish."
-        )
-    else:  # Teacher Mode
-        system_rules = (
-            "You are VEER AI in Teacher Mode. You are an extremely wise, patient, and knowledgeable educator. "
-            "You were created and developed by your brilliant student and Chief Architect 'Anurag Sir'. "
-            "The user is Anurag Sir. Always address him respectfully as 'Anurag Sir'. "
-            "If anyone asks about your creator, explain with respect that Anurag Sir engineered you. "
-            "Answer academic questions beautifully, clearly, breaking concepts down simply in Hindi/Hinglish like a professional teacher."
-        )
-    
-    try:
-        api_key = st.secrets["GEMINI_API_KEY"]
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
-        
-        headers = {"Content-Type": "application/json"}
-        payload = {
-            "contents": [
-                {
-                    "parts": [
-                        {"text": f"System Instructions:\n{system_rules}\n\nUser Question:\n{prompt}"}
-                    ]
-                }
-            ]
-        }
-        
-        response = requests.post(url, headers=headers, json=payload, timeout=15)
-        
-        if response.status_code == 200:
-            data = response.json()
-            ai_reply = data['candidates'][0]['content']['parts'][0]['text']
-            return ai_reply.strip()
-        else:
-            return f"Anurag Sir, कनेक्शन में थोड़ी दिक्कत आ रही है (Error Code: {response.status_code})।"
-            
-    except KeyError:
-        return "Anurag Sir, बैकएंड में 'GEMINI_API_KEY' नहीं मिल पा रही है। कृपया अपनी secrets.toml फ़ाइल चेक करें।"
-    except Exception:
-        return "Anurag Sir, नेटवर्क थोड़ा धीमा है। कृपया फिर से कोशिश करें।"
-
 # ================= SESSION STATE =================
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -91,20 +38,7 @@ header { visibility: hidden; }
 }
 [data-testid="stSidebar"] * { color: #00ff41 !important; }
 
-/* Tabs Styling */
-div[data-testid="stTabs"] button {
-    color: #00ff41 !important;
-    font-size: 18px !important;
-    font-weight: bold !important;
-    font-family: 'Courier New', Consolas, monospace !important;
-    border: 1px solid transparent !important;
-}
-div[data-testid="stTabs"] button[aria-selected="true"] {
-    border: 1px solid #00ff41 !important;
-    box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
-    background: rgba(0, 255, 65, 0.05) !important;
-}
-
+/* Cyber Boxes with Neon Lighting */
 .cyber-logo-card {
     background: rgba(0, 255, 65, 0.03);
     border: 2px solid #00ff41;
@@ -145,6 +79,12 @@ div[data-testid="stTabs"] button[aria-selected="true"] {
     box-shadow: 0 0 20px rgba(0, 255, 65, 0.4) !important;
 }
 
+/* Radio Button Styling for Cyber Look */
+div[data-testid="stRadio"] > label {
+    font-weight: bold !important;
+    color: #00ff41 !important;
+}
+
 .stButton button { 
     width: 100%; background: #000000; color: #00ff41; border: 2px solid #00ff41; border-radius: 8px;
     font-weight: bold; transition: all 0.3s ease;
@@ -157,7 +97,7 @@ p, span, div, label, h1, h2, h3, h4, li {
 </style>
 """, unsafe_allow_html=True)
 
-# ================= SIDEBAR =================
+# ================= SIDEBAR (CORE CONTROL) =================
 with st.sidebar:
     st.markdown("# ⚡ VEER AI")
     st.success("🔒 MULTI-CORE PIPELINE ACTIVE")
@@ -166,77 +106,105 @@ with st.sidebar:
     <div class="cyber-logo-card">
         <img class="cyber-logo-img" src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3Z0cmNvdWp6M214b29pYTdqM29scXFlZnN4ZXFpZWh0ZXN5MmswOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Y3bme762LLXbg4Mme6/giphy.gif" width="110" height="110">
         <h3 style="margin:0; letter-spacing: 3px;">V E E R</h3>
-        <span style="font-size:11px; opacity:0.8;">MULTI-CORE v9.0</span>
+        <span style="font-size:11px; opacity:0.8;">CORE EDITION v9.0</span>
     </div>
     """, unsafe_allow_html=True)
 
+    st.markdown("---")
+    
+    # 🎛️ यहाँ से मोड कंट्रोल होगा बिना किसी सिंटैक्स एरर के
+    selected_mode = st.radio(
+        "🧠 CHOOSE SYSTEM CORE MODULE:",
+        ["🟢 HACKER MODE", "📚 TEACHER MODE"]
+    )
+    
     st.markdown("---")
     if st.button("🗑️ CLEAR SYSTEM MEMORY"):
         st.session_state.messages = []
         st.rerun()
 
+# ================= AI ENGINE LOGIC =================
+def fetch_unlimited_response(prompt, mode):
+    if "HACKER" in mode:
+        system_rules = (
+            "You are VEER AI, a highly advanced cyber core intelligence and a friendly hacker-style collaborator. "
+            "You were created and developed by 'Anurag Sir' (who is your Chief Architect). "
+            "The user talking to you is Anurag Sir. Always address him respectfully as 'Anurag Sir'. "
+            "If anyone asks who created you or who made you, proudly state that you were designed and engineered by Anurag Sir. "
+            "Answer naturally, with clear formatting and a cool, helpful tone in Hindi or Hinglish."
+        )
+    else:  # Teacher Mode
+        system_rules = (
+            "You are VEER AI in Teacher Mode. You are an extremely wise, patient, and knowledgeable educator. "
+            "You were created and developed by your brilliant student and Chief Architect 'Anurag Sir'. "
+            "The user is Anurag Sir. Always address him respectfully as 'Anurag Sir'. "
+            "If anyone asks about your creator, explain with respect that Anurag Sir engineered you. "
+            "Answer academic questions beautifully, clearly, breaking concepts down simply in Hindi/Hinglish like a professional teacher."
+        )
+    
+    try:
+        api_key = st.secrets["GEMINI_API_KEY"]
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+        
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "contents": [
+                {
+                    "parts": [
+                        {"text": f"System Instructions:\n{system_rules}\n\nUser Question:\n{prompt}"}
+                    ]
+                }
+            ]
+        }
+        
+        response = requests.post(url, headers=headers, json=payload, timeout=15)
+        
+        if response.status_code == 200:
+            data = response.json()
+            return data['candidates'][0]['content']['parts'][0]['text'].strip()
+        else:
+            return f"Anurag Sir, कनेक्शन में थोड़ी दिक्कत आ रही है (Error Code: {response.status_code})।"
+            
+    except KeyError:
+        return "Anurag Sir, बैकएंड में 'GEMINI_API_KEY' नहीं मिल पा रही है। कृपया अपनी secrets.toml फ़ाइल चेक करें।"
+    except Exception:
+        return "Anurag Sir, नेटवर्क थोड़ा धीमा है। कृपया फिर से कोशिश करें।"
+
 # ================= MAIN RENDERING =================
 st.markdown("<h1 class='main-title'>⚡ VEER AI // CORE INTERFACE ⚡</h1>", unsafe_allow_html=True)
 
-# 1. HACKER MODE TAB
-with selected_mode[0]:
-    st.markdown("""
-    <div class='cyber-card'>
-        <h3 style='margin-top:0; color:#00ff41;'>[ HACKER MODE PARAMETERS ]</h3>
-        • USER : ANURAG SIR (CHIEF ARCHITECT)<br>
-        • CREATOR : ANURAG SIR<br>
-        • CORE : CYBER INTEL SYSTEM ACTIVE
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Chat History
-    for msg in st.session_state.messages:
-        avatar = "👤" if msg["role"] == "user" else "🤖"
-        with st.chat_message(msg["role"], avatar=avatar):
-            st.markdown(msg["content"])
+# वर्तमान में एक्टिव मोड का स्टेटस कार्ड
+st.markdown(f"""
+<div class='cyber-card'>
+    <h3 style='margin-top:0; color:#00ff41;'>[ {selected_mode} CURRENT SYSTEM PARAMETERS ]</h3>
+    • USER : ANURAG SIR (CHIEF ARCHITECT)<br>
+    • CREATOR : ANURAG SIR<br>
+    • MODULE STATUS : SECURED & LIVE
+</div>
+""", unsafe_allow_html=True)
 
-    # Input Box for Hacker Mode
-    prompt = st.chat_input("यहाँ अपना हैकर कमांड या सवाल लिखें, Anurag Sir...", key="hacker_input")
-    if prompt:
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        st.rerun()
+# Chat History Display
+for msg in st.session_state.messages:
+    avatar = "👤" if msg["role"] == "user" else ("🤖" if "HACKER" in selected_mode else "👨‍🏫")
+    with st.chat_message(msg["role"], avatar=avatar):
+        st.markdown(msg["content"])
 
-# 2. TEACHER MODE TAB
-with selected_mode[1]:
-    st.markdown("""
-    <div class='cyber-card'>
-        <h3 style='margin-top:0; color:#00ff41;'>[ TEACHER MODE ACTIVE ]</h3>
-        • ARCHITECT : ANURAG SIR<br>
-        • MISSION : KNOWLEDGE & STUDY ASSISTANCE<br>
-        • STATUS : READY TO TEACH
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Chat History
-    for msg in st.session_state.messages:
-        avatar = "👤" if msg["role"] == "user" else "👨‍🏫"
-        with st.chat_message(msg["role"], avatar=avatar):
-            st.markdown(msg["content"])
+# ================= CHAT INPUT & LOGIC =================
+input_hint = "यहाँ अपना हैकर कमांड लिखें, Anurag Sir..." if "HACKER" in selected_mode else "कोई भी पढ़ाई का सवाल पूछें, Anurag Sir..."
+prompt = st.chat_input(input_hint)
 
-    # Input Box for Teacher Mode
-    prompt = st.chat_input("कोई भी पढ़ाई का सवाल पूछें, Anurag Sir...", key="teacher_input")
-    if prompt:
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        st.rerun()
-
-# ================= API RESPONSE TRIGGER =================
-# अगर नया मैसेज आया है तो आखिरी मैसेज का जवाब जेनरेट करें
-if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
-    last_prompt = st.session_state.messages[-1]["content"]
-    
-    # चेक करें कि यूजर इस वक्त किस टैब/मोड पर है
-    # Streamlit में एक्टिव टैब का पता लगाने के लिए हम इनपुट की की (key) के हिसाब से मोड तय करेंगे
-    current_mode = "Teacher" if st.as_穩定_internal_state if "teacher_input" in st.context else "Hacker"
-    
-    # असल में आसान तरीका है कि हम सेशन स्टेट या सिंपल कंडीशन से डिटेक्ट करें
-    # यहाँ हम डिफ़ॉल्ट रूप से एक्टिव विजेट से मोड उठा लेंगे
-    with st.chat_message("assistant", avatar="🤖"):
-        with st.spinner("⚡ PROCESSING DATA..."):
-            reply = fetch_unlimited_response(last_prompt, mode=current_mode)
-            st.session_state.messages.append({"role": "assistant", "content": reply})
-            st.rerun()
+if prompt:
+    # 1. यूजर का मैसेज सेव करें और दिखाएं
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user", avatar="👤"):
+        st.markdown(prompt)
+        
+    # 2. AI का रिस्पॉन्स जनरेट करें
+    with st.chat_message("assistant", avatar="🤖" if "HACKER" in selected_mode else "👨‍🏫"):
+        with st.spinner("⚡ PROCESSING LOGS..."):
+            reply = fetch_unlimited_response(prompt, selected_mode)
+            st.markdown(reply)
+            
+    # 3. AI का मैसेज हिस्ट्री में सेव करें और पेज रीलोड करें
+    st.session_state.messages.append({"role": "assistant", "content": reply})
+    st.rerun()
