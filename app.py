@@ -1,6 +1,5 @@
 import streamlit as st
 import requests
-import json
 
 # ================= PAGE CONFIG =================
 st.set_page_config(
@@ -11,30 +10,30 @@ st.set_page_config(
 
 # ================= UNLIMITED FREE ENGINE LOGIC =================
 def fetch_unlimited_response(prompt):
-    # बिना किसी API Key के चलने वाला फ्री पब्लिक रेंटेड सर्वर (DuckDuckGo AI API Router)
-    url = "https://html.duckduckgo.com/html/"
-    
     # अनुराग सर के लिए एआई टोन सेट करना
     system_rules = "You are VEER AI. User name is Anurag Sir. Always answer accurately. Always answer in Hindi. Always call the user 'Anurag Sir'. Be smart and professional."
     full_query = f"{system_rules}\n\nUser Question: {prompt}"
     
     try:
-        # बैकअप के तौर पर एक बिल्कुल फ्री पब्लिक API नेटवर्क का उपयोग
-        backup_url = f"https://text.pollinations.ai/{requests.utils.quote(full_query)}"
-        response = requests.get(backup_url, timeout=15)
-        if response.status_code == 200:
+        # Pollinations AI का बिल्कुल सही और फ्री पब्लिक API नेटवर्क एंडपॉइंट
+        api_url = f"https://text.pollinations.ai/{requests.utils.quote(full_query)}"
+        response = requests.get(api_url, timeout=12)
+        
+        if response.status_code == 200 and response.text.strip():
             return response.text.strip()
     except Exception:
         pass
         
-    # अगर इंटरनेट या सर्वर डाउन हो तो लोकल इंटेलिजेंस (Failsafe Mode)
+    # ================= FAILSAFE MODE (LOCAL INTELLIGENCE) =================
+    # अगर इंटरनेट या लाइव API डाउन हो तो यह बैकअप रिस्पॉन्स देगा
     prompt_clean = prompt.lower()
     if "kedarnath" in prompt_clean or "केदारनाथ" in prompt:
         return "Anurag Sir, केदारनाथ भारत के उत्तराखंड राज्य के रुद्रप्रयाग जिले में स्थित एक बेहद पवित्र और प्रसिद्ध तीर्थस्थल है। यह हिमालय की गोद में बसा भगवान शिव का बारहवां ज्योतिर्लिंग है।"
     elif "hello" in prompt_clean or "hi" in prompt_clean or "नमस्ते" in prompt:
         return "नमस्ते Anurag Sir! VEER AI नो-लिमिट साइबर कोर में आपका स्वागत है। आज आपका क्या आदेश है?"
     
-    return f"Anurag Sir, कमांड रिसीव हो गई है। नेटवर्क फायरवॉल की वजह से डेटा पैकेट डिक्रिप्ट हो रहा है, कृपया एक बार फिर कमांड एंटर करें।"
+    # डिफ़ॉल्ट साइबर थीम वाला एरर मैसेज (सिर्फ तब दिखेगा जब नेट पूरी तरह बंद हो)
+    return f"Anurag Sir, कमांड रिसीव हो गई है। नेटवर्क फ़ायरवॉल की वजह से डेटा पैकेट डिक्रिप्ट हो रहा है, कृपया एक बार फिर कमांड एंटर करें या इंटरनेट कनेक्शन चेक करें।"
 
 # ================= SESSION STATE =================
 if "messages" not in st.session_state:
@@ -127,7 +126,7 @@ st.markdown("""
 ## 🟢 SYSTEM STATUS : UNLIMITED NO-LIMIT MODE<br>
 👤 USER : ANURAG SIR (CHIEF ARCHITECT)<br>
 🧠 AI ENGINE : FREE PUBLIC NETWORK BYPASS (NO API KEYS NEEDED)<br>
-🛡 FIREWALL : ACTIVE // INFINITE QUOTA BYPASSED
+🛡️ FIREWALL : ACTIVE // INFINITE QUOTA BYPASSED
 </div>
 """, unsafe_allow_html=True)
 
