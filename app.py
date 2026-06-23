@@ -126,7 +126,7 @@ with st.sidebar:
     st.markdown("# ⚡ VEER AI")
     st.success("🟢 CYBER CORE ONLINE")
 
-    # आपका नया रोबोट लोगो यहाँ फिक्स है
+    # एनिमेटेड रोबोट लोगो कार्ड
     st.markdown("""
     <div class="cyber-logo-card">
         <div class="cyber-logo-text">🤖</div>
@@ -180,8 +180,10 @@ with c3:
 st.markdown("---")
 
 # ================= CHAT HISTORY DISPLAY =================
+# यहाँ avatar पैरामीटर जोड़कर टेक्स्ट लेबल्स को इमोजी में बदल दिया गया है
 for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
+    custom_avatar = "👤" if msg["role"] == "user" else "🤖"
+    with st.chat_message(msg["role"], avatar=custom_avatar):
         st.markdown(msg["content"])
 
 # ================= CHAT INPUT & LOGIC =================
@@ -189,17 +191,16 @@ prompt = st.chat_input(">>> ENTER COMMAND")
 
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
+    with st.chat_message("user", avatar="👤"):
         st.markdown(prompt)
 
-    with st.chat_message("assistant"):
+    with st.chat_message("assistant", avatar="🤖"):
         with st.spinner("⚡ ACCESSING CYBER CORE..."):
             try:
                 # सीधे लाइव जेमिनी इंजन से वास्तविक जवाब मंगाया जा रहा है
                 response = model.generate_content(prompt)
                 reply = response.text
             except Exception as e:
-                # कोटा ओवरलोड होने पर यूज़र-फ्रेंडली रिपलाई
                 if "429" in str(e) or "ResourceExhausted" in str(e):
                     reply = "Anurag Sir, मुख्य सर्वर ओवरलोड (API Limit Exceeded) हो गया है। कृपया कोर को रीस्टार्ट होने के लिए 1 मिनट का समय दें और पुनः प्रयास करें।"
                 else:
