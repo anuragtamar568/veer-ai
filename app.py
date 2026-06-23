@@ -6,8 +6,8 @@ import random
 
 # ================= PAGE CONFIG =================
 st.set_page_config(
-    page_title="VEER AI // OS V4.0_PRO",
-    page_icon="⚡",
+    page_title="VEER AI // MATRIX OS V5.0_PRO",
+    page_icon="🤖",
     layout="wide"
 )
 
@@ -32,74 +32,114 @@ if st.session_state.authenticated:
         st.rerun()
     st.session_state.last_activity = current_time
 
-# ================= MATRIX/CYBERPUNK GLOW CSS =================
+# ================= PREMIUM CYBER-GLOW, GLITCH & NEON BOXES CSS =================
 st.markdown("""
 <style>
+/* AI Specialist Immersive Background */
 .stApp {
-    background: linear-gradient(rgba(0, 8, 0, 0.94), rgba(0, 0, 0, 0.98)), 
+    background: linear-gradient(rgba(0, 15, 5, 0.93), rgba(0, 0, 0, 0.97)), 
                 url('https://unsplash.com') no-repeat center center fixed;
     background-size: cover;
 }
 header { visibility: hidden; }
 footer { visibility: hidden; }
 
+/* Glowing & Shining Letters Animation */
 .main-title {
     text-align: center;
-    font-size: 50px;
+    font-size: 55px;
     font-weight: 900;
     color: #00ff41;
-    text-shadow: 0 0 10px #00ff41, 0 0 25px #00ff41;
     font-family: 'Courier New', Consolas, monospace !important;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41, 0 0 40px #00ff22;
+    animation: neonShine 1.5s infinite alternate;
 }
 
+@keyframes neonShine {
+    0% {
+        text-shadow: 0 0 5px #00ff41, 0 0 10px #00ff41, 0 0 20px #00ff22;
+        color: #00ff41;
+    }
+    100% {
+        text-shadow: 0 0 15px #00ff41, 0 0 30px #00ff41, 0 0 50px #00ff22, 0 0 70px #00ff41;
+        color: #ffffff; /* Subtle text shine switch */
+    }
+}
+
+/* Glassmorphism Cyber-Sidebar */
 [data-testid="stSidebar"] {
-    background: rgba(0, 5, 0, 0.97) !important;
-    border-right: 2px solid #00ff41;
-    box-shadow: 5px 0 15px rgba(0, 255, 65, 0.1);
+    background: rgba(0, 8, 3, 0.96) !important;
+    border-right: 3px solid #00ff41 !important;
+    box-shadow: 10px 0 30px rgba(0, 255, 65, 0.2) !important;
 }
 [data-testid="stSidebar"] * { color: #00ff41 !important; }
 
+/* Rigid Neon Cyber Boxes */
 .cyber-card {
-    background: rgba(0, 15, 0, 0.88);
+    background: rgba(0, 12, 4, 0.85);
     border: 2px solid #00ff41;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+    border-radius: 4px; /* Sharp corners for military hacker terminal style */
+    padding: 22px;
+    margin-bottom: 25px;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.2), inset 0 0 12px rgba(0, 255, 65, 0.15);
+    backdrop-filter: blur(5px);
 }
 
+/* Sharp Chat Boxes with Inner Glow */
 .stChatMessage {
-    background: rgba(0, 12, 0, 0.9) !important;
-    border-left: 4px solid #00ff41 !important;
-    border-top: 1px solid rgba(0,255,65,0.3) !important;
-    border-bottom: 1px solid rgba(0,255,65,0.3) !important;
-    border-right: 1px solid rgba(0,255,65,0.3) !important;
-    border-radius: 8px !important;
-    margin-bottom: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    background: rgba(0, 8, 2, 0.92) !important;
+    border: 2px solid rgba(0, 255, 65, 0.5) !important;
+    border-left: 6px solid #00ff41 !important;
+    border-radius: 4px !important;
+    margin-bottom: 16px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.7), 0 0 10px rgba(0, 255, 65, 0.1);
+    transition: all 0.3s ease;
 }
 
+.stChatMessage:hover {
+    border-color: #00ff41 !important;
+    box-shadow: 0 5px 25px rgba(0, 255, 65, 0.25);
+}
+
+/* Highly Interactive Cyber Input Box */
 [data-testid="stChatInput"] {
-    border: 2px solid #00ff41 !important;
-    border-radius: 8px !important;
-    background-color: #000000 !important;
-    box-shadow: 0 0 25px rgba(0, 255, 65, 0.3) !important;
+    border: 2px solid rgba(0, 255, 65, 0.7) !important;
+    border-radius: 4px !important;
+    background-color: #000300 !important;
+    box-shadow: 0 0 35px rgba(0, 255, 65, 0.3) !important;
+    transition: all 0.3s ease;
 }
 
+[data-testid="stChatInput"]:focus-within {
+    border-color: #00ff41 !important;
+    box-shadow: 0 0 45px rgba(0, 255, 65, 0.5) !important;
+}
+
+/* Passcode Terminal Input Box */
 input[type="password"] {
-    background-color: #000000 !important;
+    background-color: #000500 !important;
     color: #00ff41 !important;
     border: 2px solid #00ff41 !important;
-    box-shadow: 0 0 20px rgba(0, 255, 65, 0.4) !important;
-    font-size: 26px !important;
-    letter-spacing: 12px !important;
+    box-shadow: 0 0 30px rgba(0, 255, 65, 0.4) !important;
+    font-size: 30px !important;
+    letter-spacing: 15px !important;
     text-align: center !important;
+    border-radius: 4px !important;
 }
 
-p, span, div, label, h1, h2, h3, h4, li, small { 
+/* Custom Webkit Matrix Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #000000; }
+::-webkit-scrollbar-thumb { background: #00ff41; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #00cc33; }
+
+/* Global Fonts & Shining Controls */
+p, span, div, label, h1, h2, h3, h4, li, small, button { 
     color: #00ff41 !important; 
     font-family: 'Courier New', Consolas, monospace !important; 
+    text-shadow: 0 0 2px rgba(0, 255, 65, 0.5);
 }
 </style>
 """, unsafe_allow_html=True)
@@ -112,8 +152,8 @@ if not st.session_state.authenticated:
     with col2:
         st.markdown("""
         <div class='cyber-card' style='text-align: center;'>
-            <h3 style='margin-top:0;'>[ MAIN CORE ACCESS REQUIRED ]</h3>
-            <small style='opacity: 0.8;'>SECURITY TERMINAL FOR ANURAG SIR</small>
+            <h3 style='margin-top:0; letter-spacing: 1px;'>[ MAIN CORE ACCESS REQUIRED ]</h3>
+            <small style='opacity: 0.9; color: #ffffff !important; text-shadow: 0 0 5px #00ff41;'>SECURITY TERMINAL FOR ANURAG SIR</small>
         </div>
         """, unsafe_allow_html=True)
         
@@ -135,7 +175,7 @@ if not st.session_state.authenticated:
 else:
     # --- SIDEBAR & DIAGNOSTICS ---
     with st.sidebar:
-        st.markdown("# ⚡ VEER AI OS V4")
+        st.markdown("<h2 style='text-shadow: 0 0 10px #00ff41;'>⚡ VEER AI OS V5</h2>", unsafe_allow_html=True)
         st.success("👤 OWNER: ANURAG SIR")
         st.markdown("---")
         
@@ -212,36 +252,8 @@ else:
             return "Anurag Sir, पैकेट ट्रांसफर टाइमआउट हो गया है। (Server Timeout)"
 
     # --- MAIN CONSOLE RENDER ---
-    st.markdown("<h1 class='main-title'>⚡ VEER AI // MAIN CORE</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='main-title'>⚡ VEER AI // MAIN CORE ⚡</h1>", unsafe_allow_html=True)
 
     st.markdown(f"""
     <div class='cyber-card'>
-        <span style='color:#00ff41; font-weight:bold;'>[ ACTIVE SHIELD: {selected_mode} ]</span><br>
-        <small>SECURE COUPLING ACCESSED BY OWNER // ENCRYPTION KEY: AES-256</small>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Render Chat History
-    for msg in st.session_state.messages:
-        avatar = "👤" if msg["role"] == "user" else ("🤖" if "HACKER" in selected_mode else "👨‍🏫")
-        with st.chat_message(msg["role"], avatar=avatar):
-            st.markdown(msg["content"])
-
-    # Chat Input Command
-    input_hint = "Execute hacker query, Anurag Sir..." if "HACKER" in selected_mode else "Ask educational terminal, Anurag Sir..."
-    prompt = st.chat_input(input_hint)
-
-    if prompt:
-        # Save user query
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user", avatar="👤"):
-            st.markdown(prompt)
-            
-        # Get and save AI response with full chat history context
-        with st.chat_message("assistant", avatar="🤖" if "HACKER" in selected_mode else "👨‍🏫"):
-            with st.spinner("⚡ DECRYPTING SYSTEM RESPONSES..."):
-                reply = fetch_smart_response(prompt, selected_mode, st.session_state.messages[:-1])
-                st.markdown(reply)
-                
-        st.session_state.messages.append({"role": "assistant", "content": reply})
-        st.rerun()
+        <span style='color:#ffffff !important; font-weight:bold; text-shadow: 0 0 8px #00ff41;'>[ ACTIVE SHIELD: {selected_mode} ]</span><br>
