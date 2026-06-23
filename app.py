@@ -8,26 +8,28 @@ st.set_page_config(
     layout="wide"
 )
 
-# ================= AI ENGINE LOGIC (WITH SECURE OPENAI API) =================
+# ================= AI ENGINE LOGIC (LIVE EXPERT CHAT) =================
 def fetch_unlimited_response(prompt):
-    # अनुराग सर के लिए एआई टोन सेट करना
-    system_rules = "You are VEER AI. User name is Anurag Sir. Always answer accurately. Always answer in Hindi. Always call the user 'Anurag Sir'. Be smart, professional, and act as a highly advanced cyber core intelligence."
+    # अब यह AI आपके साथ बिल्कुल नॉर्मल, स्मार्ट और मददगार दोस्त की तरह बात करेगा
+    system_rules = (
+        "You are VEER AI, a helpful, intelligent, and friendly AI collaborator. "
+        "The user's name is Anurag Sir. Always address him respectfully as 'Anurag Sir'. "
+        "Answer naturally, with clear formatting and a helpful tone in Hindi (or Hinglish if appropriate). "
+        "Do not show any hacker prank errors or fake system errors. Act as a real assistant."
+    )
     
     try:
-        # 🔒 st.secrets से की (Key) को सुरक्षित तरीके से लोड करना
+        # 🔒 Vault से सुरक्षित तरीके से की (Key) उठाना
         api_key = st.secrets["OPENAI_API_KEY"]
         
-        # OpenAI Chat Completions End Point
         url = "https://api.openai.com/v1/chat/completions"
-        
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {api_key}"
         }
         
-        # OpenAI के स्टैंडर्ड फॉर्मेट में पेलोड
         payload = {
-            "model": "gpt-4o-mini",  # आप अपनी पसंद का मॉडल (जैसे gpt-4o) यहाँ बदल सकते हैं
+            "model": "gpt-4o-mini",
             "messages": [
                 {"role": "system", "content": system_rules},
                 {"role": "user", "content": prompt}
@@ -39,124 +41,110 @@ def fetch_unlimited_response(prompt):
         
         if response.status_code == 200:
             data = response.json()
-            ai_reply = data['choices'][0]['message']['content']
-            return ai_reply.strip()
+            return data['choices'][0]['message']['content'].strip()
         else:
-            return f"Anurag Sir, API एरर कोड {response.status_code} रिसीव हुआ है। कृपया बैकएंड कॉन्फ़िगरेशन या बिलिंग जांचें।"
+            return f"Anurag Sir, कनेक्शन में थोड़ी दिक्कत आ रही है (Error Code: {response.status_code})। कृपया एक बार बैकएंड सेटिंग्स चेक कर लें।"
             
     except KeyError:
-        return "Anurag Sir, 'OPENAI_API_KEY' आपकी secrets.toml फ़ाइल में नहीं मिली। कृपया फ़ाइल स्ट्रक्चर चेक करें।"
+        return "Anurag Sir, बैकएंड में 'OPENAI_API_KEY' नहीं मिल पा रही है। कृपया अपनी secrets.toml फ़ाइल चेक करें।"
     except Exception:
-        pass
-        
-    # ================= FAILSAFE MODE =================
-    prompt_clean = prompt.lower()
-    if "kedarnath" in prompt_clean or "केदारनाथ" in prompt:
-        return "Anurag Sir, केदारनाथ भारत के उत्तराखंड राज्य के रुद्रप्रयाग जिले में स्थित एक बेहद पवित्र और प्रसिद्ध तीर्थस्थल है।"
-    elif "hello" in prompt_clean or "hi" in prompt_clean or "नमस्ते" in prompt:
-        return "नमस्ते Anurag Sir! VEER AI नो-लिमिट साइबर कोर में आपका स्वागत है। आज आपका क्या आदेश है?"
-    
-    return f"Anurag Sir, कमांड रिसीव हो गई है। नेटवर्क फ़ायरवॉल की वजह से डेटा पैकेट डिक्रिप्ट हो रहा है, कृपया एक बार फिर कमांड एंटर करें।"
+        return "Anurag Sir, नेटवर्क थोड़ा स्लो लग रहा है। कृपया एक बार फिर कोशिश करें।"
 
 # ================= SESSION STATE =================
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# ================= CYBERPUNK CSS =================
+# ================= CYBERPUNK CSS (HACKER VIBE ONLY) =================
 st.markdown("""
 <style>
 .stApp {
-    background: linear-gradient(rgba(0, 20, 0, 0.85), rgba(0, 0, 0, 0.95)), 
+    background: linear-gradient(rgba(0, 15, 0, 0.9), rgba(0, 0, 0, 0.95)), 
                 url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1920') no-repeat center center fixed;
     background-size: cover;
 }
 header { visibility: hidden; }
 .main-title {
     text-align: center;
-    font-size: 60px;
+    font-size: 50px;
     font-weight: 900;
     color: #00ff41;
-    text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41, 0 0 40px #00ff41;
+    text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41;
+    font-family: Consolas, monospace !important;
 }
 [data-testid="stSidebar"] {
-    background: rgba(0, 0, 0, 0.9) !important;
+    background: rgba(0, 0, 0, 0.95) !important;
     border-right: 2px solid #00ff41;
 }
 [data-testid="stSidebar"] * { color: #00ff41 !important; }
 .cyber-logo-card {
     background: rgba(0, 255, 65, 0.05);
-    border: 2px dashed #00ff41;
-    border-radius: 18px;
+    border: 1px solid #00ff41;
+    border-radius: 12px;
     padding: 15px 10px;
     text-align: center;
-    box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
 }
-.cyber-logo-img { border-radius: 50%; border: 2px solid #00ff41; box-shadow: 0 0 15px #00ff41; margin-bottom: 10px; }
+.cyber-logo-img { border-radius: 50%; border: 1px solid #00ff41; margin-bottom: 10px; }
 .cyber-card {
-    background: rgba(0, 15, 0, 0.75);
+    background: rgba(0, 10, 0, 0.8);
     border: 1px solid #00ff41;
-    border-radius: 18px;
-    padding: 18px;
+    border-radius: 12px;
+    padding: 15px;
     margin-bottom: 15px;
-    box-shadow: 0 0 12px rgba(0, 255, 65, 0.4);
 }
 .stChatMessage {
-    background: rgba(0, 10, 0, 0.8) !important;
+    background: rgba(0, 10, 0, 0.85) !important;
     border: 1px solid #00ff41 !important;
-    border-radius: 18px !important;
-    box-shadow: 0 0 8px rgba(0, 255, 65, 0.3) !important;
+    border-radius: 12px !important;
     margin-bottom: 10px;
 }
 [data-testid="stChatInput"] {
     border: 1px solid #00ff41 !important;
-    border-radius: 15px !important;
-    box-shadow: 0 0 15px #00ff41 !important;
+    border-radius: 12px !important;
     background-color: black !important;
 }
 [data-testid="metric-container"] {
-    background: rgba(0, 20, 0, 0.8);
+    background: rgba(0, 15, 0, 0.8);
     border: 1px solid #00ff41;
-    border-radius: 15px;
+    border-radius: 12px;
 }
-.stButton button { width: 100%; background: black; color: #00ff41; border: 1px solid #00ff41; border-radius: 12px; }
+.stButton button { width: 100%; background: black; color: #00ff41; border: 1px solid #00ff41; border-radius: 8px; }
 .stButton button:hover { background: #00ff41; color: black; }
-p, span, div, label, h1, h2, h3, h4 { color: #00ff41 !important; font-family: Consolas, monospace !important; }
+p, span, div, label, h1, h2, h3, h4, li { color: #00ff41 !important; font-family: Consolas, monospace !important; }
 </style>
 """, unsafe_allow_html=True)
 
 # ================= SIDEBAR =================
 with st.sidebar:
     st.markdown("# ⚡ VEER AI")
-    st.success("🔒 VAULT KEY SECURED & HIDDEN")
+    st.success("🔒 SECURE CONNECTION ACTIVE")
 
     st.markdown("""
     <div class="cyber-logo-card">
-        <img class="cyber-logo-img" src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3Z0cmNvdWp6M214b29pYTdqM29scXFlZnN4ZXFpZWh0ZXN5MmswOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Y3bme762LLXbg4Mme6/giphy.gif" width="120" height="120">
+        <img class="cyber-logo-img" src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3Z0cmNvdWp6M214b29pYTdqM29scXFlZnN4ZXFpZWh0ZXN5MmswOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Y3bme762LLXbg4Mme6/giphy.gif" width="100" height="100">
         <h3 style="margin:0; letter-spacing: 2px;">V E E R</h3>
-        <span style="font-size:11px; opacity:0.8;">INFINITY CORE v6.0</span>
+        <span style="font-size:11px; opacity:0.8;">LIVE CORE v7.0</span>
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("---")
-    if st.button("🗑️ NEW CHAT"):
+    if st.button("🗑️ CLEAR CHAT"):
         st.session_state.messages = []
         st.rerun()
 
 # ================= MAIN TITLE & DASHBOARD =================
-st.markdown("<h1 class='main-title'>⚡ VEER AI // CYBER CORE ⚡</h1>", unsafe_allow_html=True)
+st.markdown("<h1 class='main-title'>⚡ VEER AI // LIVE GATEWAY ⚡</h1>", unsafe_allow_html=True)
 st.markdown("""
 <div class='cyber-card'>
-## 🟢 SYSTEM STATUS : VAULT ENCRYPTED (SAFE)<br>
+## 🟢 SYSTEM STATUS : ONLINE<br>
 👤 USER : ANURAG SIR (CHIEF ARCHITECT)<br>
-🧠 AI ENGINE : ENCRYPTED PRIVATE GATEWAY (SECRETS ROUTED)<br>
-🛡️ FIREWALL : ACTIVE // STEALTH MODE ONLINE
+🧠 ENGINE : PRIVATE LIVE GATEWAY (REAL CHAT ACTIVE)
 </div>
 """, unsafe_allow_html=True)
 
-c1, c2, c3 = st.columns(3)
+c1, c2 = st.columns(2)
 with c1: st.metric("💬 Total Chats", len(st.session_state.messages))
-with c2: st.metric("🧠 API Key Status", "HIDDEN IN VAULT 🔒")
-with c3: st.metric("⚡ Server Quota", "STABLE")
+with c2: st.metric("🛡️ Firewall Status", "SECURE")
 
 st.markdown("---")
 
@@ -167,7 +155,8 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 # ================= CHAT INPUT & LOGIC =================
-prompt = st.chat_input(">>> ENTER COMMAND")
+# यहाँ नीचे से मैंने पुरानी बोरिंग "ENTER COMMAND" हिंट को हटाकर नॉर्मल कर दिया है
+prompt = st.chat_input("यहाँ अपना सवाल लिखें, Anurag Sir...")
 
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
@@ -175,7 +164,7 @@ if prompt:
         st.markdown(prompt)
 
     with st.chat_message("assistant", avatar="🤖"):
-        with st.spinner("⚡ PROCESSING THROUGH ENCRYPTED STREAM..."):
+        with st.spinner("⚡ सोच रहा हूँ..."):
             reply = fetch_unlimited_response(prompt)
             st.markdown(reply)
 
