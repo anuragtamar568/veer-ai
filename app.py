@@ -1,169 +1,109 @@
 import streamlit as st
+import google.generativeai as genai
+import streamlit.components.v1 as components
+
+# ================= PAGE CONFIG =================
 
 st.set_page_config(
-    page_title="VEER AI Enterprise",
+    page_title="VEER AI",
     page_icon="🤖",
     layout="wide"
 )
+
+# ================= GEMINI =================
+
+try:
+    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+    model = genai.GenerativeModel("gemini-2.5-flash")
+except Exception as e:
+    st.error(f"Gemini Error: {e}")
+    st.stop()
+
+# ================= SESSION =================
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+if "voice" not in st.session_state:
+    st.session_state.voice = True
 
 # ================= CSS =================
 
 st.markdown("""
 <style>
 
-/* Animated Background */
-
 .stApp{
-    background: linear-gradient(
-        -45deg,
-        #0f172a,
-        #7c3aed,
-        #0891b2,
-        #2563eb,
-        #db2777,
-        #16a34a
-    );
-
-    background-size: 600% 600%;
-    animation: gradient 18s ease infinite;
+background: linear-gradient(-45deg,
+#ff0080,#7928ca,#007cf0,#00dfd8,#ff4d4d);
+background-size:400% 400%;
+animation: gradient 15s ease infinite;
 }
 
 @keyframes gradient{
-    0%{background-position:0% 50%;}
-    50%{background-position:100% 50%;}
-    100%{background-position:0% 50%;}
+0%{background-position:0% 50%;}
+50%{background-position:100% 50%;}
+100%{background-position:0% 50%;}
 }
-
-/* Hide Streamlit Header */
 
 header{
-    visibility:hidden;
+visibility:hidden;
 }
-
-/* Main Title */
 
 .main-title{
-    text-align:center;
-    font-size:70px;
-    font-weight:900;
+text-align:center;
+font-size:70px;
+font-weight:900;
+color:white;
 
-    background: linear-gradient(
-        90deg,
-        #00ffff,
-        #ff00ff,
-        #00ff99,
-        #ffff00
-    );
-
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-
-    text-shadow:
-        0 0 10px #00ffff,
-        0 0 20px #00ffff,
-        0 0 40px #00ffff;
+text-shadow:
+0 0 10px #00ffff,
+0 0 20px #00ffff,
+0 0 40px #00ffff,
+0 0 80px #00ffff;
 }
 
-/* Subtitle */
-
-.sub{
-    text-align:center;
-    color:white;
-    font-size:20px;
-    text-shadow:0 0 10px white;
+.subtitle{
+text-align:center;
+font-size:20px;
+color:white;
+text-shadow:0 0 10px white;
 }
 
-/* Glass Card */
-
-.glass{
-    background:rgba(255,255,255,0.08);
-    backdrop-filter: blur(20px);
-
-    border:1px solid rgba(255,255,255,.2);
-
-    border-radius:25px;
-
-    padding:30px;
-
-    box-shadow:
-        0 8px 32px rgba(0,0,0,.3),
-        0 0 30px rgba(0,255,255,.2);
+.stChatMessage{
+background:rgba(255,255,255,.10);
+backdrop-filter: blur(20px);
+border:1px solid rgba(255,255,255,.2);
+border-radius:25px;
+padding:15px;
+box-shadow:0 0 20px rgba(255,255,255,.2);
 }
-
-/* Sidebar */
 
 [data-testid="stSidebar"]{
-    background:rgba(0,0,0,.35);
-    backdrop-filter: blur(25px);
+background:rgba(0,0,0,.30);
+backdrop-filter:blur(20px);
 }
-
-/* Sidebar Text */
 
 [data-testid="stSidebar"] *{
-    color:white !important;
+color:white !important;
 }
 
-/* Buttons */
-
 .stButton button{
-
-    width:100%;
-    height:55px;
-
-    border:none;
-    border-radius:18px;
-
-    color:white;
-    font-size:18px;
-    font-weight:700;
-
-    background: linear-gradient(
-        90deg,
-        #00ffff,
-        #ff00ff
-    );
-
-    box-shadow:
-        0 0 20px #00ffff;
-
-    transition:0.3s;
+width:100%;
+border:none;
+border-radius:15px;
+font-weight:bold;
+color:white;
+background:linear-gradient(90deg,#00ffff,#ff00ff);
+box-shadow:0 0 15px cyan;
 }
 
 .stButton button:hover{
-
-    transform:translateY(-3px);
-
-    box-shadow:
-        0 0 35px #ff00ff;
+transform:scale(1.02);
+transition:.3s;
 }
 
-/* Chat Messages */
-
-.stChatMessage{
-
-    background:rgba(255,255,255,0.08);
-
-    border-radius:22px;
-
-    border:1px solid rgba(255,255,255,.2);
-
-    box-shadow:
-        0 0 20px rgba(0,255,255,.2);
-
-    color:white;
-}
-
-/* Input Box */
-
-[data-testid="stChatInput"]{
-    border-radius:20px;
-    box-shadow:0 0 20px cyan;
-}
-
-/* General Text */
-
-p, span, div, label{
-    color:white !important;
+p,span,div,label{
+color:white !important;
 }
 
 </style>
@@ -173,34 +113,35 @@ p, span, div, label{
 
 with st.sidebar:
 
-    st.image(
-        "https://cdn-icons-png.flaticon.com/512/4712/4712109.png",
-        width=120
-    )
-
-    st.title("VEER AI")
-
-    st.markdown("---")
+    st.title("🤖 VEER AI")
 
     mode = st.selectbox(
         "🧠 AI Mode",
-        [
-            "VEER",
-            "Jarvis",
-            "Teacher",
-            "Coder"
-        ]
+        ["VEER", "Jarvis", "Teacher", "Coder"]
     )
 
-    voice = st.toggle("🔊 Voice Reply", True)
+    st.session_state.voice = st.toggle(
+        "🔊 Voice Reply",
+        value=st.session_state.voice
+    )
 
-    st.button("🗑️ New Chat")
+    if st.button("🗑️ New Chat"):
+        st.session_state.messages = []
+        st.rerun()
 
-    st.button("📄 Download Chat")
+    # Download Chat
+    chat_text = ""
 
-    st.button("🚪 Logout")
+    for msg in st.session_state.messages:
+        chat_text += f"{msg['role']}: {msg['content']}\n\n"
 
-# ================= MAIN =================
+    st.download_button(
+        "📥 Download Chat",
+        chat_text,
+        "veer_chat.txt"
+    )
+
+# ================= TITLE =================
 
 st.markdown(
     "<h1 class='main-title'>🤖 VEER AI</h1>",
@@ -208,35 +149,113 @@ st.markdown(
 )
 
 st.markdown(
-    "<p class='sub'>Next Generation Enterprise Assistant</p>",
+    "<p class='subtitle'>Next Generation Enterprise Assistant</p>",
     unsafe_allow_html=True
 )
 
-st.markdown(
+# ================= VOICE =================
+
+def speak(text):
+
+    if not st.session_state.voice:
+        return
+
+    text = text.replace("\n", " ")
+    text = text.replace("'", "")
+    text = text.replace('"', "")
+
+    js = f"""
+    <script>
+    window.speechSynthesis.cancel();
+
+    let msg = new SpeechSynthesisUtterance(`{text}`);
+    msg.lang='hi-IN';
+    msg.rate=1;
+    msg.pitch=1;
+
+    window.speechSynthesis.speak(msg);
+    </script>
     """
-    <div class='glass'>
-    <h2>✨ Welcome Anurag Sir</h2>
 
-    <p>
-    VEER AI is ready to assist you.
-    Ask anything related to business, coding,
-    education, research or automation.
-    </p>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+    components.html(js, height=0)
 
-prompt = st.chat_input(
-    "अनुराग सर, कुछ पूछिए..."
-)
+# ================= HISTORY =================
+
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+
+# ================= CHAT =================
+
+prompt = st.chat_input("अनुराग सर, कुछ पूछिए...")
 
 if prompt:
 
+    st.session_state.messages.append(
+        {"role": "user", "content": prompt}
+    )
+
     with st.chat_message("user"):
-        st.write(prompt)
+        st.markdown(prompt)
+
+    # Personality
+
+    if mode == "Jarvis":
+        personality = """
+        तुम JARVIS हो।
+        futuristic style में जवाब दो।
+        हमेशा User को 'अनुराग सर' कहो।
+        """
+
+    elif mode == "Teacher":
+        personality = """
+        तुम expert teacher हो।
+        हर चीज सरल भाषा में समझाओ।
+        हमेशा User को 'अनुराग सर' कहो।
+        """
+
+    elif mode == "Coder":
+        personality = """
+        तुम senior software engineer हो।
+        coding answers professional दो।
+        हमेशा User को 'अनुराग सर' कहो।
+        """
+
+    else:
+        personality = """
+        तुम VEER AI हो।
+
+        नियम:
+        - User का नाम अनुराग सर है।
+        - हमेशा User को 'अनुराग सर' कहकर संबोधित करो।
+        - हमेशा हिंदी में उत्तर दो।
+        - अगर पूछा जाए 'तुम्हें किसने बनाया?'
+          तो जवाब दो:
+          'अनुराग सर, मुझे आपने बनाया और विकसित किया है।'
+        """
 
     with st.chat_message("assistant"):
-        st.write(
-            f"अनुराग सर, आपने पूछा: {prompt}"
-        )
+
+        with st.spinner("⚡ VEER सोच रहा है..."):
+
+            try:
+
+                response = model.generate_content(
+                    f"{personality}\n\nUser: {prompt}"
+                )
+
+                reply = response.text
+
+            except Exception as e:
+                reply = f"❌ Error: {e}"
+
+            st.markdown(reply)
+
+            st.session_state.messages.append(
+                {
+                    "role": "assistant",
+                    "content": reply
+                }
+            )
+
+            speak(reply)
