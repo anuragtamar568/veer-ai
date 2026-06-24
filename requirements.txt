@@ -1,9 +1,7 @@
 streamlit
-google-generativeai
-gTTS
-streamlit-mic-recorder
-opencv-python-headless
 requests
-Pillow
-pypdf
-speechrecognition
+google-generativeai
+streamlit-mic-recorder
+gtts
+pillow
+PyPDF2
