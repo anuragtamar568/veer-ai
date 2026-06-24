@@ -20,7 +20,6 @@ st.markdown("""
     background: linear-gradient(135deg,#0f172a,#1e293b);
 }
 
-/* Title */
 .main-title{
     text-align:center;
     color:white;
@@ -35,12 +34,10 @@ st.markdown("""
     margin-bottom:25px;
 }
 
-/* Sidebar */
 [data-testid="stSidebar"]{
     background:#111827;
 }
 
-/* Chat box */
 .stChatMessage{
     background:rgba(255,255,255,0.08);
     border-radius:15px;
@@ -48,7 +45,6 @@ st.markdown("""
     margin-bottom:10px;
 }
 
-/* Force White Text */
 .stMarkdown,
 .stMarkdown p,
 .stChatMessage,
@@ -57,7 +53,6 @@ st.markdown("""
     color:white !important;
 }
 
-/* Input Box */
 input{
     color:white !important;
 }
@@ -113,7 +108,9 @@ def get_gemini_response(prompt):
 
         response = requests.post(
             url,
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json"
+            },
             json=payload,
             timeout=30
         )
@@ -134,9 +131,9 @@ def get_gemini_response(prompt):
 for msg in st.session_state.messages:
 
     with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
+        st.write(msg["content"])
 
-# ---------------- CHAT INPUT ----------------
+# ---------------- INPUT ----------------
 prompt = st.chat_input("Ask VEER AI...")
 
 if prompt:
@@ -149,7 +146,7 @@ if prompt:
     )
 
     with st.chat_message("user"):
-        st.markdown(prompt)
+        st.write(prompt)
 
     with st.chat_message("assistant"):
 
@@ -157,7 +154,7 @@ if prompt:
 
             reply = get_gemini_response(prompt)
 
-            st.markdown(reply)
+            st.write(reply)
 
     st.session_state.messages.append(
         {
