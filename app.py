@@ -15,152 +15,60 @@ if "messages" not in st.session_state:
 # ---------------- CUSTOM CSS ----------------
 st.markdown("""
 <style>
-
-.stApp{
-    background: linear-gradient(135deg,#0f172a,#1e293b);
-}
-
-.main-title{
-    text-align:center;
-    color:white;
-    font-size:48px;
-    font-weight:700;
-    margin-bottom:5px;
-}
-
-.subtitle{
-    text-align:center;
-    color:#cbd5e1;
-    margin-bottom:25px;
-}
-
-[data-testid="stSidebar"]{
-    background:#111827;
-}
-
-.stChatMessage{
-    background:rgba(255,255,255,0.08);
-    border-radius:15px;
-    padding:10px;
-    margin-bottom:10px;
-}
-
-.stMarkdown,
-.stMarkdown p,
-.stChatMessage,
-[data-testid="stChatMessageContent"],
-[data-testid="stChatMessageContent"] p{
-    color:white !important;
-}
-
-input{
-    color:white !important;
-}
-
+.stApp { background: linear-gradient(135deg, #0f172a, #1e293b); }
+.main-title { text-align: center; color: white; font-size: 40px; font-weight: 800; margin-bottom: 5px; }
+.subtitle { text-align: center; color: #94a3b8; margin-bottom: 25px; }
+[data-testid="stSidebar"] { background: #020617; }
+.stChatMessage { border-radius: 12px; background: rgba(255,255,255,0.05); }
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------- HEADER ----------------
-st.markdown(
-    "<h1 class='main-title'>🤖 VEER AI</h1>",
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    "<p class='subtitle'>Running on Gemini 2.5 Flash</p>",
-    unsafe_allow_html=True
-)
+st.markdown("<h1 class='main-title'>🤖 VEER AI</h1>", unsafe_allow_html=True)
+st.markdown("<p class='subtitle'>Powered by Gemini 2.5 Flash</p>", unsafe_allow_html=True)
 
 # ---------------- SIDEBAR ----------------
 with st.sidebar:
-
-    st.title("⚙️ VEER AI")
-
-    if st.button("🗑️ Clear Chat"):
+    st.header("⚙️ Settings")
+    if st.button("🗑️ Clear Chat History", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
-
     st.markdown("---")
-
-    st.info("Gemini 2.5 Flash")
-    st.caption("Modern AI Assistant")
+    st.success("Gemini 2.5 Flash is Active")
 
 # ---------------- GEMINI FUNCTION ----------------
 def get_gemini_response(prompt):
-
-    api_key = st.secrets["GEMINI_API_KEY"]
-
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
-
-    payload = {
-        "contents": [
-            {
-                "parts": [
-                    {
-                        "text": prompt
-                    }
-                ]
-            }
-        ]
-    }
-
+    api_key = st.secrets.get("GEMINI_API_KEY")
+    if not api_key:
+        return "Error: API Key not found in secrets."
+        
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    payload = {"contents": [{"parts": [{"text": prompt}]}]}
+    
     try:
-
-        response = requests.post(
-            url,
-            headers={
-                "Content-Type": "application/json"
-            },
-            json=payload,
-            timeout=30
-        )
-
+        response = requests.post(url, json=payload, timeout=30)
         if response.status_code == 200:
-
-            data = response.json()
-
-            return data["candidates"][0]["content"]["parts"][0]["text"]
-
-        return f"API Error: {response.status_code}"
-
+            return response.json()["candidates"][0]["content"]["parts"][0]["text"]
+        return f"API Error ({response.status_code}): {response.text}"
     except Exception as e:
-
-        return f"Error: {str(e)}"
+        return f"Connection Error: {str(e)}"
 
 # ---------------- CHAT HISTORY ----------------
 for msg in st.session_state.messages:
-
     with st.chat_message(msg["role"]):
-        st.write(msg["content"])
+        st.markdown(msg["content"])
 
 # ---------------- INPUT ----------------
-prompt = st.chat_input("Ask VEER AI...")
-
-if prompt:
-
-    st.session_state.messages.append(
-        {
-            "role": "user",
-            "content": prompt
-        }
-    )
-
+if prompt := st.chat_input("Type your message here..."):
+    # Add user message
+    st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-        st.write(prompt)
+        st.markdown(prompt)
 
+    # Get assistant response
     with st.chat_message("assistant"):
-
-        with st.spinner("Thinking..."):
-
+        with st.spinner("VEER is thinking..."):
             reply = get_gemini_response(prompt)
-
-            st.write(reply)
-
-    st.session_state.messages.append(
-        {
-            "role": "assistant",
-            "content": reply
-        }
-    )
-
-    st.rerun()
+            st.markdown(reply)
+    
+    st.session_state.messages.append({"role": "assistant", "content": reply})
