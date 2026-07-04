@@ -5,3 +5,4 @@ streamlit-mic-recorder
 gtts
 pillow
 PyPDF2
+pip install streamlit-authenticator PyPDF2
