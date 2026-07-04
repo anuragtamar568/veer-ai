@@ -56,7 +56,7 @@ def main_app():
         with st.chat_message("assistant"):
             with st.spinner("Processing..."):
                 api_key = st.secrets.get("GEMINI_API_KEY")
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
                 
                 # Simple Request
                 res = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]})
