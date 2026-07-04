@@ -2,78 +2,68 @@ import streamlit as st
 import requests
 import PyPDF2
 
-# 1. Page Config
+# 1. Page Configuration
 st.set_page_config(page_title="VEER AI Pro", page_icon="🤖", layout="wide")
 
-# 2. Simple Authentication Logic
-if "authenticated" not in st.session_state:
-    st.session_state.authenticated = False
+# 2. Custom Modern CSS
+st.markdown("""
+<style>
+    .main { background-color: #0f172a; }
+    .stChatMessage { border-radius: 15px; background: rgba(255, 255, 255, 0.05); }
+    .stAppHeader { background: transparent; }
+    h1 { color: #38bdf8; text-align: center; }
+</style>
+""", unsafe_allow_html=True)
 
+# 3. Session State Init
+if "authenticated" not in st.session_state: st.session_state.authenticated = False
+if "messages" not in st.session_state: st.session_state.messages = []
+
+# 4. Auth Screen
 def login_screen():
-    st.markdown("<h1 style='text-align: center;'>VEER AI - Login</h1>", unsafe_allow_html=True)
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    if st.button("Login"):
-        # Yahan aap apne credentials set karein
-        if username == "admin" and password == "veer123":
-            st.session_state.authenticated = True
-            st.rerun()
-        else:
-            st.error("Invalid Username or Password")
+    st.markdown("<h1>🔒 VEER AI Access</h1>", unsafe_allow_html=True)
+    with st.container():
+        col1, col2, col3 = st.columns([1,2,1])
+        with col2:
+            user = st.text_input("Username")
+            pswd = st.text_input("Password", type="password")
+            if st.button("Secure Login"):
+                if user == "admin" and pswd == "veer123":
+                    st.session_state.authenticated = True
+                    st.rerun()
+                else: st.error("Access Denied!")
 
-# 3. Main App Logic
+# 5. Main App
 def main_app():
-    st.markdown("<h1 class='main-title'>🤖 VEER AI Pro</h1>", unsafe_allow_html=True)
+    st.sidebar.title("🚀 VEER AI Controls")
+    if st.sidebar.button("Logout"):
+        st.session_state.authenticated = False
+        st.rerun()
     
-    # Sidebar
-    with st.sidebar:
-        st.title("⚙️ Controls")
-        if st.button("Logout"):
-            st.session_state.authenticated = False
-            st.rerun()
-        
-        uploaded_file = st.file_uploader("Upload PDF for AI to read", type="pdf")
-        doc_text = ""
-        if uploaded_file:
-            reader = PyPDF2.PdfReader(uploaded_file)
-            for page in reader.pages:
-                doc_text += page.extract_text()
-            st.success("File uploaded!")
+    uploaded_file = st.sidebar.file_uploader("Upload Knowledge Base (PDF)", type="pdf")
+    
+    st.markdown("<h1>🤖 VEER AI Pro</h1>", unsafe_allow_html=True)
 
-    # Chat UI
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-
+    # Chat logic
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
-            st.write(msg["content"])
+            st.markdown(msg["content"])
 
-    if prompt := st.chat_input("Ask VEER AI..."):
-        # Context management
-        full_prompt = f"Context: {doc_text[:2000]} \n\n User Question: {prompt}" if doc_text else prompt
-        
+    if prompt := st.chat_input("Ask your assistant..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.write(prompt)
+        with st.chat_message("user"): st.markdown(prompt)
 
         with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
-                # Gemini API call
+            with st.spinner("Processing..."):
                 api_key = st.secrets.get("GEMINI_API_KEY")
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
-                response = requests.post(url, json={"contents": [{"parts": [{"text": full_prompt}]}]})
                 
-                if response.status_code == 200:
-                    reply = response.json()["candidates"][0]["content"]["parts"][0]["text"]
-                else:
-                    reply = "Error: Could not connect to AI."
+                # Simple Request
+                res = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]})
+                reply = res.json()["candidates"][0]["content"]["parts"][0]["text"] if res.status_code == 200 else "API Error."
                 
-                st.write(reply)
-        
-        st.session_state.messages.append({"role": "assistant", "content": reply})
+                st.markdown(reply)
+                st.session_state.messages.append({"role": "assistant", "content": reply})
 
-# 4. Routing
-if st.session_state.authenticated:
-    main_app()
-else:
-    login_screen()
+if st.session_state.authenticated: main_app()
+else: login_screen()
