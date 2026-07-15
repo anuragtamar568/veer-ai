@@ -1,22 +1,36 @@
+import streamlit as st
+import google.generativeai as genai
+
+# =========================
+# PAGE CONFIG
+# =========================
+
+st.set_page_config(
+    page_title="VEER AI X",
+    page_icon="⚡",
+    layout="wide"
+)
+
+# =========================
+# THEME
+# =========================
+
 st.markdown("""
 <style>
-
-/* ===== HACKER BACKGROUND ===== */
 
 .stApp{
     background:
     radial-gradient(circle at top left,#0f0f0f,#050505,#000000);
-    color:#00ff88;
 }
 
-/* ===== SIDEBAR ===== */
+/* Sidebar */
 
 section[data-testid="stSidebar"]{
     background:#050505;
     border-right:1px solid #00ff88;
 }
 
-/* ===== GLOW TITLE ===== */
+/* Title */
 
 .glow-title{
     text-align:center;
@@ -34,7 +48,6 @@ section[data-testid="stSidebar"]{
 }
 
 @keyframes glow{
-
     from{
         text-shadow:
             0 0 10px #00ff88,
@@ -47,13 +60,11 @@ section[data-testid="stSidebar"]{
             0 0 40px #00ff88,
             0 0 80px #00ff88;
     }
-
 }
 
-/* ===== SHINING TEXT ===== */
+/* Shining Text */
 
 .shine{
-
     background:linear-gradient(
         90deg,
         #00ff88,
@@ -62,84 +73,172 @@ section[data-testid="stSidebar"]{
     );
 
     background-size:200% auto;
-
     color:transparent;
-
     -webkit-background-clip:text;
 
     animation:shine 3s linear infinite;
 }
 
 @keyframes shine{
-
     to{
         background-position:200% center;
     }
-
 }
 
-/* ===== CHAT BOX ===== */
+/* Chat */
 
 [data-testid="stChatMessage"]{
-
     background:#0d1117;
-
     border:1px solid #00ff88;
-
     border-radius:15px;
-
-    box-shadow:
-        0 0 10px rgba(0,255,136,.2);
-
     padding:10px;
-
+    box-shadow:
+        0 0 15px rgba(0,255,136,.2);
 }
 
-/* ===== INPUT ===== */
+/* Input */
 
 .stChatInputContainer{
-
     border:2px solid #00ff88;
-
     border-radius:15px;
-
     box-shadow:
-        0 0 15px rgba(0,255,136,.4);
-
+        0 0 20px rgba(0,255,136,.4);
 }
 
-/* ===== BUTTON ===== */
+/* Button */
 
 .stButton button{
-
     background:#00ff88 !important;
-
     color:black !important;
-
-    border:none !important;
-
     font-weight:bold !important;
-
-    border-radius:10px !important;
-
+    border:none !important;
 }
 
-/* ===== TEXT ===== */
+/* Text */
 
 p,span,div{
     color:#e5ffe5 !important;
 }
 
-/* ===== SCROLLBAR ===== */
-
-::-webkit-scrollbar{
-    width:8px;
-}
-
-::-webkit-scrollbar-thumb{
-    background:#00ff88;
-    border-radius:20px;
-}
-
 </style>
 """, unsafe_allow_html=True)
+
+# =========================
+# GEMINI
+# =========================
+
+genai.configure(
+    api_key=st.secrets["GEMINI_API_KEY"]
+)
+
+model = genai.GenerativeModel(
+    "gemini-2.5-flash"
+)
+
+# =========================
+# MEMORY
+# =========================
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# =========================
+# SIDEBAR
+# =========================
+
+st.sidebar.title("⚡ VEER AI X")
+
+if st.sidebar.button("🗑 Clear Chat"):
+    st.session_state.messages = []
+    st.rerun()
+
+# =========================
+# HEADER
+# =========================
+
+st.markdown("""
+<h1 class="glow-title">
+⚡ VEER AI X ⚡
+</h1>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<div class="shine"
+style="
+text-align:center;
+font-size:18px;
+margin-bottom:20px;">
+> SYSTEM ONLINE | GEMINI CONNECTED | VEER AI ACTIVE
+</div>
+""", unsafe_allow_html=True)
+
+# =========================
+# CHAT HISTORY
+# =========================
+
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+
+# =========================
+# CHAT INPUT
+# =========================
+
+prompt = st.chat_input(
+    "Ask Anything..."
+)
+
+if prompt:
+
+    st.session_state.messages.append(
+        {
+            "role":"user",
+            "content":prompt
+        }
+    )
+
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    try:
+
+        conversation = ""
+
+        for m in st.session_state.messages:
+            conversation += (
+                f"{m['role']}: "
+                f"{m['content']}\n"
+            )
+
+        final_prompt = f"""
+You are VEER AI X.
+
+Rules:
+- Always say your name is VEER AI X.
+- Reply in Hindi if user uses Hindi.
+- Reply in English if user uses English.
+- Be smart and helpful.
+
+Conversation:
+
+{conversation}
+"""
+
+        response = model.generate_content(
+            final_prompt
+        )
+
+        reply = response.text
+
+    except Exception as e:
+        reply = f"Error: {e}"
+
+    with st.chat_message("assistant"):
+        st.markdown(reply)
+
+    st.session_state.messages.append(
+        {
+            "role":"assistant",
+            "content":reply
+        }
+    )
