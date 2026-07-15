@@ -19,7 +19,7 @@ if prompt:
 
     url = (
         f"https://generativelanguage.googleapis.com/"
-        f"v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+        f"v1beta/models/gemini-2.5 pro:generateContent?key={api_key}"
     )
 
     try:
