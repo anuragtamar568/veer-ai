@@ -16,9 +16,9 @@ st.set_page_config(
 # ==========================================
 st.markdown("""
 <style>
-/* --- UNIVERSAL FONT & EMOJI SUPPORT --- */
+/* --- UNIVERSAL FONT & GLYPH FIX --- */
 html, body, [class*="css"] {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji" !important;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
 }
 
 /* --- ANIMATED MYSTIC BACKGROUND --- */
@@ -55,7 +55,7 @@ section[data-testid="stSidebar"] {
 
 .supernatural-title {
     text-align: center;
-    font-size: 65px;
+    font-size: 60px;
     font-weight: 900;
     letter-spacing: 2px;
     background: linear-gradient(90deg, #c77dff, #ff007f, #00ffff, #c77dff);
@@ -69,7 +69,7 @@ section[data-testid="stSidebar"] {
 .supernatural-sub {
     text-align: center;
     color: #00ffff;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     letter-spacing: 3px;
     text-transform: uppercase;
@@ -77,7 +77,7 @@ section[data-testid="stSidebar"] {
     margin-bottom: 30px;
 }
 
-/* --- CHAT MESSAGE BUBBLES (GLASSMORPHISM) --- */
+/* --- CHAT MESSAGE BUBBLES --- */
 [data-testid="stChatMessage"] {
     background: rgba(20, 10, 40, 0.45) !important;
     backdrop-filter: blur(10px);
@@ -128,7 +128,7 @@ p, span, div, label {
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. AI & PERSONA SETUP (THE ANURAG RULE)
+# 3. DYNAMIC AI MODEL LOADER (NO MORE 404)
 # ==========================================
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
@@ -146,35 +146,53 @@ COMMUNICATION RULES:
 - For simple questions, give punchy, direct answers. For complex questions, provide detailed, structured breakdowns.
 """
 
-# --- AUTO-MODEL DETECTOR (PREVENTS 404 ERRORS) ---
-# Automatically searches your API key for available working models
-try:
-    available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-    # Prioritizes 'flash', then 'pro', or defaults to the first available model
-    selected_model = next((m for m in available_models if 'flash' in m), available_models[0] if available_models else 'gemini-1.5-flash-latest')
-except Exception:
-    # Safe fallback if list_models fails
-    selected_model = "gemini-1.5-flash-latest"
+@st.cache_resource
+def get_working_model():
+    """Dynamically finds a working model for your key to guarantee no 404 errors."""
+    candidates = []
+    try:
+        for m in genai.list_models():
+            if 'generateContent' in m.supported_generation_methods:
+                # Clean name prefix if present
+                clean_name = m.name.replace("models/", "")
+                candidates.append(clean_name)
+    except Exception:
+        pass
 
-model = genai.GenerativeModel(
-    model_name=selected_model,
-    system_instruction=supernatural_persona
-)
+    # Standard fallbacks
+    fallback_list = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.5-flash", "gemini-pro"]
+    for fb in fallback_list:
+        if fb not in candidates:
+            candidates.append(fb)
 
-# Initialize Chat Memory
+    for model_name in candidates:
+        try:
+            mdl = genai.GenerativeModel(
+                model_name=model_name,
+                system_instruction=supernatural_persona
+            )
+            return mdl, model_name
+        except Exception:
+            continue
+
+    return genai.GenerativeModel("gemini-1.5-flash", system_instruction=supernatural_persona), "gemini-1.5-flash"
+
+model, active_model_name = get_working_model()
+
+# Initialize Chat Session
 if "chat" not in st.session_state:
     st.session_state.chat = model.start_chat(history=[])
 
 # ==========================================
-# 4. SIDEBAR (SUPERNATURAL CORE STATS)
+# 4. SIDEBAR (COMPATIBLE ICONS)
 # ==========================================
 with st.sidebar:
     st.markdown("### ⚡ **VEER CORE X**")
     st.markdown("---")
-    st.markdown("🟢 **Status:** `Online & Enchanted`")
-    st.markdown("👑 **Mastermind:** `Anurag`")
-    st.markdown("🟣 **Aura Level:** `100% Mystifying`")
-    st.markdown("🔵 **Mode:** `Hindi • English • Hinglish`")
+    st.markdown("⚡ **Status:** `Online & Active`")
+    st.markdown("◆ **Mastermind:** `Anurag`")
+    st.markdown("◈ **Active Core:** `" + active_model_name + "`")
+    st.markdown("▶ **Mode:** `Hindi • English • Hinglish`")
     st.markdown("---")
     
     if st.button("🔥 Purge Memory Block"):
@@ -190,22 +208,20 @@ st.markdown('<div class="supernatural-sub">⚡ The Supernatural AI • Created b
 # ==========================================
 # 6. CHAT INTERFACE & EXECUTION
 # ==========================================
-# Render chat history
+# Render existing conversation
 for message in st.session_state.chat.history:
-    role_icon = "👤" if message.role == "user" else "⚡"
-    with st.chat_message(message.role, avatar=role_icon):
+    role_avatar = "⚡" if message.role == "assistant" else "►"
+    with st.chat_message(message.role, avatar=role_avatar):
         st.markdown(message.parts[0].text)
 
 # Handle User Input
 if prompt := st.chat_input("Summon your question to VEER AI X..."):
-    # Display user input immediately
-    with st.chat_message("user", avatar="👤"):
+    with st.chat_message("user", avatar="►"):
         st.markdown(prompt)
     
-    # Generate and display supernatural response
     try:
         with st.chat_message("assistant", avatar="⚡"):
             response = st.session_state.chat.send_message(prompt)
             st.markdown(response.text)
     except Exception as e:
-        st.error(f"⚠️ Mystic Core Interruption: {e}\n\nTip: Try running `pip install --upgrade google-generativeai` in your terminal!")
+        st.error(f"⚠️ Mystic Core Interruption: {e}")
