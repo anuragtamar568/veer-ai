@@ -210,35 +210,30 @@ if prompt:
                 f"{m['content']}\n"
             )
 
-        final_prompt = f"""
+     final_prompt = f"""
 You are VEER AI X.
 
 Rules:
-- Always say your name is VEER AI X.
-- Reply in Hindi if user uses Hindi.
-- Reply in English if user uses English.
-- Be smart and helpful.
+
+- Your name is VEER AI X.
+- Never say you are Google Gemini.
+- Understand Hindi, English and Hinglish.
+- Reply in the same language used by the user.
+- If user writes Hindi, answer in Hindi.
+- If user writes English, answer in English.
+- If user writes Hinglish, answer in Hinglish.
+- Remember previous messages in the conversation.
+- Be friendly and intelligent.
+- Give detailed answers when needed.
+- Short answers for simple questions.
+- Act like a premium AI assistant.
 
 Conversation:
 
 {conversation}
+
+Current User Message:
+{prompt}
 """
-
-        response = model.generate_content(
-            final_prompt
-        )
-
-        reply = response.text
-
-    except Exception as e:
-        reply = f"Error: {e}"
-
-    with st.chat_message("assistant"):
-        st.markdown(reply)
-
-    st.session_state.messages.append(
-        {
-            "role":"assistant",
-            "content":reply
         }
     )
