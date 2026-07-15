@@ -6,7 +6,7 @@ import google.generativeai as genai
 # =========================
 
 st.set_page_config(
-    page_title="VEER AI X",
+    page_title="VEER AI",
     page_icon="⚡",
     layout="wide"
 )
@@ -182,7 +182,7 @@ if prompt:
             )
 
         final_prompt = f"""
-You are VEER AI X.
+You are VEER AI.
 
 Rules:
 - Your name is VEER AI X.
