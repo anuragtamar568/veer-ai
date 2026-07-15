@@ -1,70 +1,55 @@
-def ask_gemini(prompt):
+import streamlit as st
+import requests
+
+st.set_page_config(page_title="VEER AI Pro", page_icon="🤖")
+
+st.title("🤖 VEER AI Pro")
+
+api_key = st.secrets.get("GEMINI_API_KEY")
+
+if not api_key:
+    st.error("GEMINI_API_KEY not found in Streamlit Secrets")
+    st.stop()
+
+prompt = st.chat_input("Ask anything...")
+
+if prompt:
+    with st.chat_message("user"):
+        st.write(prompt)
+
+    url = (
+        f"https://generativelanguage.googleapis.com/"
+        f"v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    )
 
     try:
-        api_key = st.secrets["GEMINI_API_KEY"]
-
-        url = (
-            "https://generativelanguage.googleapis.com"
-            f"/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
-        )
-
-        contents = []
-
-        for msg in st.session_state.messages:
-
-            role = (
-                "user"
-                if msg["role"] == "user"
-                else "model"
-            )
-
-            contents.append({
-                "role": role,
-                "parts": [
-                    {"text": msg["content"]}
-                ]
-            })
-
-        if st.session_state.pdf_text:
-
-            prompt = f"""
-PDF CONTENT:
-{st.session_state.pdf_text[:10000]}
-
-QUESTION:
-{prompt}
-"""
-
-        contents.append({
-            "role": "user",
-            "parts": [{"text": prompt}]
-        })
-
         response = requests.post(
             url,
-            headers={
-                "Content-Type": "application/json"
-            },
+            headers={"Content-Type": "application/json"},
             json={
-                "contents": contents
+                "contents": [
+                    {
+                        "parts": [
+                            {"text": prompt}
+                        ]
+                    }
+                ]
             },
             timeout=60
         )
 
-        if response.status_code != 200:
-            return f"""
-Status Code: {response.status_code}
+        st.write("Status:", response.status_code)
 
-Response:
-{response.text}
-"""
+        if response.status_code == 200:
+            data = response.json()
 
-        data = response.json()
+            reply = data["candidates"][0]["content"]["parts"][0]["text"]
 
-        if "candidates" not in data:
-            return str(data)
+            with st.chat_message("assistant"):
+                st.write(reply)
 
-        return data["candidates"][0]["content"]["parts"][0]["text"]
+        else:
+            st.error(response.text)
 
     except Exception as e:
-        return f"ERROR: {str(e)}"
+        st.error(str(e))
