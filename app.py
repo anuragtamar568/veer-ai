@@ -12,69 +12,44 @@ st.set_page_config(
 )
 
 # =========================
-# THEME
+# HACKER + AESTHETIC THEME
 # =========================
 
 st.markdown("""
 <style>
 
 .stApp{
-    background:
-    radial-gradient(circle at top left,#0f0f0f,#050505,#000000);
+    background: linear-gradient(
+        135deg,
+        #020617,
+        #0f172a,
+        #000000
+    );
 }
 
 /* Sidebar */
-
 section[data-testid="stSidebar"]{
     background:#050505;
     border-right:1px solid #00ff88;
 }
 
 /* Title */
-
 .glow-title{
     text-align:center;
     font-size:60px;
-    font-weight:bold;
-    color:#00ff88;
+    font-weight:800;
 
-    text-shadow:
-        0 0 5px #00ff88,
-        0 0 10px #00ff88,
-        0 0 20px #00ff88,
-        0 0 40px #00ff88;
-
-    animation:glow 2s infinite alternate;
-}
-
-@keyframes glow{
-    from{
-        text-shadow:
-            0 0 10px #00ff88,
-            0 0 20px #00ff88;
-    }
-
-    to{
-        text-shadow:
-            0 0 20px #00ff88,
-            0 0 40px #00ff88,
-            0 0 80px #00ff88;
-    }
-}
-
-/* Shining Text */
-
-.shine{
     background:linear-gradient(
         90deg,
         #00ff88,
-        #ffffff,
+        #00ffff,
         #00ff88
     );
 
     background-size:200% auto;
-    color:transparent;
+
     -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
 
     animation:shine 3s linear infinite;
 }
@@ -85,39 +60,41 @@ section[data-testid="stSidebar"]{
     }
 }
 
-/* Chat */
+/* Subtitle */
+.subtitle{
+    text-align:center;
+    color:#00ff88;
+    font-size:18px;
+    margin-bottom:25px;
 
+    text-shadow:
+        0 0 10px #00ff88;
+}
+
+/* Chat */
 [data-testid="stChatMessage"]{
-    background:#0d1117;
-    border:1px solid #00ff88;
-    border-radius:15px;
-    padding:10px;
-    box-shadow:
-        0 0 15px rgba(0,255,136,.2);
+    background:rgba(0,255,136,0.05);
+    border:1px solid rgba(0,255,136,0.25);
+    border-radius:18px;
+    box-shadow:0 0 15px rgba(0,255,136,.12);
 }
 
 /* Input */
-
 .stChatInputContainer{
     border:2px solid #00ff88;
-    border-radius:15px;
-    box-shadow:
-        0 0 20px rgba(0,255,136,.4);
+    border-radius:20px;
 }
 
-/* Button */
-
+/* Buttons */
 .stButton button{
     background:#00ff88 !important;
     color:black !important;
     font-weight:bold !important;
-    border:none !important;
 }
 
 /* Text */
-
 p,span,div{
-    color:#e5ffe5 !important;
+    color:#f8fafc !important;
 }
 
 </style>
@@ -163,12 +140,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown("""
-<div class="shine"
-style="
-text-align:center;
-font-size:18px;
-margin-bottom:20px;">
-> SYSTEM ONLINE | GEMINI CONNECTED | VEER AI ACTIVE
+<div class="subtitle">
+🚀 Hindi • English • Hinglish • Smart AI
 </div>
 """, unsafe_allow_html=True)
 
@@ -184,16 +157,14 @@ for msg in st.session_state.messages:
 # CHAT INPUT
 # =========================
 
-prompt = st.chat_input(
-    "Ask Anything..."
-)
+prompt = st.chat_input("Ask Anything...")
 
 if prompt:
 
     st.session_state.messages.append(
         {
-            "role":"user",
-            "content":prompt
+            "role": "user",
+            "content": prompt
         }
     )
 
@@ -210,30 +181,42 @@ if prompt:
                 f"{m['content']}\n"
             )
 
-     final_prompt = f"""
+        final_prompt = f"""
 You are VEER AI X.
 
 Rules:
-
 - Your name is VEER AI X.
 - Never say you are Google Gemini.
 - Understand Hindi, English and Hinglish.
 - Reply in the same language used by the user.
-- If user writes Hindi, answer in Hindi.
-- If user writes English, answer in English.
-- If user writes Hinglish, answer in Hinglish.
-- Remember previous messages in the conversation.
+- Remember previous messages in this chat.
 - Be friendly and intelligent.
 - Give detailed answers when needed.
-- Short answers for simple questions.
-- Act like a premium AI assistant.
+- Keep short answers for simple questions.
 
 Conversation:
-
 {conversation}
 
 Current User Message:
 {prompt}
 """
+
+        response = model.generate_content(
+            final_prompt
+        )
+
+        reply = response.text
+
+    except Exception as e:
+
+        reply = f"Error: {e}"
+
+    with st.chat_message("assistant"):
+        st.markdown(reply)
+
+    st.session_state.messages.append(
+        {
+            "role": "assistant",
+            "content": reply
         }
     )
