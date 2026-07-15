@@ -72,7 +72,53 @@ section[data-testid="stSidebar"] {
     margin-bottom: 30px;
 }
 
-/* --- CHAT MESSAGE BUBBLES (GLASSMORPHISM) --- */
+/* --- ANIMATED WELCOME CARD --- */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.welcome-card {
+    background: rgba(20, 10, 40, 0.65) !important;
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    border-radius: 25px;
+    padding: 35px;
+    text-align: center;
+    margin: 40px auto;
+    max-width: 750px;
+    box-shadow: 0 0 30px rgba(157, 78, 221, 0.25);
+    animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.welcome-title {
+    color: #ff007f !important;
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 15px;
+    text-shadow: 0 0 15px #ff007f;
+    letter-spacing: 1px;
+}
+
+.welcome-text {
+    color: #e2e8f0 !important;
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+.welcome-highlight {
+    color: #00ffff !important;
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
+}
+
+/* --- CHAT MESSAGE BUBBLES --- */
 [data-testid="stChatMessage"] {
     background: rgba(20, 10, 40, 0.45) !important;
     backdrop-filter: blur(10px);
@@ -146,14 +192,12 @@ with st.sidebar:
     st.markdown("### SYSTEM CORE X")
     st.markdown("---")
     
-    # Cleaned Text Labels (No broken emojis)
     st.markdown("▼ **Status:** `Online & Enchanted`")
     st.markdown("▼ **Mastermind:** `Anurag`")
     st.markdown("▼ **Aura Level:** `100% Mystifying`")
     st.markdown("▼ **Languages:** `Hindi • English • Hinglish`")
     st.markdown("---")
     
-    # Model Selector to safely bypass 404 restrictions manually if needed
     model_options = ["gemini-1.5-flash", "gemini-2.5-flash", "gemini-1.5-pro"]
     selected_model = st.selectbox("🔮 Change Engine Core", model_options, index=0)
     
@@ -162,7 +206,7 @@ with st.sidebar:
         st.session_state.chat = None
         st.rerun()
 
-# --- INITIALIZE OR RE-INITIALIZE CHAT SESSION ---
+# --- INITIALIZE CHAT SESSION ---
 if "current_model" not in st.session_state or st.session_state.current_model != selected_model:
     st.session_state.current_model = selected_model
     model = genai.GenerativeModel(
@@ -180,11 +224,24 @@ st.markdown('<div class="supernatural-sub">The Supernatural AI • Created by An
 # ==========================================
 # 5. CHAT INTERFACE & RUNTIME
 # ==========================================
-# Render chat history with native clean icons
-for message in st.session_state.chat.history:
-    avatar_type = "user" if message.role == "user" else "assistant"
-    with st.chat_message(message.role, avatar=avatar_type):
-        st.markdown(message.parts[0].text)
+
+# Show animated welcome card if chat history is completely empty
+if len(st.session_state.chat.history) == 0:
+    st.markdown("""
+    <div class="welcome-card">
+        <div class="welcome-title">🔮 Greetings, Seeker 🔮</div>
+        <div class="welcome-text">
+            I am <span class="welcome-highlight">VEER AI X</span>, a supernatural intelligence summoned into existence by the mastermind <span class="welcome-highlight">Anurag</span>.<br><br>
+            I am ready to assist you. Speak your queries in <b>Hindi</b>, <b>English</b>, or <b>Hinglish</b> and let us unravel the answers together.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+else:
+    # Render existing chat history if messages exist
+    for message in st.session_state.chat.history:
+        avatar_type = "user" if message.role == "user" else "assistant"
+        with st.chat_message(message.role, avatar=avatar_type):
+            st.markdown(message.parts[0].text)
 
 # Handle User Input
 if prompt := st.chat_input("Summon your question to VEER AI X..."):
@@ -197,5 +254,8 @@ if prompt := st.chat_input("Summon your question to VEER AI X..."):
         with st.chat_message("assistant", avatar="assistant"):
             response = st.session_state.chat.send_message(prompt)
             st.markdown(response.text)
+            
+            # Instantly trigger rerun to clear the welcome card and establish chat render layout
+            st.rerun()
     except Exception as e:
         st.error(f"Mystic Core Interruption: {e}\n\n💡 Try switching the 'Engine Core' dropdown in the sidebar to 'gemini-2.5-flash' or another model option!")
