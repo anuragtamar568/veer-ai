@@ -1,203 +1,145 @@
-import streamlit as st
-import google.generativeai as genai
-
-# ---------------- PAGE CONFIG ----------------
-
-st.set_page_config(
-    page_title="VEER AI Ultra",
-    page_icon="🚀",
-    layout="wide"
-)
-
-# ---------------- AESTHETIC THEME ----------------
-
 st.markdown("""
 <style>
 
-/* Background */
+/* ===== HACKER BACKGROUND ===== */
+
 .stApp{
-    background: linear-gradient(
-        135deg,
-        #0f172a,
-        #111827,
-        #1e293b
-    );
+    background:
+    radial-gradient(circle at top left,#0f0f0f,#050505,#000000);
+    color:#00ff88;
 }
 
-/* Sidebar */
+/* ===== SIDEBAR ===== */
+
 section[data-testid="stSidebar"]{
-    background: rgba(15,23,42,0.95);
-    backdrop-filter: blur(20px);
-    border-right: 1px solid rgba(255,255,255,0.08);
+    background:#050505;
+    border-right:1px solid #00ff88;
 }
 
-/* Title */
-.main-title{
+/* ===== GLOW TITLE ===== */
+
+.glow-title{
     text-align:center;
-    font-size:55px;
-    font-weight:800;
-    margin-top:10px;
-    background: linear-gradient(
-        90deg,
-        #38bdf8,
-        #8b5cf6,
-        #ec4899
-    );
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-}
-
-/* Subtitle */
-.sub-title{
-    text-align:center;
-    color:#cbd5e1;
-    margin-bottom:25px;
-}
-
-/* Chat Messages */
-[data-testid="stChatMessage"]{
-    background: rgba(255,255,255,0.06);
-    backdrop-filter: blur(18px);
-    border-radius:18px;
-    border:1px solid rgba(255,255,255,0.08);
-    padding:12px;
-}
-
-/* Text */
-p,span,div{
-    color:#f8fafc !important;
-}
-
-/* Buttons */
-.stButton button{
-    width:100%;
-    border:none;
-    border-radius:12px;
-    background: linear-gradient(
-        90deg,
-        #3b82f6,
-        #8b5cf6
-    );
-    color:white;
+    font-size:60px;
     font-weight:bold;
+    color:#00ff88;
+
+    text-shadow:
+        0 0 5px #00ff88,
+        0 0 10px #00ff88,
+        0 0 20px #00ff88,
+        0 0 40px #00ff88;
+
+    animation:glow 2s infinite alternate;
 }
 
-/* Input */
+@keyframes glow{
+
+    from{
+        text-shadow:
+            0 0 10px #00ff88,
+            0 0 20px #00ff88;
+    }
+
+    to{
+        text-shadow:
+            0 0 20px #00ff88,
+            0 0 40px #00ff88,
+            0 0 80px #00ff88;
+    }
+
+}
+
+/* ===== SHINING TEXT ===== */
+
+.shine{
+
+    background:linear-gradient(
+        90deg,
+        #00ff88,
+        #ffffff,
+        #00ff88
+    );
+
+    background-size:200% auto;
+
+    color:transparent;
+
+    -webkit-background-clip:text;
+
+    animation:shine 3s linear infinite;
+}
+
+@keyframes shine{
+
+    to{
+        background-position:200% center;
+    }
+
+}
+
+/* ===== CHAT BOX ===== */
+
+[data-testid="stChatMessage"]{
+
+    background:#0d1117;
+
+    border:1px solid #00ff88;
+
+    border-radius:15px;
+
+    box-shadow:
+        0 0 10px rgba(0,255,136,.2);
+
+    padding:10px;
+
+}
+
+/* ===== INPUT ===== */
+
 .stChatInputContainer{
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(20px);
-    border-radius:20px;
+
+    border:2px solid #00ff88;
+
+    border-radius:15px;
+
+    box-shadow:
+        0 0 15px rgba(0,255,136,.4);
+
 }
 
-/* Scrollbar */
+/* ===== BUTTON ===== */
+
+.stButton button{
+
+    background:#00ff88 !important;
+
+    color:black !important;
+
+    border:none !important;
+
+    font-weight:bold !important;
+
+    border-radius:10px !important;
+
+}
+
+/* ===== TEXT ===== */
+
+p,span,div{
+    color:#e5ffe5 !important;
+}
+
+/* ===== SCROLLBAR ===== */
+
 ::-webkit-scrollbar{
     width:8px;
 }
+
 ::-webkit-scrollbar-thumb{
-    background:#8b5cf6;
+    background:#00ff88;
     border-radius:20px;
 }
 
 </style>
 """, unsafe_allow_html=True)
-
-# ---------------- GEMINI ----------------
-
-genai.configure(
-    api_key=st.secrets["GEMINI_API_KEY"]
-)
-
-model = genai.GenerativeModel(
-    "gemini-2.5-flash"
-)
-
-# ---------------- SESSION ----------------
-
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-# ---------------- SIDEBAR ----------------
-
-st.sidebar.title("🚀 VEER AI Controls")
-
-if st.sidebar.button("🗑 Clear Chat"):
-    st.session_state.messages = []
-    st.rerun()
-
-# ---------------- HEADER ----------------
-
-st.markdown(
-    '<div class="main-title">✨ VEER AI Ultra</div>',
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    '<div class="sub-title">Your Personal AI Assistant</div>',
-    unsafe_allow_html=True
-)
-
-# ---------------- HISTORY ----------------
-
-for msg in st.session_state.messages:
-
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
-
-# ---------------- INPUT ----------------
-
-prompt = st.chat_input(
-    "Ask anything..."
-)
-
-if prompt:
-
-    st.session_state.messages.append({
-        "role":"user",
-        "content":prompt
-    })
-
-    with st.chat_message("user"):
-        st.markdown(prompt)
-
-    try:
-
-        conversation = ""
-
-        for m in st.session_state.messages:
-            conversation += (
-                f"{m['role']}: "
-                f"{m['content']}\n"
-            )
-
-        final_prompt = f"""
-You are VEER AI Ultra.
-
-Rules:
-- Never say you are Google Gemini.
-- Always introduce yourself as VEER AI Ultra.
-- Reply in Hindi if user uses Hindi.
-- Reply in English if user uses English.
-- Be helpful and intelligent.
-
-Conversation:
-
-{conversation}
-"""
-
-        response = model.generate_content(
-            final_prompt
-        )
-
-        reply = response.text
-
-    except Exception as e:
-
-        reply = f"Error: {e}"
-
-    with st.chat_message("assistant"):
-        st.markdown(reply)
-
-    st.session_state.messages.append({
-        "role":"assistant",
-        "content":reply
-    })
