@@ -6,7 +6,7 @@ import google.generativeai as genai
 # ==========================================
 st.set_page_config(
     page_title="VEER AI X | Supernatural AI",
-    page_icon="🔮",
+    page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -16,6 +16,11 @@ st.set_page_config(
 # ==========================================
 st.markdown("""
 <style>
+/* --- UNIVERSAL FONT & EMOJI SUPPORT --- */
+html, body, [class*="css"] {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji" !important;
+}
+
 /* --- ANIMATED MYSTIC BACKGROUND --- */
 @keyframes mysticBG {
     0% { background-position: 0% 50%; }
@@ -66,7 +71,7 @@ section[data-testid="stSidebar"] {
     color: #00ffff;
     font-size: 16px;
     font-weight: 600;
-    letter-spacing: 4px;
+    letter-spacing: 3px;
     text-transform: uppercase;
     text-shadow: 0 0 10px #00ffff;
     margin-bottom: 30px;
@@ -127,7 +132,6 @@ p, span, div, label {
 # ==========================================
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
-# Strict instructions to enforce identity and creator rules
 supernatural_persona = """
 You are VEER AI X, a supernatural, hyper-intelligent AI entity with a mystical and advanced aura.
 
@@ -142,8 +146,18 @@ COMMUNICATION RULES:
 - For simple questions, give punchy, direct answers. For complex questions, provide detailed, structured breakdowns.
 """
 
+# --- AUTO-MODEL DETECTOR (PREVENTS 404 ERRORS) ---
+# Automatically searches your API key for available working models
+try:
+    available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+    # Prioritizes 'flash', then 'pro', or defaults to the first available model
+    selected_model = next((m for m in available_models if 'flash' in m), available_models[0] if available_models else 'gemini-1.5-flash-latest')
+except Exception:
+    # Safe fallback if list_models fails
+    selected_model = "gemini-1.5-flash-latest"
+
 model = genai.GenerativeModel(
-    model_name="gemini-2.5-flash",
+    model_name=selected_model,
     system_instruction=supernatural_persona
 )
 
@@ -155,12 +169,12 @@ if "chat" not in st.session_state:
 # 4. SIDEBAR (SUPERNATURAL CORE STATS)
 # ==========================================
 with st.sidebar:
-    st.markdown("### 🔮 **VEER CORE X**")
+    st.markdown("### ⚡ **VEER CORE X**")
     st.markdown("---")
-    st.markdown("⚡ **Status:** `Online & Enchanted`")
+    st.markdown("🟢 **Status:** `Online & Enchanted`")
     st.markdown("👑 **Mastermind:** `Anurag`")
-    st.markdown("🌌 **Aura Level:** `100% Mystifying`")
-    st.markdown("🗣️ **Mode:** `Hindi • English • Hinglish`")
+    st.markdown("🟣 **Aura Level:** `100% Mystifying`")
+    st.markdown("🔵 **Mode:** `Hindi • English • Hinglish`")
     st.markdown("---")
     
     if st.button("🔥 Purge Memory Block"):
@@ -171,28 +185,27 @@ with st.sidebar:
 # 5. MAIN HEADER
 # ==========================================
 st.markdown('<h1 class="supernatural-title">⚡ VEER AI X ⚡</h1>', unsafe_allow_html=True)
-st.markdown('<div class="supernatural-sub">✨ The Supernatural AI • Created by Anurag ✨</div>', unsafe_allow_html=True)
+st.markdown('<div class="supernatural-sub">⚡ The Supernatural AI • Created by Anurag ⚡</div>', unsafe_allow_html=True)
 
 # ==========================================
 # 6. CHAT INTERFACE & EXECUTION
 # ==========================================
 # Render chat history
 for message in st.session_state.chat.history:
-    role_icon = "🧑‍💻" if message.role == "user" else "🔮"
+    role_icon = "👤" if message.role == "user" else "⚡"
     with st.chat_message(message.role, avatar=role_icon):
         st.markdown(message.parts[0].text)
 
 # Handle User Input
 if prompt := st.chat_input("Summon your question to VEER AI X..."):
     # Display user input immediately
-    with st.chat_message("user", avatar="🧑‍💻"):
+    with st.chat_message("user", avatar="👤"):
         st.markdown(prompt)
     
     # Generate and display supernatural response
     try:
-        with st.chat_message("assistant", avatar="🔮"):
-            message_placeholder = st.empty()
+        with st.chat_message("assistant", avatar="⚡"):
             response = st.session_state.chat.send_message(prompt)
-            message_placeholder.markdown(response.text)
+            st.markdown(response.text)
     except Exception as e:
-        st.error(f"⚠️ Mystic Core Interruption: {e}")
+        st.error(f"⚠️ Mystic Core Interruption: {e}\n\nTip: Try running `pip install --upgrade google-generativeai` in your terminal!")
