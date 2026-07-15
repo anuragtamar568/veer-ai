@@ -1,0 +1,9 @@
+VEER-AI/
+│
+├── app.py
+├── requirements.txt
+├── .streamlit/
+│   └── secrets.toml
+│
+└── assets/
+    └── logo.png
