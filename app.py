@@ -16,11 +16,6 @@ st.set_page_config(
 # ==========================================
 st.markdown("""
 <style>
-/* --- UNIVERSAL FONT & GLYPH FIX --- */
-html, body, [class*="css"] {
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
-}
-
 /* --- ANIMATED MYSTIC BACKGROUND --- */
 @keyframes mysticBG {
     0% { background-position: 0% 50%; }
@@ -55,7 +50,7 @@ section[data-testid="stSidebar"] {
 
 .supernatural-title {
     text-align: center;
-    font-size: 60px;
+    font-size: 65px;
     font-weight: 900;
     letter-spacing: 2px;
     background: linear-gradient(90deg, #c77dff, #ff007f, #00ffff, #c77dff);
@@ -69,7 +64,7 @@ section[data-testid="stSidebar"] {
 .supernatural-sub {
     text-align: center;
     color: #00ffff;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
     letter-spacing: 3px;
     text-transform: uppercase;
@@ -77,7 +72,7 @@ section[data-testid="stSidebar"] {
     margin-bottom: 30px;
 }
 
-/* --- CHAT MESSAGE BUBBLES --- */
+/* --- CHAT MESSAGE BUBBLES (GLASSMORPHISM) --- */
 [data-testid="stChatMessage"] {
     background: rgba(20, 10, 40, 0.45) !important;
     backdrop-filter: blur(10px);
@@ -128,7 +123,7 @@ p, span, div, label {
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. DYNAMIC AI MODEL LOADER (NO MORE 404)
+# 3. AI CONFIGURATION & MODEL DROPDOWN
 # ==========================================
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
@@ -146,82 +141,61 @@ COMMUNICATION RULES:
 - For simple questions, give punchy, direct answers. For complex questions, provide detailed, structured breakdowns.
 """
 
-@st.cache_resource
-def get_working_model():
-    """Dynamically finds a working model for your key to guarantee no 404 errors."""
-    candidates = []
-    try:
-        for m in genai.list_models():
-            if 'generateContent' in m.supported_generation_methods:
-                # Clean name prefix if present
-                clean_name = m.name.replace("models/", "")
-                candidates.append(clean_name)
-    except Exception:
-        pass
+# --- SIDEBAR CONTROLS & SYSTEM INFORMATION ---
+with st.sidebar:
+    st.markdown("### SYSTEM CORE X")
+    st.markdown("---")
+    
+    # Cleaned Text Labels (No broken emojis)
+    st.markdown("▼ **Status:** `Online & Enchanted`")
+    st.markdown("▼ **Mastermind:** `Anurag`")
+    st.markdown("▼ **Aura Level:** `100% Mystifying`")
+    st.markdown("▼ **Languages:** `Hindi • English • Hinglish`")
+    st.markdown("---")
+    
+    # Model Selector to safely bypass 404 restrictions manually if needed
+    model_options = ["gemini-1.5-flash", "gemini-2.5-flash", "gemini-1.5-pro"]
+    selected_model = st.selectbox("🔮 Change Engine Core", model_options, index=0)
+    
+    st.markdown("---")
+    if st.button("Purge Memory Block"):
+        st.session_state.chat = None
+        st.rerun()
 
-    # Standard fallbacks
-    fallback_list = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.5-flash", "gemini-pro"]
-    for fb in fallback_list:
-        if fb not in candidates:
-            candidates.append(fb)
-
-    for model_name in candidates:
-        try:
-            mdl = genai.GenerativeModel(
-                model_name=model_name,
-                system_instruction=supernatural_persona
-            )
-            return mdl, model_name
-        except Exception:
-            continue
-
-    return genai.GenerativeModel("gemini-1.5-flash", system_instruction=supernatural_persona), "gemini-1.5-flash"
-
-model, active_model_name = get_working_model()
-
-# Initialize Chat Session
-if "chat" not in st.session_state:
+# --- INITIALIZE OR RE-INITIALIZE CHAT SESSION ---
+if "current_model" not in st.session_state or st.session_state.current_model != selected_model:
+    st.session_state.current_model = selected_model
+    model = genai.GenerativeModel(
+        model_name=selected_model,
+        system_instruction=supernatural_persona
+    )
     st.session_state.chat = model.start_chat(history=[])
 
 # ==========================================
-# 4. SIDEBAR (COMPATIBLE ICONS)
+# 4. MAIN APPLICATION HEADER
 # ==========================================
-with st.sidebar:
-    st.markdown("### ⚡ **VEER CORE X**")
-    st.markdown("---")
-    st.markdown("⚡ **Status:** `Online & Active`")
-    st.markdown("◆ **Mastermind:** `Anurag`")
-    st.markdown("◈ **Active Core:** `" + active_model_name + "`")
-    st.markdown("▶ **Mode:** `Hindi • English • Hinglish`")
-    st.markdown("---")
-    
-    if st.button("🔥 Purge Memory Block"):
-        st.session_state.chat = model.start_chat(history=[])
-        st.rerun()
+st.markdown('<h1 class="supernatural-title">VEER AI X</h1>', unsafe_allow_html=True)
+st.markdown('<div class="supernatural-sub">The Supernatural AI • Created by Anurag</div>', unsafe_allow_html=True)
 
 # ==========================================
-# 5. MAIN HEADER
+# 5. CHAT INTERFACE & RUNTIME
 # ==========================================
-st.markdown('<h1 class="supernatural-title">⚡ VEER AI X ⚡</h1>', unsafe_allow_html=True)
-st.markdown('<div class="supernatural-sub">⚡ The Supernatural AI • Created by Anurag ⚡</div>', unsafe_allow_html=True)
-
-# ==========================================
-# 6. CHAT INTERFACE & EXECUTION
-# ==========================================
-# Render existing conversation
+# Render chat history with native clean icons
 for message in st.session_state.chat.history:
-    role_avatar = "⚡" if message.role == "assistant" else "►"
-    with st.chat_message(message.role, avatar=role_avatar):
+    avatar_type = "user" if message.role == "user" else "assistant"
+    with st.chat_message(message.role, avatar=avatar_type):
         st.markdown(message.parts[0].text)
 
 # Handle User Input
 if prompt := st.chat_input("Summon your question to VEER AI X..."):
-    with st.chat_message("user", avatar="►"):
+    # Display user input immediately
+    with st.chat_message("user", avatar="user"):
         st.markdown(prompt)
     
+    # Generate and display response
     try:
-        with st.chat_message("assistant", avatar="⚡"):
+        with st.chat_message("assistant", avatar="assistant"):
             response = st.session_state.chat.send_message(prompt)
             st.markdown(response.text)
     except Exception as e:
-        st.error(f"⚠️ Mystic Core Interruption: {e}")
+        st.error(f"Mystic Core Interruption: {e}\n\n💡 Try switching the 'Engine Core' dropdown in the sidebar to 'gemini-2.5-flash' or another model option!")
