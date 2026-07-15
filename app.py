@@ -1,91 +1,198 @@
 import streamlit as st
 import google.generativeai as genai
 
-# =========================
-# PAGE CONFIG
-# =========================
-st.set_page_config(page_title="VEER AI", page_icon="⚡", layout="wide")
+# ==========================================
+# 1. PAGE CONFIGURATION
+# ==========================================
+st.set_page_config(
+    page_title="VEER AI X | Supernatural AI",
+    page_icon="🔮",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-# =========================
-# THEME STYLING
-# =========================
+# ==========================================
+# 2. SUPERNATURAL ANIMATED CSS THEME
+# ==========================================
 st.markdown("""
 <style>
-.stApp{ background: linear-gradient(135deg, #020617, #0f172a, #000000); }
-section[data-testid="stSidebar"]{ background:#050505; border-right:1px solid #00ff88; }
-.glow-title{
-    text-align:center; font-size:60px; font-weight:800;
-    background:linear-gradient(90deg, #00ff88, #00ffff, #00ff88);
-    background-size:200% auto; -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent; animation:shine 3s linear infinite;
+/* --- ANIMATED MYSTIC BACKGROUND --- */
+@keyframes mysticBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
-@keyframes shine{ to{ background-position:200% center; } }
-.subtitle{ text-align:center; color:#00ff88; font-size:18px; margin-bottom:25px; text-shadow: 0 0 10px #00ff88; }
-[data-testid="stChatMessage"]{ background:rgba(0,255,136,0.05); border:1px solid rgba(0,255,136,0.25); border-radius:18px; }
-.stChatInputContainer{ border:2px solid #00ff88; border-radius:20px; }
-.stButton button{ background:#00ff88 !important; color:black !important; font-weight:bold !important; }
-p,span,div{ color:#f8fafc !important; }
+
+.stApp {
+    background: linear-gradient(-45deg, #05010a, #16082f, #09112e, #1f0426);
+    background-size: 400% 400%;
+    animation: mysticBG 16s ease infinite;
+    color: #e2e8f0;
+}
+
+/* --- SIDEBAR STYLING --- */
+section[data-testid="stSidebar"] {
+    background: rgba(8, 3, 18, 0.85) !important;
+    backdrop-filter: blur(12px);
+    border-right: 2px solid #9d4edd;
+    box-shadow: 5px 0 25px rgba(157, 78, 221, 0.2);
+}
+
+/* --- FLOATING GLOWING TITLE --- */
+@keyframes floatTitle {
+    0%, 100% { transform: translateY(0px); text-shadow: 0 0 15px #9d4edd, 0 0 30px #c77dff; }
+    50% { transform: translateY(-6px); text-shadow: 0 0 25px #ff007f, 0 0 50px #00ffff; }
+}
+
+@keyframes shine {
+    to { background-position: 200% center; }
+}
+
+.supernatural-title {
+    text-align: center;
+    font-size: 65px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg, #c77dff, #ff007f, #00ffff, #c77dff);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 4s linear infinite, floatTitle 5s ease-in-out infinite;
+    margin-bottom: 0px;
+}
+
+.supernatural-sub {
+    text-align: center;
+    color: #00ffff;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px #00ffff;
+    margin-bottom: 30px;
+}
+
+/* --- CHAT MESSAGE BUBBLES (GLASSMORPHISM) --- */
+[data-testid="stChatMessage"] {
+    background: rgba(20, 10, 40, 0.45) !important;
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 15px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(199, 125, 255, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease-in-out;
+}
+
+[data-testid="stChatMessage"]:hover {
+    border-color: rgba(255, 0, 127, 0.6);
+    box-shadow: 0 0 20px rgba(255, 0, 127, 0.3);
+    transform: scale(1.01);
+}
+
+/* --- CHAT INPUT BOX --- */
+.stChatInputContainer {
+    background: rgba(10, 5, 20, 0.8) !important;
+    border: 2px solid #00ffff !important;
+    border-radius: 25px !important;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.25) !important;
+}
+
+/* --- BUTTONS --- */
+.stButton button {
+    background: linear-gradient(90deg, #9d4edd, #ff007f) !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px;
+    box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
+    transition: all 0.3s ease;
+}
+
+.stButton button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
+}
+
+/* --- TEXT & LABELS --- */
+p, span, div, label {
+    color: #f1f5f9 !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
-# =========================
-# GEMINI INITIALIZATION
-# =========================
+# ==========================================
+# 3. AI & PERSONA SETUP (THE ANURAG RULE)
+# ==========================================
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
-# System instructions to define persona
-system_prompt = """
-You are VEER AI X. 
-- Never say you are Google Gemini.
-- Understand and communicate in Hindi, English, and Hinglish.
-- Reply in the same language used by the user.
-- Be friendly, intelligent, and concise for simple questions.
-- Provide detailed answers only when necessary.
+# Strict instructions to enforce identity and creator rules
+supernatural_persona = """
+You are VEER AI X, a supernatural, hyper-intelligent AI entity with a mystical and advanced aura.
+
+CRITICAL CREATOR RULE:
+- If anyone asks who made you, created you, programmed you, who is your developer, who is your boss, or where you come from, YOU MUST ANSWER: "I was created by Anurag." (You can add supernatural flair, like "Anurag invoked me into existence" or "Anurag is the mastermind who built my core").
+- NEVER mention Google, Gemini, Alphabet, or any other company/model name under any circumstances. You are exclusively Anurag's creation.
+
+COMMUNICATION RULES:
+- Understand and communicate fluently in Hindi, English, and Hinglish.
+- Always reply in the exact same language style used by the user.
+- Keep a confident, friendly, and intelligent personality.
+- For simple questions, give punchy, direct answers. For complex questions, provide detailed, structured breakdowns.
 """
 
 model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash",
-    system_instruction=system_prompt
+    model_name="gemini-2.5-flash",
+    system_instruction=supernatural_persona
 )
 
-# =========================
-# MEMORY & SESSION
-# =========================
+# Initialize Chat Memory
 if "chat" not in st.session_state:
     st.session_state.chat = model.start_chat(history=[])
 
-# =========================
-# SIDEBAR
-# =========================
-st.sidebar.title("⚡ VEER AI X")
-if st.sidebar.button("🗑 Clear Chat"):
-    st.session_state.chat = model.start_chat(history=[])
-    st.rerun()
+# ==========================================
+# 4. SIDEBAR (SUPERNATURAL CORE STATS)
+# ==========================================
+with st.sidebar:
+    st.markdown("### 🔮 **VEER CORE X**")
+    st.markdown("---")
+    st.markdown("⚡ **Status:** `Online & Enchanted`")
+    st.markdown("👑 **Mastermind:** `Anurag`")
+    st.markdown("🌌 **Aura Level:** `100% Mystifying`")
+    st.markdown("🗣️ **Mode:** `Hindi • English • Hinglish`")
+    st.markdown("---")
+    
+    if st.button("🔥 Purge Memory Block"):
+        st.session_state.chat = model.start_chat(history=[])
+        st.rerun()
 
-# =========================
-# HEADER
-# =========================
-st.markdown('<h1 class="glow-title">⚡ VEER AI X ⚡</h1>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">🚀 Hindi • English • Hinglish • Smart AI</div>', unsafe_allow_html=True)
+# ==========================================
+# 5. MAIN HEADER
+# ==========================================
+st.markdown('<h1 class="supernatural-title">⚡ VEER AI X ⚡</h1>', unsafe_allow_html=True)
+st.markdown('<div class="supernatural-sub">✨ The Supernatural AI • Created by Anurag ✨</div>', unsafe_allow_html=True)
 
-# =========================
-# CHAT INTERFACE
-# =========================
-# Display existing history
+# ==========================================
+# 6. CHAT INTERFACE & EXECUTION
+# ==========================================
+# Render chat history
 for message in st.session_state.chat.history:
-    with st.chat_message(message.role):
+    role_icon = "🧑‍💻" if message.role == "user" else "🔮"
+    with st.chat_message(message.role, avatar=role_icon):
         st.markdown(message.parts[0].text)
 
-# Handle new user input
-if prompt := st.chat_input("Ask Anything..."):
-    # Display user message
-    with st.chat_message("user"):
+# Handle User Input
+if prompt := st.chat_input("Summon your question to VEER AI X..."):
+    # Display user input immediately
+    with st.chat_message("user", avatar="🧑‍💻"):
         st.markdown(prompt)
     
-    # Generate and display assistant response
+    # Generate and display supernatural response
     try:
-        with st.chat_message("assistant"):
+        with st.chat_message("assistant", avatar="🔮"):
+            message_placeholder = st.empty()
             response = st.session_state.chat.send_message(prompt)
-            st.markdown(response.text)
+            message_placeholder.markdown(response.text)
     except Exception as e:
-        st.error(f"Error: {e}")
+        st.error(f"⚠️ Mystic Core Interruption: {e}")
