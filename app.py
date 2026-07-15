@@ -1,42 +1,13 @@
+import google.generativeai as genai
 import streamlit as st
-import requests
 
-st.set_page_config(page_title="VEER AI Pro", page_icon="🤖")
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
-st.title("🤖 VEER AI Pro")
+model = genai.GenerativeModel("gemini-2.5-flash")
 
-api_key = st.secrets.get("GEMINI_API_KEY")
+response = model.generate_content("Hello")
 
-if not api_key:
-    st.error("GEMINI_API_KEY not found in Streamlit Secrets")
-    st.stop()
-
-prompt = st.chat_input("Ask anything...")
-
-if prompt:
-    with st.chat_message("user"):
-        st.write(prompt)
-
-    url = (
-        f"https://generativelanguage.googleapis.com/"
-        f"v1beta/models/gemini-2.5-flash-lite:generateContent?key={api_key}"
-    )
-
-    try:
-        response = requests.post(
-            url,
-            headers={"Content-Type": "application/json"},
-            json={
-                "contents": [
-                    {
-                        "parts": [
-                            {"text": prompt}
-                        ]
-                    }
-                ]
-            },
-            timeout=60
-        )
+st.write(response.text)
 
         st.write("Status:", response.status_code)
 
