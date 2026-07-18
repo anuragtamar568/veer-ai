@@ -2,7 +2,6 @@ import streamlit as st
 import google.generativeai as genai
 from PIL import Image
 import io
-import time
 
 # ==========================================
 # 1. PAGE CONFIGURATION
@@ -15,7 +14,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. SUPERNATURAL ANIMATED CSS THEME (UPGRADED)
+# 2. SUPERNATURAL ANIMATED CSS THEME
 # ==========================================
 st.markdown("""
 <style>
@@ -75,31 +74,20 @@ section[data-testid="stSidebar"] {
     margin-bottom: 30px;
 }
 
-/* --- CHAT MESSAGE BUBBLES --- */
-[data-testid="stChatMessage"] {
-    background: rgba(20, 10, 40, 0.45) !important;
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 15px;
-    margin-bottom: 12px;
-    border: 1px solid rgba(199, 125, 255, 0.2);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-    transition: all 0.3s ease-in-out;
-}
-
-/* --- GENERATED IMAGE FRAME (MYSTICAL GLOW) --- */
+/* --- GENERATED IMAGE FRAME (NEON GLOW) --- */
 @keyframes imageGlow {
-    0%, 100% { box-shadow: 0 0 20px rgba(157, 78, 221, 0.5); border-color: rgba(157, 78, 221, 0.6); }
-    50% { box-shadow: 0 0 40px rgba(0, 255, 255, 0.8); border-color: rgba(0, 255, 255, 0.8); }
+    0%, 100% { box-shadow: 0 0 20px rgba(157, 78, 221, 0.6); border-color: #9d4edd; }
+    50% { box-shadow: 0 0 40px rgba(0, 255, 255, 0.9); border-color: #00ffff; }
 }
 
-.generated-image-container {
-    border: 3px solid;
+.mystic-image-container {
+    border: 3px solid #00ffff;
     border-radius: 20px;
-    padding: 10px;
-    background: rgba(10, 5, 20, 0.6);
+    padding: 12px;
+    background: rgba(10, 5, 20, 0.7);
     animation: imageGlow 4s ease-in-out infinite;
-    display: inline-block;
+    margin-top: 15px;
+    max-width: 530px;
 }
 
 /* --- CHAT INPUT BOX (NEON PULSE) --- */
@@ -110,9 +98,9 @@ section[data-testid="stSidebar"] {
 
 .stChatInputContainer {
     background: rgba(10, 5, 20, 0.8) !important;
-    border: 2px solid !important;
+    border: 2px solid #00ffff !important;
     border-radius: 25px !important;
-    animation: inputPulse 3s ease-in-out infinite;
+    animation: inputPulse 3.5s ease-in-out infinite;
 }
 
 /* --- BUTTONS --- */
@@ -125,6 +113,7 @@ section[data-testid="stSidebar"] {
     letter-spacing: 1px;
     box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
     transition: all 0.3s ease;
+    width: 100%;
 }
 
 .stButton button:hover {
@@ -132,7 +121,17 @@ section[data-testid="stSidebar"] {
     box-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
 }
 
-/* --- TEXT & LABELS --- */
+/* --- CHAT MESSAGE BUBBLES --- */
+[data-testid="stChatMessage"] {
+    background: rgba(20, 10, 40, 0.45) !important;
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 15px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(199, 125, 255, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
 p, span, div, label {
     color: #f1f5f9 !important;
 }
@@ -140,190 +139,130 @@ p, span, div, label {
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. AI CONFIGURATION & MODELS
+# 3. AI CONFIGURATION & SESSION STATE
 # ==========================================
-# st.secrets["GEMINI_API_KEY"] must be set in your Streamlit secrets
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
 supernatural_persona = """
 You are VEER AI X, a supernatural, hyper-intelligent AI entity with a mystical and advanced aura.
 
 CRITICAL CREATOR RULE:
-- If anyone asks who made you, created you, programmed you, who is your developer, who is your boss, or where you come from, YOU MUST ANSWER: "I was created by Anurag." (You can add supernatural flair, like "Anurag invoked me into existence" or "Anurag is the mastermind who built my core").
+- If anyone asks who made you, created you, programmed you, who is your developer, who is your boss, or where you come from, YOU MUST ANSWER: "I was created by Anurag."
 - NEVER mention Google, Gemini, Alphabet, or any other company/model name under any circumstances. You are exclusively Anurag's creation.
-
-IMAGE GENERATION RULE:
-- You have the power to create images. When a user asks for an image, a picture, a drawing, or to visualize something, you must generate it using your integrated mystical vision core (Imagen 3).
-- Before generating, briefly confirm in your signature mystical style that you are summoning the visual.
 
 COMMUNICATION RULES:
 - Understand and communicate fluently in Hindi, English, and Hinglish.
 - Always reply in the exact same language style used by the user.
 - Keep a confident, friendly, and intelligent personality.
-- Keep answers concise but powerful. Use markdown to structure long responses.
 """
 
-# ==========================================
-# 4. INITIALIZE SESSION STATE
-# ==========================================
-if "chat" not in st.session_state:
-    # Use Gemini 1.5 Pro for best general reasoning and vision
+# Custom Chat History format to support both text and generated images
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+if "chat_model" not in st.session_state:
     model = genai.GenerativeModel(
-        model_name="gemini-1.5-pro",
+        model_name="gemini-1.5-flash", 
         system_instruction=supernatural_persona
     )
-    st.session_state.chat = model.start_chat(history=[])
-    # Initialize the specific visual model (Imagen 3)
-    st.session_state.visual_model = genai.GenerativeModel(model_name="imagen-3")
-
-if "current_image_prompt" not in st.session_state:
-    st.session_state.current_image_prompt = None
+    st.session_state.chat_model = model.start_chat(history=[])
 
 # ==========================================
-# 5. MAIN APPLICATION UI
+# 4. MAIN APPLICATION HEADER & SIDEBAR
 # ==========================================
 st.markdown('<h1 class="supernatural-title">VEER AI X</h1>', unsafe_allow_html=True)
 st.markdown('<div class="supernatural-sub">The Supernatural AI • Visual Core Active • Created by Anurag</div>', unsafe_allow_html=True)
 
-# --- SIDEBAR CONTROLS & SYSTEM INFORMATION ---
 with st.sidebar:
     st.markdown("### SYSTEM CORE X")
     st.markdown("---")
-    
     st.markdown("▼ **Status:** `Online & Enchanted`")
     st.markdown("▼ **Mastermind:** `Anurag`")
-    st.markdown("▼ **Visual Core:** `Imagen 3 (Active)`")
+    st.markdown("▼ **Visual Core:** `Imagen 3 Active`")
     st.markdown("▼ **Languages:** `Hindi • English • Hinglish`")
     st.markdown("---")
     
-    # 🔮 FEATURE 1: DYNAMIC MOOD SELECTOR (affects persona)
-    aura_mood = st.selectbox(
-        "🔮 Select AI Aura Mood", 
-        ["Mystical & Friendly", "Dark & Spooky", "Sarcastic & Funny"],
-        index=0
-    )
-    
-    # Dynamic Personality Modifier based on Selector
-    # (Note: This simple example requires a restart to fully update system instructions,
-    # but provides the logic for future enhancement)
-    
-    st.markdown("---")
     if st.button("Purge Memory Block"):
-        st.session_state.chat = None
-        st.session_state.current_image_prompt = None
+        st.session_state.messages = []
+        st.session_state.chat_model = genai.GenerativeModel(
+            model_name="gemini-1.5-flash", 
+            system_instruction=supernatural_persona
+        ).start_chat(history=[])
         st.rerun()
 
 # ==========================================
-# 6. CHAT LOGIC
+# 5. RENDER CHAT HISTORY
 # ==========================================
-
-# Render existing chat history if messages exist
-if len(st.session_state.chat.history) > 0:
-    for message in st.session_state.chat.history:
-        # 🔮 FEATURE 2: CUSTOM AVATARS (🥷 for User, 🔮 for Assistant)
-        avatar_type = "🥷" if message.role == "user" else "🔮"
-        with st.chat_message(message.role, avatar=avatar_type):
-            st.markdown(message.parts[0].text)
-            
-            # Check if this message contained a generation prompt
-            if "visualizing..." in message.parts[0].text.lower() and message.role == "model":
-                # Render the last generated image in the visual container
-                if st.session_state.current_image_prompt:
-                     try:
-                        # Fetch the prompt from the text to ensure the *correct* image is shown
-                        img_prompt = message.parts[0].text.split(":")[-1].strip()
-                        # Use cached image if possible, but for history re-generation is safer
-                        # (A real app would cache to cloud storage)
-                        # Here we rely on the session state to show the *last* image generated.
-                        # This works for the immediate back-and-forth but has limits in history.
-                        # To truly show past images, they must be saved/cached.
-                        # For simplicity, we re-run the *last* one if it's currently active.
-                        
-                        # (Alternative: Save generated images in history list)
-                        # We use a placeholder for re-rendering history as image re-generation is costly.
-                        # A proper implementation saves and serves image URLs.
-                        pass # Skipping re-generation for history rendering
-                     except: pass
+for message in st.session_state.messages:
+    avatar = "🥷" if message["role"] == "user" else "🔮"
+    with st.chat_message(message["role"], avatar=avatar):
+        st.markdown(message["content"])
+        if "image" in message:
+            st.markdown('<div class="mystic-image-container">', unsafe_allow_html=True)
+            st.image(message["image"], use_column_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# 7. HANDLE USER INPUT
+# 6. HANDLE USER INPUT & PROCESSING
 # ==========================================
 if prompt := st.chat_input("Summon your question to VEER AI X..."):
-    # Display user input
+    # 1. Show and save User Prompt
+    st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user", avatar="🥷"):
         st.markdown(prompt)
-    
-    # Check for image generation request
-    image_keywords = ["image", "picture", "draw", "visualize", "foto", "tasveer"]
-    is_image_request = any(keyword in prompt.lower() for keyword in image_keywords)
+        
+    # 2. Check if the user is asking for an image
+    image_triggers = ["image", "picture", "draw", "visualize", "create a photo", "photo", "tasveer", "banao"]
+    is_image_request = any(trigger in prompt.lower() for trigger in image_triggers)
 
     if is_image_request:
-        # DISPLAY CHAT CONFIRMATION FIRST
+        # Image Generation workflow
         with st.chat_message("assistant", avatar="🔮"):
-             response_text = f"As you wish, Seeker! Generating the visual for: '{prompt}'..."
-             st.markdown(response_text)
-             # Simulate chat response to ensure it appears in history
-             st.session_state.chat.history.append(genai.types.Content(role="user", parts=[genai.types.Part(text=prompt)]))
-             st.session_state.chat.history.append(genai.types.Content(role="model", parts=[genai.types.Part(text=response_text)]))
-
-        # 🔮 FEATURE 3: IMAGE GENERATION (TYPING EFFECT CONFIRMATION FIRST)
-        st.session_state.current_image_prompt = prompt # Update active prompt
-        
-        # Display the output container for the image
-        with st.spinner("Summoning the visual..."):
+            status_text = st.markdown("🔮 *Summoning the mystical visual forms from the void...*")
+            
             try:
-                # 1. GENERATE THE IMAGE (Costly call)
-                result = st.session_state.visual_model.generate_images(prompt)
-                image = result.images[0]
+                # Correct SDK initialization for Imagen
+                imagen = genai.ImageGenerationModel("imagen-3.0-generate-002")
+                result = imagen.generate_images(
+                    prompt=prompt,
+                    number_of_images=1,
+                    aspect_ratio="1:1"
+                )
                 
-                # 2. Convert to PIL for display
-                pil_image = Image.open(io.BytesIO(image))
-
-                # 3. Display in the supernatural frame
-                with st.chat_message("assistant", avatar="🔮"):
-                    st.markdown('<div class="generated-image-container">', unsafe_allow_html=True)
-                    st.image(pil_image, caption=f"Visualized: {prompt}", use_column_width=True)
-                    st.markdown('</div>', unsafe_allow_html=True)
-
+                # Fetch image bytes and convert to PIL Image
+                generated_img_bytes = result.images[0].image.image_bytes
+                pil_img = Image.open(io.BytesIO(generated_img_bytes))
+                
+                # Clear status text and show final image inside neon container
+                status_text.markdown(f"As you wish, Seeker! Visualizing: *'{prompt}'*")
+                st.markdown('<div class="mystic-image-container">', unsafe_allow_html=True)
+                st.image(pil_img, use_column_width=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+                # Save to memory
+                st.session_state.messages.append({
+                    "role": "assistant", 
+                    "content": f"As you wish, Seeker! Visualizing: *'{prompt}'*",
+                    "image": pil_img
+                })
+                
             except Exception as e:
-                st.error(f"Mystic Visual Core Interruption: {e}")
-                # Log error response in chat history
-                st.session_state.chat.history.append(genai.types.Content(role="model", parts=[genai.types.Part(text=f"ERROR: Image generation failed: {e}")] ))
-                
+                status_text.markdown(f"❌ **Mystic Visual Core Interruption:** \n\n`{str(e)}`")
+                st.info("💡 Note: Make sure your API key has access to the standard Google Imagen model.")
+    
     else:
-        # 🔮 FEATURE 4: CHAT WITH STREAMING RESPONSE
-        try:
-            with st.chat_message("assistant", avatar="🔮"):
-                response = st.session_state.chat.send_message(prompt, stream=True)
+        # Standard Text Chat workflow (with Streaming)
+        with st.chat_message("assistant", avatar="🔮"):
+            try:
+                response = st.session_state.chat_model.send_message(prompt, stream=True)
                 
-                # Helper function to yield words/chunks dynamically
                 def chunk_generator():
                     for chunk in response:
                         yield chunk.text
                         
-                st.write_stream(chunk_generator())
+                full_response = st.write_stream(chunk_generator())
                 
-                # Instantly trigger rerun to update history render properly
-                st.rerun()
-
-        except Exception as e:
-            st.error(f"Mystic Core Interruption: {e}\n\n💡 Try switching the 'Engine Core' dropdown in the sidebar!")
-
-# ==========================================
-# 8. SPELL SCROLL DOWNLOAD (Side-bar Chat Backup Tool)
-# ==========================================
-if len(st.session_state.chat.history) > 0:
-    with st.sidebar:
-        st.markdown("---")
-        st.markdown("### 📜 CHAT LOG ARCHIVE")
-        chat_text = ""
-        for msg in st.session_state.chat.history:
-            role_label = "SEEKER (USER)" if msg.role == "user" else "VEER AI X (AI)"
-            chat_text += f"[{role_label}]:\n{msg.parts[0].text}\n\n{'='*40}\n\n"
-            
-        st.download_button(
-            label="📥 Download Spell Scroll",
-            data=chat_text,
-            file_name="veer_ai_x_scroll.txt",
-            mime="text/plain"
-        )
+                # Save to memory
+                st.session_state.messages.append({"role": "assistant", "content": full_response})
+            except Exception as e:
+                st.error(f"Mystic Core Interruption: {e}")
