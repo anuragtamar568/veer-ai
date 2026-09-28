@@ -7,7 +7,7 @@ import google.generativeai as genai
 from PIL import Image
 
 # =========================================================
-# VEER AI X | ROBOTIC JARVIS-INSPIRED ASSISTANT
+# VEER AI X | JARVIS INSPIRED ROBOTIC AI
 # =========================================================
 
 st.set_page_config(
@@ -17,7 +17,9 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ------------------------- ROBOTIC THEME -------------------------
+# =========================================================
+# 1. ROBOTIC THEME
+# =========================================================
 
 st.markdown("""
 <style>
@@ -27,25 +29,28 @@ st.markdown("""
     --cyan: #00eaff;
     --blue: #168bff;
     --deep: #030912;
-    --panel: rgba(5, 23, 39, .82);
-    --line: rgba(0, 234, 255, .32);
+    --line: rgba(0,234,255,.32);
 }
 
 .stApp {
     background:
-      radial-gradient(ellipse at 50% -20%, rgba(0, 110, 160, .28), transparent 55%),
-      linear-gradient(145deg, #02060d 0%, #061322 48%, #020711 100%);
+        radial-gradient(ellipse at 50% -20%,
+        rgba(0,110,160,.28), transparent 55%),
+        linear-gradient(145deg,
+        #02060d 0%, #061322 48%, #020711 100%);
     color: #dffaff;
 }
 
 header[data-testid="stHeader"] {
-    background: rgba(0,0,0,0);
+    background: transparent;
 }
 
 [data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #04111f 0%, #020711 100%) !important;
+    background: linear-gradient(
+        180deg, #04111f 0%, #020711 100%
+    ) !important;
     border-right: 1px solid var(--line);
-    box-shadow: 5px 0 28px rgba(0, 234, 255, .08);
+    box-shadow: 5px 0 28px rgba(0,234,255,.08);
 }
 
 h1, h2, h3, h4, p, label, span, div {
@@ -59,9 +64,10 @@ h1, h2, h3, h4, p, label, span, div {
     font-size: clamp(32px, 5vw, 62px);
     letter-spacing: .13em;
     color: #dffcff;
-    text-shadow: 0 0 8px #00eaff,
-                 0 0 24px rgba(0,234,255,.7),
-                 0 0 48px rgba(22,139,255,.45);
+    text-shadow:
+        0 0 8px #00eaff,
+        0 0 24px rgba(0,234,255,.7),
+        0 0 48px rgba(22,139,255,.45);
     margin: 4px 0 0 0;
 }
 
@@ -69,7 +75,7 @@ h1, h2, h3, h4, p, label, span, div {
     font-family: 'Orbitron', sans-serif !important;
     text-align: center;
     color: #6eefff;
-    letter-spacing: .22em;
+    letter-spacing: .18em;
     font-size: 11px;
     margin: 4px 0 20px 0;
 }
@@ -91,8 +97,9 @@ h1, h2, h3, h4, p, label, span, div {
     letter-spacing: .12em;
     font-family: 'Orbitron', sans-serif;
     font-size: 10px;
-    box-shadow: inset 0 0 18px rgba(0,234,255,.05),
-                0 0 20px rgba(0,234,255,.05);
+    box-shadow:
+        inset 0 0 18px rgba(0,234,255,.05),
+        0 0 20px rgba(0,234,255,.05);
 }
 
 .core-card {
@@ -106,8 +113,9 @@ h1, h2, h3, h4, p, label, span, div {
         rgba(5,27,45,.92),
         rgba(3,10,22,.9)
     );
-    box-shadow: inset 0 0 30px rgba(0,234,255,.035),
-                0 0 28px rgba(0,145,255,.09);
+    box-shadow:
+        inset 0 0 30px rgba(0,234,255,.035),
+        0 0 28px rgba(0,145,255,.09);
     text-align: center;
     position: relative;
     overflow: hidden;
@@ -120,7 +128,9 @@ h1, h2, h3, h4, p, label, span, div {
     right: 8%;
     top: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, #00eaff, transparent);
+    background: linear-gradient(
+        90deg, transparent, #00eaff, transparent
+    );
 }
 
 .core-heading {
@@ -151,7 +161,7 @@ h1, h2, h3, h4, p, label, span, div {
 }
 
 [data-testid="stChatMessage"] {
-    background: rgba(4, 19, 34, .78) !important;
+    background: rgba(4,19,34,.78) !important;
     border: 1px solid rgba(0,234,255,.2) !important;
     border-radius: 10px !important;
     box-shadow: 0 5px 22px rgba(0,0,0,.22);
@@ -174,8 +184,11 @@ h1, h2, h3, h4, p, label, span, div {
     color: #e6fcff !important;
 }
 
-.stButton button, .stDownloadButton button {
-    background: linear-gradient(100deg, #075a83, #087e9c) !important;
+.stButton button,
+.stDownloadButton button {
+    background: linear-gradient(
+        100deg, #075a83, #087e9c
+    ) !important;
     border: 1px solid #00dff5 !important;
     border-radius: 6px !important;
     color: #efffff !important;
@@ -185,8 +198,11 @@ h1, h2, h3, h4, p, label, span, div {
     box-shadow: 0 0 12px rgba(0,234,255,.12);
 }
 
-.stButton button:hover, .stDownloadButton button:hover {
-    background: linear-gradient(100deg, #087e9c, #079eb8) !important;
+.stButton button:hover,
+.stDownloadButton button:hover {
+    background: linear-gradient(
+        100deg, #087e9c, #079eb8
+    ) !important;
     box-shadow: 0 0 20px rgba(0,234,255,.3);
 }
 
@@ -224,89 +240,101 @@ footer {
 """, unsafe_allow_html=True)
 
 
-# -------------------- JARVIS-STYLE VOICE ----------------------
+# =========================================================
+# 2. JARVIS-INSPIRED VOICE SYSTEM
+# =========================================================
 
 def speak_text(text, voice_style="JARVIS Deep", language="Auto"):
-    """Browser voice. Available voices depend on browser and OS."""
-
     safe_text = json.dumps(str(text), ensure_ascii=False)
     safe_style = json.dumps(voice_style)
     safe_language = json.dumps(language)
 
-    st.components.v1.html(f"""
+    # Avoid Python f-string parsing of JavaScript braces.
+    html = """
     <script>
-    (() => {{
-      const text = {safe_text};
-      const style = {safe_style};
-      const language = {safe_language};
+    (() => {
+        const text = __TEXT__;
+        const style = __STYLE__;
+        const language = __LANGUAGE__;
 
-      if (!('speechSynthesis' in window) || !text) return;
+        if (!('speechSynthesis' in window) || !text) return;
 
-      const synth = window.speechSynthesis;
-      synth.cancel();
+        const synth = window.speechSynthesis;
+        synth.cancel();
 
-      const speak = () => {{
-        const voices = synth.getVoices();
-        const u = new SpeechSynthesisUtterance(text);
+        const speak = () => {
+            const voices = synth.getVoices();
+            const u = new SpeechSynthesisUtterance(text);
 
-        const langRegex =
-            language === "Hindi" ? /^hi/i :
-            language === "English" ? /^en/i : null;
+            const langRegex =
+                language === "Hindi" ? /^hi/i :
+                language === "English" ? /^en/i : null;
 
-        let candidates = langRegex
-            ? voices.filter(v => langRegex.test(v.lang))
-            : voices;
+            let candidates = langRegex
+                ? voices.filter(v => langRegex.test(v.lang))
+                : voices;
 
-        if (!candidates.length) candidates = voices;
+            if (!candidates.length) {
+                candidates = voices;
+            }
 
-        const preferred =
-            candidates.find(v => /Microsoft David|Google UK English Male|Daniel|Alex|Mark/i.test(v.name))
-            || candidates.find(v => /^en-US/i.test(v.lang))
-            || candidates.find(v => /^en-IN/i.test(v.lang))
-            || candidates.find(v => /^hi-IN/i.test(v.lang))
-            || candidates[0];
+            const preferred =
+                candidates.find(v =>
+                    /Microsoft David|Google UK English Male|Daniel|Alex|Mark/i.test(v.name)
+                )
+                || candidates.find(v => /^en-US/i.test(v.lang))
+                || candidates.find(v => /^en-IN/i.test(v.lang))
+                || candidates.find(v => /^hi-IN/i.test(v.lang))
+                || candidates[0];
 
-        if (preferred) u.voice = preferred;
+            if (preferred) {
+                u.voice = preferred;
+            }
 
-        if (style === "JARVIS Deep") {
-            u.rate = 0.88;
-            u.pitch = 0.62;
-        }
-        else if (style === "Robotic") {
-            u.rate = 0.78;
-            u.pitch = 0.48;
-        }
-        else if (style === "Calm AI") {
-            u.rate = 0.92;
-            u.pitch = 0.82;
+            if (style === "JARVIS Deep") {
+                u.rate = 0.88;
+                u.pitch = 0.62;
+            }
+            else if (style === "Robotic") {
+                u.rate = 0.78;
+                u.pitch = 0.48;
+            }
+            else if (style === "Calm AI") {
+                u.rate = 0.92;
+                u.pitch = 0.82;
+            }
+            else {
+                u.rate = 1.0;
+                u.pitch = 1.0;
+            }
+
+            u.volume = 1.0;
+            synth.speak(u);
+        };
+
+        if (synth.getVoices().length) {
+            speak();
         }
         else {
-            u.rate = 1.0;
-            u.pitch = 1.0;
+            synth.onvoiceschanged = () => {
+                synth.onvoiceschanged = null;
+                speak();
+            };
         }
-
-        u.volume = 1.0;
-        synth.speak(u);
-      };
-
-      if (synth.getVoices().length) {
-          speak();
-      } else {
-          synth.onvoiceschanged = () => {
-              synth.onvoiceschanged = null;
-              speak();
-          };
-
-          setTimeout(() => {
-              if (!synth.speaking && !synth.pending) speak();
-          }, 700);
-      }
-    }})();
+    })();
     </script>
-    """, height=0)
+    """
+
+    html = html.replace("__TEXT__", safe_text)
+    html = html.replace("__STYLE__", safe_style)
+    html = html.replace("__LANGUAGE__", safe_language)
+
+    st.components.v1.html(html, height=0)
 
 
-# -------------------- GEMINI CONFIG ---------------------
+# =========================================================
+# 3. GEMINI AI CONFIGURATION
+# =========================================================
 
 api_key = st.secrets.get("GEMINI_API_KEY", "")
 
@@ -320,10 +348,14 @@ if not api_key:
 genai.configure(api_key=api_key)
 
 
-# -------------------- SIDEBAR ---------------------------
+# =========================================================
+# 4. SIDEBAR CONTROL PANEL
+# =========================================================
 
 with st.sidebar:
+
     st.markdown("## 🤖 VEER AI X")
+
     st.markdown(
         '<div class="small-label">ROBOTIC INTELLIGENCE CORE</div>',
         unsafe_allow_html=True
@@ -371,9 +403,13 @@ with st.sidebar:
 
     voice_style = st.selectbox(
         "VOICE PROFILE",
-        ["JARVIS Deep", "Robotic", "Calm AI", "Natural"],
-        index=0,
-        help="Voice profiles browser speech ki speed aur pitch set karte hain."
+        [
+            "JARVIS Deep",
+            "Robotic",
+            "Calm AI",
+            "Natural"
+        ],
+        index=0
     )
 
     voice_language = st.selectbox(
@@ -383,18 +419,24 @@ with st.sidebar:
     )
 
     st.caption(
-        "Actual voice options Chrome/Windows ke installed voices par depend karte hain."
+        "Actual voice Chrome/Windows ke installed voices par depend karti hai."
     )
 
     st.divider()
 
-    if st.button("🧹 CLEAR CHAT MEMORY", use_container_width=True):
+    if st.button(
+        "🧹 CLEAR CHAT MEMORY",
+        use_container_width=True
+    ):
         st.session_state.messages = []
         st.session_state.suggested_prompt = None
         st.session_state.last_voice_hash = None
         st.rerun()
 
-    if st.button("🔊 TEST AI VOICE", use_container_width=True):
+    if st.button(
+        "🔊 TEST AI VOICE",
+        use_container_width=True
+    ):
         speak_text(
             "Hello Anurag. VEER AI X systems are online. How may I assist you today?",
             voice_style,
@@ -404,15 +446,19 @@ with st.sidebar:
     st.divider()
 
     st.markdown("### 📡 CORE READOUT")
+
     st.caption(
         "VOICE MODULE: " +
         ("ACTIVE" if voice_enabled else "STANDBY")
     )
+
     st.caption("VISUAL INTERFACE: ONLINE")
     st.caption("MEMORY BUFFER: SESSION")
 
 
-# -------------------- SESSION STATE ---------------------
+# =========================================================
+# 5. SESSION STATE
+# =========================================================
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -424,7 +470,9 @@ if "voice_input_counter" not in st.session_state:
     st.session_state.voice_input_counter = 0
 
 
-# -------------------- MAIN HEADER ------------------------
+# =========================================================
+# 6. MAIN HEADER
+# =========================================================
 
 st.markdown(
     '<div class="robot-title">VEER AI X</div>',
@@ -447,56 +495,80 @@ st.markdown(
 )
 
 
-# -------------------- WELCOME SCREEN ---------------------
+# =========================================================
+# 7. WELCOME SCREEN
+# =========================================================
 
 if not st.session_state.messages:
+
     st.markdown("""
     <div class="core-card">
-      <div class="core-heading">🤖 SYSTEM INITIALIZED</div>
-      <div class="core-copy">
-        Greetings, Anurag. I am <b>VEER AI X</b>,
-        your personal AI assistant.
-        Voice interface and neural response core are ready.
-        Ask a question in Hindi, English, or Hinglish.
-      </div>
-      <div style="margin-top:15px">
-        <span class="core-chip">VOICE ENABLED</span>
-        <span class="core-chip">MULTILINGUAL CORE</span>
-        <span class="core-chip">IMAGE MODULE</span>
-      </div>
+        <div class="core-heading">🤖 SYSTEM INITIALIZED</div>
+
+        <div class="core-copy">
+            Greetings, Anurag. I am <b>VEER AI X</b>,
+            your personal AI assistant.
+            Voice interface and neural response core are ready.
+            Ask a question in Hindi, English, or Hinglish.
+        </div>
+
+        <div style="margin-top:15px">
+            <span class="core-chip">VOICE ENABLED</span>
+            <span class="core-chip">MULTILINGUAL CORE</span>
+            <span class="core-chip">IMAGE MODULE</span>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
     c1, c2, c3 = st.columns(3)
 
     with c1:
-        if st.button("🧠 Explain a topic", use_container_width=True):
+        if st.button(
+            "🧠 Explain a topic",
+            use_container_width=True
+        ):
             st.session_state.suggested_prompt = (
                 "Explain artificial intelligence in simple Hinglish."
             )
             st.rerun()
 
     with c2:
-        if st.button("⚙️ System capabilities", use_container_width=True):
+        if st.button(
+            "⚙️ System capabilities",
+            use_container_width=True
+        ):
             st.session_state.suggested_prompt = (
                 "Tell me your capabilities in a concise list."
             )
             st.rerun()
 
     with c3:
-        if st.button("🎨 Create futuristic art", use_container_width=True):
+        if st.button(
+            "🎨 Create futuristic art",
+            use_container_width=True
+        ):
             st.session_state.suggested_prompt = (
                 "Create an image of a futuristic blue robotic AI assistant interface."
             )
             st.rerun()
 
 
-# -------------------- CHAT HISTORY ----------------------
+# =========================================================
+# 8. CHAT HISTORY
+# =========================================================
 
 for message in st.session_state.messages:
-    avatar = "⚡" if message["role"] == "user" else "🤖"
 
-    with st.chat_message(message["role"], avatar=avatar):
+    avatar = (
+        "⚡"
+        if message["role"] == "user"
+        else "🤖"
+    )
+
+    with st.chat_message(
+        message["role"],
+        avatar=avatar
+    ):
         st.markdown(message["content"])
 
         if message.get("image") is not None:
@@ -506,7 +578,9 @@ for message in st.session_state.messages:
             )
 
 
-# -------------------- VOICE INPUT ------------------------
+# =========================================================
+# 9. VOICE INPUT
+# =========================================================
 
 st.markdown(
     '<div class="voice-panel">'
@@ -525,10 +599,15 @@ active_prompt = st.session_state.suggested_prompt
 st.session_state.suggested_prompt = None
 
 if voice_audio is not None:
+
     audio_bytes = voice_audio.getvalue()
-    audio_hash = hashlib.sha256(audio_bytes).hexdigest()
+
+    audio_hash = hashlib.sha256(
+        audio_bytes
+    ).hexdigest()
 
     if st.session_state.get("last_voice_hash") != audio_hash:
+
         st.session_state.last_voice_hash = audio_hash
 
         try:
@@ -548,11 +627,14 @@ if voice_audio is not None:
                 audio_part,
             ])
 
-            spoken_text = (transcription.text or "").strip()
+            spoken_text = (
+                transcription.text or ""
+            ).strip()
 
             if spoken_text:
                 active_prompt = spoken_text
                 st.session_state.voice_input_counter += 1
+
             else:
                 st.warning(
                     "Awaaz samajh nahi aayi. Dobara try karein."
@@ -562,41 +644,59 @@ if voice_audio is not None:
             st.error(f"Voice input error: {exc}")
 
 
-# -------------------- TEXT INPUT -------------------------
+# =========================================================
+# 10. TEXT INPUT
+# =========================================================
 
 if active_prompt is None:
+
     active_prompt = st.chat_input(
         "Type your command to VEER AI X..."
     )
 
 
-# -------------------- AI RESPONSE ENGINE -----------------
+# =========================================================
+# 11. AI RESPONSE ENGINE
+# =========================================================
 
 if active_prompt:
+
     st.session_state.messages.append({
         "role": "user",
         "content": active_prompt
     })
 
-    with st.chat_message("user", avatar="⚡"):
+    with st.chat_message(
+        "user",
+        avatar="⚡"
+    ):
         st.markdown(active_prompt)
 
     image_triggers = [
-        "image", "picture", "draw", "visualize",
-        "create a photo", "photo", "tasveer", "banao"
+        "generate image",
+        "create image",
+        "create a photo",
+        "draw",
+        "visualize",
+        "make an image",
+        "image banao",
+        "photo banao",
+        "tasveer banao"
     ]
 
+    prompt_lower = active_prompt.lower()
+
     is_image_request = any(
-        word in active_prompt.lower()
+        word in prompt_lower
         for word in image_triggers
     )
 
     tone_modifier = {
         "JARVIS Assistant":
-            "You are VEER AI X, a polished, concise, highly "
-            "capable futuristic assistant inspired by cinematic "
-            "AI assistants. Speak respectfully and clearly. "
-            "Do not claim to be the fictional JARVIS.",
+            "You are VEER AI X, a polished, concise, "
+            "highly capable futuristic assistant inspired "
+            "by cinematic AI assistants. Speak respectfully "
+            "and clearly. Do not claim to be the fictional JARVIS.",
 
         "Mystical & Friendly":
             "Be friendly, confident, slightly mystical, and helpful.",
@@ -606,7 +706,8 @@ if active_prompt:
             "while remaining helpful.",
 
         "Sarcastic & Funny":
-            "Be witty, playful, and lightly sarcastic without being rude.",
+            "Be witty, playful, and lightly sarcastic "
+            "without being rude.",
     }[aura_mood]
 
     system_prompt = f"""
@@ -622,10 +723,18 @@ Use steps when helpful.
 Do not invent facts. If uncertain, say so.
 """
 
-    # ---------------- IMAGE GENERATION ------------------
+
+    # =====================================================
+    # 12. IMAGE GENERATION
+    # =====================================================
 
     if is_image_request:
-        with st.chat_message("assistant", avatar="🤖"):
+
+        with st.chat_message(
+            "assistant",
+            avatar="🤖"
+        ):
+
             try:
                 st.markdown(
                     "**VISUAL CORE:** Image generation request received."
@@ -640,8 +749,8 @@ Do not invent facts. If uncertain, say so.
                 if image_model_class is None:
                     raise RuntimeError(
                         "Installed google-generativeai SDK does not "
-                        "expose ImageGenerationModel. Use a compatible "
-                        "image-generation API/SDK for this feature."
+                        "expose ImageGenerationModel. A compatible "
+                        "image-generation API/SDK is required."
                     )
 
                 image_model = image_model_class(
@@ -687,6 +796,7 @@ Do not invent facts. If uncertain, say so.
                     )
 
             except Exception as exc:
+
                 error_text = (
                     f"Image generation unavailable: {exc}"
                 )
@@ -698,10 +808,18 @@ Do not invent facts. If uncertain, say so.
                     "content": error_text
                 })
 
-    # ---------------- NORMAL AI CHAT --------------------
+
+    # =====================================================
+    # 13. NORMAL AI CHAT
+    # =====================================================
 
     else:
-        with st.chat_message("assistant", avatar="🤖"):
+
+        with st.chat_message(
+            "assistant",
+            avatar="🤖"
+        ):
+
             try:
                 model = genai.GenerativeModel(
                     model_name=selected_model,
@@ -711,6 +829,7 @@ Do not invent facts. If uncertain, say so.
                 history = []
 
                 for item in st.session_state.messages[:-1]:
+
                     history.append({
                         "role": (
                             "user"
@@ -720,7 +839,9 @@ Do not invent facts. If uncertain, say so.
                         "parts": [item["content"]],
                     })
 
-                chat = model.start_chat(history=history)
+                chat = model.start_chat(
+                    history=history
+                )
 
                 response = chat.send_message(
                     active_prompt,
@@ -749,19 +870,27 @@ Do not invent facts. If uncertain, say so.
                     )
 
             except Exception as exc:
-                st.error(f"AI core error: {exc}")
+                st.error(
+                    f"AI core error: {exc}"
+                )
 
 
-# -------------------- CHAT EXPORT ------------------------
+# =========================================================
+# 14. CHAT ARCHIVE
+# =========================================================
 
 if st.session_state.messages:
+
     with st.sidebar:
+
         st.divider()
+
         st.markdown("### 📜 CHAT ARCHIVE")
 
         archive = ""
 
         for item in st.session_state.messages:
+
             who = (
                 "ANURAG"
                 if item["role"] == "user"
@@ -769,7 +898,8 @@ if st.session_state.messages:
             )
 
             archive += (
-                f"[{who}]\n{item['content']}\n\n"
+                f"[{who}]\n"
+                f"{item['content']}\n\n"
                 f"{'-' * 36}\n\n"
             )
 
