@@ -2,19 +2,20 @@
 import io
 import json
 import hashlib
+import hmac
 import streamlit as st
 import google.generativeai as genai
 from PIL import Image
 
 # =========================================================
-# VEER AI X | JARVIS INSPIRED ROBOTIC AI
+# VEER AI X - ROBOTIC AI WITH SECURITY LOCK
 # =========================================================
 
 st.set_page_config(
     page_title="VEER AI X | Robotic Intelligence",
     page_icon="🤖",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="expanded"
 )
 
 # =========================================================
@@ -97,9 +98,7 @@ h1, h2, h3, h4, p, label, span, div {
     letter-spacing: .12em;
     font-family: 'Orbitron', sans-serif;
     font-size: 10px;
-    box-shadow:
-        inset 0 0 18px rgba(0,234,255,.05),
-        0 0 20px rgba(0,234,255,.05);
+    box-shadow: 0 0 20px rgba(0,234,255,.05);
 }
 
 .core-card {
@@ -109,28 +108,10 @@ h1, h2, h3, h4, p, label, span, div {
     border: 1px solid rgba(0,234,255,.35);
     border-radius: 12px;
     background: linear-gradient(
-        135deg,
-        rgba(5,27,45,.92),
-        rgba(3,10,22,.9)
+        135deg, rgba(5,27,45,.92), rgba(3,10,22,.9)
     );
-    box-shadow:
-        inset 0 0 30px rgba(0,234,255,.035),
-        0 0 28px rgba(0,145,255,.09);
+    box-shadow: 0 0 28px rgba(0,145,255,.09);
     text-align: center;
-    position: relative;
-    overflow: hidden;
-}
-
-.core-card:before {
-    content: "";
-    position: absolute;
-    left: 8%;
-    right: 8%;
-    top: 0;
-    height: 1px;
-    background: linear-gradient(
-        90deg, transparent, #00eaff, transparent
-    );
 }
 
 .core-heading {
@@ -160,17 +141,77 @@ h1, h2, h3, h4, p, label, span, div {
     background: rgba(0,234,255,.05);
 }
 
+.lock-card {
+    max-width: 470px;
+    margin: 5vh auto 0 auto;
+    padding: 30px 28px;
+    border: 1px solid rgba(0,234,255,.55);
+    border-radius: 18px;
+    background: linear-gradient(
+        145deg, rgba(5,28,49,.97), rgba(2,8,20,.98)
+    );
+    box-shadow:
+        0 0 18px rgba(0,234,255,.18),
+        inset 0 0 35px rgba(0,234,255,.045);
+    text-align: center;
+}
+
+.lock-icon {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    margin: 5px auto 20px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    border: 2px solid #00eaff;
+    color: #00eaff;
+    background: radial-gradient(
+        circle, rgba(0,234,255,.17), rgba(0,15,32,.3)
+    );
+    box-shadow:
+        0 0 15px rgba(0,234,255,.5),
+        inset 0 0 20px rgba(0,234,255,.12);
+}
+
+.lock-title {
+    font-family: 'Orbitron', sans-serif;
+    color: #dffcff;
+    font-size: 25px;
+    letter-spacing: .1em;
+    text-shadow: 0 0 12px #00eaff;
+}
+
+.lock-subtitle {
+    color: #7edfea;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    letter-spacing: .13em;
+    margin: 10px 0 24px 0;
+}
+
+.lock-status {
+    color: #00eaff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    letter-spacing: .1em;
+    border: 1px solid rgba(0,234,255,.22);
+    border-radius: 6px;
+    padding: 10px;
+    background: rgba(0,234,255,.04);
+    margin-top: 18px;
+}
+
 [data-testid="stChatMessage"] {
     background: rgba(4,19,34,.78) !important;
     border: 1px solid rgba(0,234,255,.2) !important;
     border-radius: 10px !important;
-    box-shadow: 0 5px 22px rgba(0,0,0,.22);
     padding: 13px !important;
 }
 
 [data-testid="stChatMessage"]:hover {
     border-color: rgba(0,234,255,.55) !important;
-    box-shadow: 0 0 20px rgba(0,234,255,.08);
 }
 
 .stChatInputContainer {
@@ -185,7 +226,8 @@ h1, h2, h3, h4, p, label, span, div {
 }
 
 .stButton button,
-.stDownloadButton button {
+.stDownloadButton button,
+.stFormSubmitButton button {
     background: linear-gradient(
         100deg, #075a83, #087e9c
     ) !important;
@@ -199,7 +241,8 @@ h1, h2, h3, h4, p, label, span, div {
 }
 
 .stButton button:hover,
-.stDownloadButton button:hover {
+.stDownloadButton button:hover,
+.stFormSubmitButton button:hover {
     background: linear-gradient(
         100deg, #087e9c, #079eb8
     ) !important;
@@ -241,15 +284,132 @@ footer {
 
 
 # =========================================================
-# 2. JARVIS-INSPIRED VOICE SYSTEM
+# 2. SESSION STATE
+# =========================================================
+
+if "unlocked" not in st.session_state:
+    st.session_state.unlocked = False
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+if "suggested_prompt" not in st.session_state:
+    st.session_state.suggested_prompt = None
+
+if "voice_input_counter" not in st.session_state:
+    st.session_state.voice_input_counter = 0
+
+if "last_voice_hash" not in st.session_state:
+    st.session_state.last_voice_hash = None
+
+if "lock_error" not in st.session_state:
+    st.session_state.lock_error = False
+
+
+# =========================================================
+# 3. ROBOTIC SECURITY LOCK
+# =========================================================
+
+lock_pin = st.secrets.get("ROBOTIC_LOCK_PIN", "")
+
+if not lock_pin:
+    st.markdown(
+        '<div class="robot-title">VEER AI X</div>',
+        unsafe_allow_html=True
+    )
+    st.error(
+        "ROBOTIC LOCK PIN configure nahi hai. "
+        "Apni Streamlit secrets file mein "
+        "ROBOTIC_LOCK_PIN add karein."
+    )
+    st.code(
+        'GEMINI_API_KEY = "your-gemini-api-key"\n'
+        'ROBOTIC_LOCK_PIN = "1234"',
+        language="toml"
+    )
+    st.stop()
+
+
+# Locked screen
+if not st.session_state.unlocked:
+
+    st.markdown(
+        '<div class="robot-title">VEER AI X</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        '<div class="robot-sub">'
+        'ADVANCED ROBOTIC SECURITY SYSTEM'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown("""
+    <div class="lock-card">
+        <div class="lock-icon">🔐</div>
+        <div class="lock-title">SYSTEM LOCKED</div>
+        <div class="lock-subtitle">
+            AUTHORIZED ACCESS ONLY
+        </div>
+        <div class="lock-status">
+            ● SECURITY SHIELD ACTIVE
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.write("")
+
+    with st.form("robotic_unlock_form"):
+
+        entered_pin = st.text_input(
+            "ENTER SECURITY PIN",
+            type="password",
+            placeholder="Enter your PIN",
+            max_chars=64
+        )
+
+        unlock_button = st.form_submit_button(
+            "🔓 UNLOCK VEER AI X",
+            use_container_width=True
+        )
+
+        if unlock_button:
+            if hmac.compare_digest(
+                entered_pin,
+                str(lock_pin)
+            ):
+                st.session_state.unlocked = True
+                st.session_state.lock_error = False
+                st.rerun()
+            else:
+                st.session_state.lock_error = True
+
+    if st.session_state.lock_error:
+        st.error(
+            "❌ ACCESS DENIED — Incorrect security PIN."
+        )
+
+    st.markdown(
+        '<div class="top-status">'
+        'ROBOTIC SECURITY CORE • ACTIVE'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+    st.stop()
+
+
+# =========================================================
+# 4. JARVIS-INSPIRED VOICE SYSTEM
 # =========================================================
 
 def speak_text(text, voice_style="JARVIS Deep", language="Auto"):
+
     safe_text = json.dumps(str(text), ensure_ascii=False)
     safe_style = json.dumps(voice_style)
     safe_language = json.dumps(language)
 
-    # Avoid Python f-string parsing of JavaScript braces.
     html = """
     <script>
     (() => {
@@ -287,9 +447,7 @@ def speak_text(text, voice_style="JARVIS Deep", language="Auto"):
                 || candidates.find(v => /^hi-IN/i.test(v.lang))
                 || candidates[0];
 
-            if (preferred) {
-                u.voice = preferred;
-            }
+            if (preferred) u.voice = preferred;
 
             if (style === "JARVIS Deep") {
                 u.rate = 0.88;
@@ -333,7 +491,7 @@ def speak_text(text, voice_style="JARVIS Deep", language="Auto"):
 
 
 # =========================================================
-# 3. GEMINI AI CONFIGURATION
+# 5. GEMINI CONFIGURATION
 # =========================================================
 
 api_key = st.secrets.get("GEMINI_API_KEY", "")
@@ -349,7 +507,7 @@ genai.configure(api_key=api_key)
 
 
 # =========================================================
-# 4. SIDEBAR CONTROL PANEL
+# 6. SIDEBAR
 # =========================================================
 
 with st.sidebar:
@@ -357,7 +515,9 @@ with st.sidebar:
     st.markdown("## 🤖 VEER AI X")
 
     st.markdown(
-        '<div class="small-label">ROBOTIC INTELLIGENCE CORE</div>',
+        '<div class="small-label">'
+        'ROBOTIC INTELLIGENCE CORE'
+        '</div>',
         unsafe_allow_html=True
     )
 
@@ -381,7 +541,7 @@ with st.sidebar:
             "Mystical & Friendly",
             "Dark & Spooky",
             "Sarcastic & Funny"
-        ],
+        ]
     )
 
     model_options = [
@@ -419,19 +579,10 @@ with st.sidebar:
     )
 
     st.caption(
-        "Actual voice Chrome/Windows ke installed voices par depend karti hai."
+        "Voice Chrome/Windows ke installed voices par depend karti hai."
     )
 
     st.divider()
-
-    if st.button(
-        "🧹 CLEAR CHAT MEMORY",
-        use_container_width=True
-    ):
-        st.session_state.messages = []
-        st.session_state.suggested_prompt = None
-        st.session_state.last_voice_hash = None
-        st.rerun()
 
     if st.button(
         "🔊 TEST AI VOICE",
@@ -443,35 +594,37 @@ with st.sidebar:
             voice_language
         )
 
+    if st.button(
+        "🔒 LOCK SYSTEM",
+        use_container_width=True
+    ):
+        st.session_state.unlocked = False
+        st.session_state.lock_error = False
+        st.rerun()
+
     st.divider()
 
     st.markdown("### 📡 CORE READOUT")
-
+    st.caption("SECURITY: UNLOCKED")
     st.caption(
-        "VOICE MODULE: " +
+        "VOICE: " +
         ("ACTIVE" if voice_enabled else "STANDBY")
     )
-
     st.caption("VISUAL INTERFACE: ONLINE")
     st.caption("MEMORY BUFFER: SESSION")
 
-
-# =========================================================
-# 5. SESSION STATE
-# =========================================================
-
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-if "suggested_prompt" not in st.session_state:
-    st.session_state.suggested_prompt = None
-
-if "voice_input_counter" not in st.session_state:
-    st.session_state.voice_input_counter = 0
+    if st.button(
+        "🧹 CLEAR CHAT MEMORY",
+        use_container_width=True
+    ):
+        st.session_state.messages = []
+        st.session_state.suggested_prompt = None
+        st.session_state.last_voice_hash = None
+        st.rerun()
 
 
 # =========================================================
-# 6. MAIN HEADER
+# 7. MAIN HEADER
 # =========================================================
 
 st.markdown(
@@ -488,15 +641,15 @@ st.markdown(
 
 st.markdown(
     '<div class="top-status">'
-    '● SYSTEM ONLINE &nbsp; | &nbsp; NEURAL CORE ACTIVE '
-    '&nbsp; | &nbsp; CREATOR: ANURAG'
+    '● SYSTEM ONLINE | NEURAL CORE ACTIVE '
+    '| SECURITY UNLOCKED | CREATOR: ANURAG'
     '</div>',
     unsafe_allow_html=True
 )
 
 
 # =========================================================
-# 7. WELCOME SCREEN
+# 8. WELCOME SCREEN
 # =========================================================
 
 if not st.session_state.messages:
@@ -504,18 +657,16 @@ if not st.session_state.messages:
     st.markdown("""
     <div class="core-card">
         <div class="core-heading">🤖 SYSTEM INITIALIZED</div>
-
         <div class="core-copy">
             Greetings, Anurag. I am <b>VEER AI X</b>,
             your personal AI assistant.
             Voice interface and neural response core are ready.
             Ask a question in Hindi, English, or Hinglish.
         </div>
-
         <div style="margin-top:15px">
             <span class="core-chip">VOICE ENABLED</span>
             <span class="core-chip">MULTILINGUAL CORE</span>
-            <span class="core-chip">IMAGE MODULE</span>
+            <span class="core-chip">SECURITY ACTIVE</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -554,7 +705,7 @@ if not st.session_state.messages:
 
 
 # =========================================================
-# 8. CHAT HISTORY
+# 9. CHAT HISTORY
 # =========================================================
 
 for message in st.session_state.messages:
@@ -579,20 +730,20 @@ for message in st.session_state.messages:
 
 
 # =========================================================
-# 9. VOICE INPUT
+# 10. VOICE INPUT
 # =========================================================
 
 st.markdown(
     '<div class="voice-panel">'
-    '🎙️ <b>VOICE INPUT MODULE</b> — Mic se Hindi, English '
-    'ya Hinglish mein bolkar sawal poochhein.'
+    '🎙️ <b>VOICE INPUT MODULE</b> — '
+    'Mic se Hindi, English ya Hinglish mein sawal poochhein.'
     '</div>',
     unsafe_allow_html=True
 )
 
 voice_audio = st.audio_input(
     "🎙️ Speak to VEER AI X",
-    key=f"voice_input_{st.session_state.voice_input_counter}",
+    key=f"voice_input_{st.session_state.voice_input_counter}"
 )
 
 active_prompt = st.session_state.suggested_prompt
@@ -606,14 +757,14 @@ if voice_audio is not None:
         audio_bytes
     ).hexdigest()
 
-    if st.session_state.get("last_voice_hash") != audio_hash:
+    if st.session_state.last_voice_hash != audio_hash:
 
         st.session_state.last_voice_hash = audio_hash
 
         try:
             audio_part = {
                 "mime_type": voice_audio.type or "audio/wav",
-                "data": audio_bytes,
+                "data": audio_bytes
             }
 
             transcriber = genai.GenerativeModel(
@@ -624,7 +775,7 @@ if voice_audio is not None:
                 "Understand the user's audio and return ONLY "
                 "the spoken request as text. The speech may be "
                 "Hindi, English, or Hinglish.",
-                audio_part,
+                audio_part
             ])
 
             spoken_text = (
@@ -634,7 +785,6 @@ if voice_audio is not None:
             if spoken_text:
                 active_prompt = spoken_text
                 st.session_state.voice_input_counter += 1
-
             else:
                 st.warning(
                     "Awaaz samajh nahi aayi. Dobara try karein."
@@ -645,18 +795,17 @@ if voice_audio is not None:
 
 
 # =========================================================
-# 10. TEXT INPUT
+# 11. TEXT INPUT
 # =========================================================
 
 if active_prompt is None:
-
     active_prompt = st.chat_input(
         "Type your command to VEER AI X..."
     )
 
 
 # =========================================================
-# 11. AI RESPONSE ENGINE
+# 12. AI RESPONSE ENGINE
 # =========================================================
 
 if active_prompt:
@@ -666,10 +815,7 @@ if active_prompt:
         "content": active_prompt
     })
 
-    with st.chat_message(
-        "user",
-        avatar="⚡"
-    ):
+    with st.chat_message("user", avatar="⚡"):
         st.markdown(active_prompt)
 
     image_triggers = [
@@ -707,7 +853,7 @@ if active_prompt:
 
         "Sarcastic & Funny":
             "Be witty, playful, and lightly sarcastic "
-            "without being rude.",
+            "without being rude."
     }[aura_mood]
 
     system_prompt = f"""
@@ -725,15 +871,12 @@ Do not invent facts. If uncertain, say so.
 
 
     # =====================================================
-    # 12. IMAGE GENERATION
+    # 13. IMAGE GENERATION
     # =====================================================
 
     if is_image_request:
 
-        with st.chat_message(
-            "assistant",
-            avatar="🤖"
-        ):
+        with st.chat_message("assistant", avatar="🤖"):
 
             try:
                 st.markdown(
@@ -748,9 +891,9 @@ Do not invent facts. If uncertain, say so.
 
                 if image_model_class is None:
                     raise RuntimeError(
-                        "Installed google-generativeai SDK does not "
-                        "expose ImageGenerationModel. A compatible "
-                        "image-generation API/SDK is required."
+                        "Installed SDK does not expose "
+                        "ImageGenerationModel. A compatible "
+                        "image-generation API is required."
                     )
 
                 image_model = image_model_class(
@@ -760,7 +903,7 @@ Do not invent facts. If uncertain, say so.
                 result = image_model.generate_images(
                     prompt=active_prompt,
                     number_of_images=1,
-                    aspect_ratio="1:1",
+                    aspect_ratio="1:1"
                 )
 
                 image_bytes = (
@@ -785,7 +928,7 @@ Do not invent facts. If uncertain, say so.
                 st.session_state.messages.append({
                     "role": "assistant",
                     "content": confirmation,
-                    "image": generated_image,
+                    "image": generated_image
                 })
 
                 if voice_enabled:
@@ -810,20 +953,17 @@ Do not invent facts. If uncertain, say so.
 
 
     # =====================================================
-    # 13. NORMAL AI CHAT
+    # 14. NORMAL AI CHAT
     # =====================================================
 
     else:
 
-        with st.chat_message(
-            "assistant",
-            avatar="🤖"
-        ):
+        with st.chat_message("assistant", avatar="🤖"):
 
             try:
                 model = genai.GenerativeModel(
                     model_name=selected_model,
-                    system_instruction=system_prompt,
+                    system_instruction=system_prompt
                 )
 
                 history = []
@@ -836,7 +976,7 @@ Do not invent facts. If uncertain, say so.
                             if item["role"] == "user"
                             else "model"
                         ),
-                        "parts": [item["content"]],
+                        "parts": [item["content"]]
                     })
 
                 chat = model.start_chat(
@@ -859,7 +999,7 @@ Do not invent facts. If uncertain, say so.
 
                 st.session_state.messages.append({
                     "role": "assistant",
-                    "content": full_response,
+                    "content": full_response
                 })
 
                 if voice_enabled and full_response:
@@ -870,13 +1010,11 @@ Do not invent facts. If uncertain, say so.
                     )
 
             except Exception as exc:
-                st.error(
-                    f"AI core error: {exc}"
-                )
+                st.error(f"AI core error: {exc}")
 
 
 # =========================================================
-# 14. CHAT ARCHIVE
+# 15. CHAT ARCHIVE
 # =========================================================
 
 if st.session_state.messages:
@@ -884,7 +1022,6 @@ if st.session_state.messages:
     with st.sidebar:
 
         st.divider()
-
         st.markdown("### 📜 CHAT ARCHIVE")
 
         archive = ""
@@ -908,5 +1045,5 @@ if st.session_state.messages:
             data=archive,
             file_name="veer_ai_x_chat.txt",
             mime="text/plain",
-            use_container_width=True,
+            use_container_width=True
         )
