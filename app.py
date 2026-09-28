@@ -186,6 +186,47 @@ p, span, div, label {
 """, unsafe_allow_html=True)
 
 # ==========================================
+# VOICE UI + BROWSER TEXT-TO-SPEECH
+# ==========================================
+st.markdown("""
+<style>
+.voice-panel {
+    border: 1px solid rgba(0,255,255,.35);
+    border-radius: 18px;
+    padding: 10px 14px;
+    margin: 8px 0 16px 0;
+    background: rgba(10,5,20,.55);
+}
+</style>
+""", unsafe_allow_html=True)
+
+# Browser-side TTS: no extra API key is required.
+def speak_text(text):
+    import json
+    safe_text = json.dumps(text)
+    st.components.v1.html(f"""
+    <script>
+    const text = {safe_text};
+    if ('speechSynthesis' in window && text) {{
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.95;
+        utterance.pitch = 1.0;
+
+        const voices = window.speechSynthesis.getVoices();
+        const preferred =
+            voices.find(v => /hi-IN/i.test(v.lang)) ||
+            voices.find(v => /en-IN/i.test(v.lang)) ||
+            voices.find(v => /en-US/i.test(v.lang));
+
+        if (preferred) utterance.voice = preferred;
+        window.speechSynthesis.speak(utterance);
+    }}
+    </script>
+    """, height=0)
+
+
+# ==========================================
 # 3. AI CONFIGURATION & SIDEBAR MODE CONTROLS
 # ==========================================
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
@@ -208,6 +249,13 @@ with st.sidebar:
     
     model_options = ["gemini-1.5-flash", "gemini-2.5-flash", "gemini-1.5-pro"]
     selected_model = st.selectbox("⚙️ Change Engine Core", model_options, index=0)
+
+    voice_enabled = st.toggle(
+        "🔊 AI Voice Reply",
+        value=True,
+        help="VEER AI ka answer browser me bolkar sunaye."
+    )
+
     st.markdown("---")
 
     # Mood system parameters
@@ -294,11 +342,69 @@ if len(st.session_state.messages) == 0:
 # 6. RUNTIME PROCESSING INTERFACE
 # ==========================================
 active_prompt = None
+
 if st.session_state.suggested_prompt:
     active_prompt = st.session_state.suggested_prompt
     st.session_state.suggested_prompt = None
-elif prompt := st.chat_input("Summon your question to VEER AI X..."):
-    active_prompt = prompt
+
+# 🎙️ Microphone input
+if "voice_input_counter" not in st.session_state:
+    st.session_state.voice_input_counter = 0
+
+st.markdown(
+    '<div class="voice-panel">🎙️ <b>Voice Mode</b> — नीचे mic दबाकर VEER AI से बोलकर बात करो. '
+    'Hindi, English ya Hinglish chalega.</div>',
+    unsafe_allow_html=True
+)
+
+voice_audio = st.audio_input(
+    "🎙️ Speak to VEER AI",
+    key=f"voice_input_{st.session_state.voice_input_counter}"
+)
+
+if voice_audio is not None:
+    # Prevent the same recorded audio from being processed repeatedly.
+    audio_bytes = voice_audio.getvalue()
+    import hashlib
+    audio_hash = hashlib.sha256(audio_bytes).hexdigest()
+
+    if st.session_state.get("last_voice_hash") != audio_hash:
+        st.session_state.last_voice_hash = audio_hash
+
+        try:
+            # Gemini can transcribe/understand the uploaded audio directly.
+            audio_part = {
+                "mime_type": voice_audio.type or "audio/wav",
+                "data": audio_bytes
+            }
+
+            voice_model = genai.GenerativeModel(
+                model_name=selected_model,
+                system_instruction=supernatural_persona
+            )
+
+            voice_result = voice_model.generate_content([
+                "Transcribe the user's speech exactly enough to understand the request. "
+                "Return ONLY the user's spoken request, without explanations or labels. "
+                "The user may speak Hindi, English, or Hinglish.",
+                audio_part
+            ])
+
+            spoken_text = (voice_result.text or "").strip()
+
+            if spoken_text:
+                active_prompt = spoken_text
+                st.session_state.voice_input_counter += 1
+            else:
+                st.warning("🎙️ Voice samajh nahi aayi. Dobara mic par bolkar try karo.")
+
+        except Exception as e:
+            st.error(f"🎙️ Voice input error: {e}")
+
+# Normal keyboard input still works.
+if active_prompt is None:
+    if prompt := st.chat_input("Summon your question to VEER AI X..."):
+        active_prompt = prompt
 
 if active_prompt:
     # 1. Show and Save User Prompt immediately
@@ -339,6 +445,9 @@ if active_prompt:
                     "content": confirm_msg,
                     "image": pil_img
                 })
+
+                if voice_enabled:
+                    speak_text(confirm_msg)
             except Exception as e:
                 status_text.markdown(f"❌ **Mystic Visual Core Interruption:** \n\n`{str(e)}`")
     else:
@@ -363,6 +472,9 @@ if active_prompt:
                         
                 full_response = st.write_stream(chunk_generator())
                 st.session_state.messages.append({"role": "assistant", "content": full_response})
+
+                if voice_enabled and full_response:
+                    speak_text(full_response)
             except Exception as e:
                 st.error(f"Mystic Core Interruption: {e}")
 
