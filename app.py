@@ -7,9 +7,9 @@ import streamlit as st
 import google.generativeai as genai
 from PIL import Image
 
-# =========================================================
-# VEER AI X - ROBOTIC AI WITH SECURITY LOCK
-# =========================================================
+# =====================================================
+# VEER AI X - NEON ROBOTIC EDITION
+# =====================================================
 
 st.set_page_config(
     page_title="VEER AI X | Robotic Intelligence",
@@ -18,9 +18,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# =========================================================
-# 1. ROBOTIC THEME
-# =========================================================
+# =====================================================
+# 1. ROBOTIC NEON THEME + TEXT GLOW
+# =====================================================
 
 st.markdown("""
 <style>
@@ -29,8 +29,9 @@ st.markdown("""
 :root {
     --cyan: #00eaff;
     --blue: #168bff;
+    --text: #d9fbff;
     --deep: #030912;
-    --line: rgba(0,234,255,.32);
+    --line: rgba(0,234,255,.35);
 }
 
 .stApp {
@@ -39,7 +40,7 @@ st.markdown("""
         rgba(0,110,160,.28), transparent 55%),
         linear-gradient(145deg,
         #02060d 0%, #061322 48%, #020711 100%);
-    color: #dffaff;
+    color: var(--text);
 }
 
 header[data-testid="stHeader"] {
@@ -54,30 +55,94 @@ header[data-testid="stHeader"] {
     box-shadow: 5px 0 28px rgba(0,234,255,.08);
 }
 
-h1, h2, h3, h4, p, label, span, div {
+/* Base font */
+.stApp,
+.stApp p,
+.stApp li,
+.stApp label {
     font-family: 'Rajdhani', sans-serif;
 }
 
+/* MAIN TEXT GLOW */
+.stMarkdown p,
+.stMarkdown li,
+.stMarkdown blockquote,
+[data-testid="stChatMessage"] p,
+[data-testid="stChatMessage"] li,
+[data-testid="stChatMessage"] span {
+    color: #d9fbff !important;
+    text-shadow:
+        0 0 3px rgba(0,234,255,.55),
+        0 0 9px rgba(0,234,255,.28);
+    font-size: 17px;
+    line-height: 1.55;
+}
+
+/* Strong and bold text */
+.stMarkdown strong,
+[data-testid="stChatMessage"] strong,
+[data-testid="stChatMessage"] b {
+    color: #ffffff !important;
+    text-shadow:
+        0 0 5px #00eaff,
+        0 0 12px rgba(0,234,255,.75);
+}
+
+/* Headings glow */
+.stMarkdown h1,
+.stMarkdown h2,
+.stMarkdown h3,
+[data-testid="stChatMessage"] h1,
+[data-testid="stChatMessage"] h2,
+[data-testid="stChatMessage"] h3 {
+    color: #7ff5ff !important;
+    font-family: 'Orbitron', sans-serif !important;
+    text-shadow:
+        0 0 5px #00eaff,
+        0 0 13px rgba(0,234,255,.8),
+        0 0 25px rgba(0,145,255,.5);
+}
+
+/* Bullet point glow */
+.stMarkdown li::marker,
+[data-testid="stChatMessage"] li::marker {
+    color: #00eaff;
+    text-shadow: 0 0 8px #00eaff;
+}
+
+/* Code text */
+.stMarkdown code,
+[data-testid="stChatMessage"] code {
+    color: #75f5ff !important;
+    background: rgba(0,234,255,.09) !important;
+    border: 1px solid rgba(0,234,255,.2);
+    text-shadow: 0 0 5px rgba(0,234,255,.6);
+}
+
+/* VEER AI X title */
 .robot-title {
     font-family: 'Orbitron', sans-serif !important;
     text-align: center;
     font-weight: 900;
     font-size: clamp(32px, 5vw, 62px);
     letter-spacing: .13em;
-    color: #dffcff;
+    color: #e5fdff !important;
     text-shadow:
         0 0 8px #00eaff,
-        0 0 24px rgba(0,234,255,.7),
-        0 0 48px rgba(22,139,255,.45);
+        0 0 24px rgba(0,234,255,.85),
+        0 0 48px rgba(22,139,255,.65);
     margin: 4px 0 0 0;
 }
 
 .robot-sub {
     font-family: 'Orbitron', sans-serif !important;
     text-align: center;
-    color: #6eefff;
+    color: #6eefff !important;
     letter-spacing: .18em;
     font-size: 11px;
+    text-shadow:
+        0 0 7px #00eaff,
+        0 0 15px rgba(0,234,255,.65);
     margin: 4px 0 20px 0;
 }
 
@@ -94,53 +159,64 @@ h1, h2, h3, h4, p, label, span, div {
         rgba(0,234,255,.04)
     );
     text-align: center;
-    color: #9ff7ff;
+    color: #9ff7ff !important;
     letter-spacing: .12em;
     font-family: 'Orbitron', sans-serif;
     font-size: 10px;
-    box-shadow: 0 0 20px rgba(0,234,255,.05);
+    text-shadow: 0 0 9px #00eaff;
+    box-shadow: 0 0 20px rgba(0,234,255,.08);
 }
 
 .core-card {
     max-width: 850px;
     margin: 18px auto 26px auto;
     padding: 25px 24px;
-    border: 1px solid rgba(0,234,255,.35);
+    border: 1px solid rgba(0,234,255,.4);
     border-radius: 12px;
     background: linear-gradient(
         135deg, rgba(5,27,45,.92), rgba(3,10,22,.9)
     );
-    box-shadow: 0 0 28px rgba(0,145,255,.09);
+    box-shadow:
+        inset 0 0 30px rgba(0,234,255,.05),
+        0 0 28px rgba(0,145,255,.13);
     text-align: center;
 }
 
 .core-heading {
     font-family: 'Orbitron', sans-serif;
-    color: #00eaff;
+    color: #00eaff !important;
     font-size: 20px;
     letter-spacing: .1em;
-    text-shadow: 0 0 12px rgba(0,234,255,.5);
+    text-shadow:
+        0 0 8px #00eaff,
+        0 0 20px rgba(0,234,255,.8);
 }
 
 .core-copy {
-    color: #c6eaf2;
+    color: #d9fbff !important;
     font-size: 18px;
-    line-height: 1.5;
+    line-height: 1.6;
+    text-shadow:
+        0 0 5px rgba(0,234,255,.6),
+        0 0 12px rgba(0,234,255,.3);
 }
 
 .core-chip {
     display: inline-block;
     margin: 6px 4px 0;
     padding: 5px 10px;
-    border: 1px solid rgba(0,234,255,.3);
+    border: 1px solid rgba(0,234,255,.4);
     border-radius: 4px;
-    color: #86f5ff;
+    color: #86f5ff !important;
     font-family: 'Orbitron', sans-serif;
     font-size: 9px;
     letter-spacing: .08em;
     background: rgba(0,234,255,.05);
+    text-shadow: 0 0 8px #00eaff;
+    box-shadow: 0 0 9px rgba(0,234,255,.1);
 }
 
+/* Security lock screen */
 .lock-card {
     max-width: 470px;
     margin: 5vh auto 0 auto;
@@ -177,22 +253,25 @@ h1, h2, h3, h4, p, label, span, div {
 
 .lock-title {
     font-family: 'Orbitron', sans-serif;
-    color: #dffcff;
+    color: #dffcff !important;
     font-size: 25px;
     letter-spacing: .1em;
-    text-shadow: 0 0 12px #00eaff;
+    text-shadow:
+        0 0 8px #00eaff,
+        0 0 18px rgba(0,234,255,.8);
 }
 
 .lock-subtitle {
-    color: #7edfea;
+    color: #7edfea !important;
     font-family: 'Orbitron', sans-serif;
     font-size: 10px;
     letter-spacing: .13em;
     margin: 10px 0 24px 0;
+    text-shadow: 0 0 8px #00eaff;
 }
 
 .lock-status {
-    color: #00eaff;
+    color: #00eaff !important;
     font-family: 'Orbitron', sans-serif;
     font-size: 10px;
     letter-spacing: .1em;
@@ -201,30 +280,39 @@ h1, h2, h3, h4, p, label, span, div {
     padding: 10px;
     background: rgba(0,234,255,.04);
     margin-top: 18px;
+    text-shadow: 0 0 8px #00eaff;
 }
 
+/* Chat cards */
 [data-testid="stChatMessage"] {
-    background: rgba(4,19,34,.78) !important;
-    border: 1px solid rgba(0,234,255,.2) !important;
+    background: rgba(4,19,34,.85) !important;
+    border: 1px solid rgba(0,234,255,.25) !important;
     border-radius: 10px !important;
     padding: 13px !important;
+    box-shadow:
+        0 5px 22px rgba(0,0,0,.22),
+        inset 0 0 18px rgba(0,234,255,.025);
 }
 
 [data-testid="stChatMessage"]:hover {
-    border-color: rgba(0,234,255,.55) !important;
+    border-color: rgba(0,234,255,.6) !important;
+    box-shadow: 0 0 20px rgba(0,234,255,.12);
 }
 
+/* Chat input */
 .stChatInputContainer {
-    border: 1px solid rgba(0,234,255,.55) !important;
+    border: 1px solid rgba(0,234,255,.6) !important;
     border-radius: 8px !important;
     background: rgba(2,12,24,.95) !important;
-    box-shadow: 0 0 16px rgba(0,234,255,.09);
+    box-shadow: 0 0 16px rgba(0,234,255,.12);
 }
 
 .stChatInputContainer textarea {
     color: #e6fcff !important;
+    text-shadow: 0 0 5px rgba(0,234,255,.4);
 }
 
+/* Buttons */
 .stButton button,
 .stDownloadButton button,
 .stFormSubmitButton button {
@@ -237,7 +325,8 @@ h1, h2, h3, h4, p, label, span, div {
     font-family: 'Orbitron', sans-serif !important;
     font-size: 10px !important;
     letter-spacing: .06em;
-    box-shadow: 0 0 12px rgba(0,234,255,.12);
+    text-shadow: 0 0 7px #00eaff;
+    box-shadow: 0 0 12px rgba(0,234,255,.15);
 }
 
 .stButton button:hover,
@@ -246,34 +335,38 @@ h1, h2, h3, h4, p, label, span, div {
     background: linear-gradient(
         100deg, #087e9c, #079eb8
     ) !important;
-    box-shadow: 0 0 20px rgba(0,234,255,.3);
+    box-shadow: 0 0 20px rgba(0,234,255,.35);
 }
 
+/* Inputs and select */
 div[data-baseweb="select"] > div,
 .stTextInput input {
     background: #071727 !important;
     border-color: rgba(0,234,255,.3) !important;
+    color: #d9fbff !important;
+}
+
+.small-label {
+    color: #70cbd8 !important;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-shadow: 0 0 7px #00eaff;
+}
+
+.voice-panel {
+    border: 1px solid rgba(0,234,255,.3);
+    border-radius: 7px;
+    background: rgba(0,234,255,.045);
+    padding: 9px 13px;
+    color: #a9eaf2 !important;
+    font-size: 15px;
+    margin: 10px 0;
+    text-shadow: 0 0 7px rgba(0,234,255,.55);
 }
 
 hr {
     border-color: rgba(0,234,255,.18) !important;
-}
-
-.small-label {
-    color: #70cbd8;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 10px;
-    letter-spacing: .12em;
-}
-
-.voice-panel {
-    border: 1px solid rgba(0,234,255,.24);
-    border-radius: 7px;
-    background: rgba(0,234,255,.035);
-    padding: 9px 13px;
-    color: #a9eaf2;
-    font-size: 15px;
-    margin: 10px 0;
 }
 
 footer {
@@ -283,9 +376,9 @@ footer {
 """, unsafe_allow_html=True)
 
 
-# =========================================================
+# =====================================================
 # 2. SESSION STATE
-# =========================================================
+# =====================================================
 
 if "unlocked" not in st.session_state:
     st.session_state.unlocked = False
@@ -306,9 +399,9 @@ if "lock_error" not in st.session_state:
     st.session_state.lock_error = False
 
 
-# =========================================================
+# =====================================================
 # 3. ROBOTIC SECURITY LOCK
-# =========================================================
+# =====================================================
 
 lock_pin = st.secrets.get("ROBOTIC_LOCK_PIN", "")
 
@@ -318,19 +411,16 @@ if not lock_pin:
         unsafe_allow_html=True
     )
     st.error(
-        "ROBOTIC LOCK PIN configure nahi hai. "
-        "Apni Streamlit secrets file mein "
-        "ROBOTIC_LOCK_PIN add karein."
+        "ROBOTIC_LOCK_PIN configure nahi hai. "
+        "Streamlit secrets mein PIN add karein."
     )
     st.code(
-        'GEMINI_API_KEY = "your-gemini-api-key"\n'
+        'GEMINI_API_KEY = "YOUR_GEMINI_API_KEY"\n'
         'ROBOTIC_LOCK_PIN = "1234"',
         language="toml"
     )
     st.stop()
 
-
-# Locked screen
 if not st.session_state.unlocked:
 
     st.markdown(
@@ -386,9 +476,7 @@ if not st.session_state.unlocked:
                 st.session_state.lock_error = True
 
     if st.session_state.lock_error:
-        st.error(
-            "❌ ACCESS DENIED — Incorrect security PIN."
-        )
+        st.error("❌ ACCESS DENIED — Incorrect security PIN.")
 
     st.markdown(
         '<div class="top-status">'
@@ -400,9 +488,9 @@ if not st.session_state.unlocked:
     st.stop()
 
 
-# =========================================================
-# 4. JARVIS-INSPIRED VOICE SYSTEM
-# =========================================================
+# =====================================================
+# 4. JARVIS-INSPIRED VOICE
+# =====================================================
 
 def speak_text(text, voice_style="JARVIS Deep", language="Auto"):
 
@@ -434,9 +522,7 @@ def speak_text(text, voice_style="JARVIS Deep", language="Auto"):
                 ? voices.filter(v => langRegex.test(v.lang))
                 : voices;
 
-            if (!candidates.length) {
-                candidates = voices;
-            }
+            if (!candidates.length) candidates = voices;
 
             const preferred =
                 candidates.find(v =>
@@ -452,16 +538,13 @@ def speak_text(text, voice_style="JARVIS Deep", language="Auto"):
             if (style === "JARVIS Deep") {
                 u.rate = 0.88;
                 u.pitch = 0.62;
-            }
-            else if (style === "Robotic") {
+            } else if (style === "Robotic") {
                 u.rate = 0.78;
                 u.pitch = 0.48;
-            }
-            else if (style === "Calm AI") {
+            } else if (style === "Calm AI") {
                 u.rate = 0.92;
                 u.pitch = 0.82;
-            }
-            else {
+            } else {
                 u.rate = 1.0;
                 u.pitch = 1.0;
             }
@@ -472,8 +555,7 @@ def speak_text(text, voice_style="JARVIS Deep", language="Auto"):
 
         if (synth.getVoices().length) {
             speak();
-        }
-        else {
+        } else {
             synth.onvoiceschanged = () => {
                 synth.onvoiceschanged = null;
                 speak();
@@ -490,25 +572,22 @@ def speak_text(text, voice_style="JARVIS Deep", language="Auto"):
     st.components.v1.html(html, height=0)
 
 
-# =========================================================
+# =====================================================
 # 5. GEMINI CONFIGURATION
-# =========================================================
+# =====================================================
 
 api_key = st.secrets.get("GEMINI_API_KEY", "")
 
 if not api_key:
-    st.error(
-        "GEMINI_API_KEY missing hai. "
-        "Streamlit secrets mein API key add karein."
-    )
+    st.error("GEMINI_API_KEY missing hai.")
     st.stop()
 
 genai.configure(api_key=api_key)
 
 
-# =========================================================
+# =====================================================
 # 6. SIDEBAR
-# =========================================================
+# =====================================================
 
 with st.sidebar:
 
@@ -563,12 +642,7 @@ with st.sidebar:
 
     voice_style = st.selectbox(
         "VOICE PROFILE",
-        [
-            "JARVIS Deep",
-            "Robotic",
-            "Calm AI",
-            "Natural"
-        ],
+        ["JARVIS Deep", "Robotic", "Calm AI", "Natural"],
         index=0
     )
 
@@ -584,20 +658,14 @@ with st.sidebar:
 
     st.divider()
 
-    if st.button(
-        "🔊 TEST AI VOICE",
-        use_container_width=True
-    ):
+    if st.button("🔊 TEST AI VOICE", use_container_width=True):
         speak_text(
             "Hello Anurag. VEER AI X systems are online. How may I assist you today?",
             voice_style,
             voice_language
         )
 
-    if st.button(
-        "🔒 LOCK SYSTEM",
-        use_container_width=True
-    ):
+    if st.button("🔒 LOCK SYSTEM", use_container_width=True):
         st.session_state.unlocked = False
         st.session_state.lock_error = False
         st.rerun()
@@ -606,26 +674,20 @@ with st.sidebar:
 
     st.markdown("### 📡 CORE READOUT")
     st.caption("SECURITY: UNLOCKED")
-    st.caption(
-        "VOICE: " +
-        ("ACTIVE" if voice_enabled else "STANDBY")
-    )
+    st.caption("VOICE: " + ("ACTIVE" if voice_enabled else "STANDBY"))
     st.caption("VISUAL INTERFACE: ONLINE")
     st.caption("MEMORY BUFFER: SESSION")
 
-    if st.button(
-        "🧹 CLEAR CHAT MEMORY",
-        use_container_width=True
-    ):
+    if st.button("🧹 CLEAR CHAT MEMORY", use_container_width=True):
         st.session_state.messages = []
         st.session_state.suggested_prompt = None
         st.session_state.last_voice_hash = None
         st.rerun()
 
 
-# =========================================================
+# =====================================================
 # 7. MAIN HEADER
-# =========================================================
+# =====================================================
 
 st.markdown(
     '<div class="robot-title">VEER AI X</div>',
@@ -648,9 +710,9 @@ st.markdown(
 )
 
 
-# =========================================================
+# =====================================================
 # 8. WELCOME SCREEN
-# =========================================================
+# =====================================================
 
 if not st.session_state.messages:
 
@@ -674,52 +736,36 @@ if not st.session_state.messages:
     c1, c2, c3 = st.columns(3)
 
     with c1:
-        if st.button(
-            "🧠 Explain a topic",
-            use_container_width=True
-        ):
+        if st.button("🧠 Explain a topic", use_container_width=True):
             st.session_state.suggested_prompt = (
                 "Explain artificial intelligence in simple Hinglish."
             )
             st.rerun()
 
     with c2:
-        if st.button(
-            "⚙️ System capabilities",
-            use_container_width=True
-        ):
+        if st.button("⚙️ System capabilities", use_container_width=True):
             st.session_state.suggested_prompt = (
                 "Tell me your capabilities in a concise list."
             )
             st.rerun()
 
     with c3:
-        if st.button(
-            "🎨 Create futuristic art",
-            use_container_width=True
-        ):
+        if st.button("🎨 Create futuristic art", use_container_width=True):
             st.session_state.suggested_prompt = (
                 "Create an image of a futuristic blue robotic AI assistant interface."
             )
             st.rerun()
 
 
-# =========================================================
+# =====================================================
 # 9. CHAT HISTORY
-# =========================================================
+# =====================================================
 
 for message in st.session_state.messages:
 
-    avatar = (
-        "⚡"
-        if message["role"] == "user"
-        else "🤖"
-    )
+    avatar = "⚡" if message["role"] == "user" else "🤖"
 
-    with st.chat_message(
-        message["role"],
-        avatar=avatar
-    ):
+    with st.chat_message(message["role"], avatar=avatar):
         st.markdown(message["content"])
 
         if message.get("image") is not None:
@@ -729,9 +775,9 @@ for message in st.session_state.messages:
             )
 
 
-# =========================================================
+# =====================================================
 # 10. VOICE INPUT
-# =========================================================
+# =====================================================
 
 st.markdown(
     '<div class="voice-panel">'
@@ -752,10 +798,7 @@ st.session_state.suggested_prompt = None
 if voice_audio is not None:
 
     audio_bytes = voice_audio.getvalue()
-
-    audio_hash = hashlib.sha256(
-        audio_bytes
-    ).hexdigest()
+    audio_hash = hashlib.sha256(audio_bytes).hexdigest()
 
     if st.session_state.last_voice_hash != audio_hash:
 
@@ -778,25 +821,21 @@ if voice_audio is not None:
                 audio_part
             ])
 
-            spoken_text = (
-                transcription.text or ""
-            ).strip()
+            spoken_text = (transcription.text or "").strip()
 
             if spoken_text:
                 active_prompt = spoken_text
                 st.session_state.voice_input_counter += 1
             else:
-                st.warning(
-                    "Awaaz samajh nahi aayi. Dobara try karein."
-                )
+                st.warning("Awaaz samajh nahi aayi. Dobara try karein.")
 
         except Exception as exc:
             st.error(f"Voice input error: {exc}")
 
 
-# =========================================================
+# =====================================================
 # 11. TEXT INPUT
-# =========================================================
+# =====================================================
 
 if active_prompt is None:
     active_prompt = st.chat_input(
@@ -804,9 +843,9 @@ if active_prompt is None:
     )
 
 
-# =========================================================
+# =====================================================
 # 12. AI RESPONSE ENGINE
-# =========================================================
+# =====================================================
 
 if active_prompt:
 
@@ -869,10 +908,9 @@ Use steps when helpful.
 Do not invent facts. If uncertain, say so.
 """
 
-
-    # =====================================================
+    # =================================================
     # 13. IMAGE GENERATION
-    # =====================================================
+    # =================================================
 
     if is_image_request:
 
@@ -919,11 +957,7 @@ Do not invent facts. If uncertain, say so.
                 )
 
                 st.markdown(confirmation)
-
-                st.image(
-                    generated_image,
-                    use_container_width=True
-                )
+                st.image(generated_image, use_container_width=True)
 
                 st.session_state.messages.append({
                     "role": "assistant",
@@ -940,10 +974,7 @@ Do not invent facts. If uncertain, say so.
 
             except Exception as exc:
 
-                error_text = (
-                    f"Image generation unavailable: {exc}"
-                )
-
+                error_text = f"Image generation unavailable: {exc}"
                 st.error(error_text)
 
                 st.session_state.messages.append({
@@ -951,10 +982,9 @@ Do not invent facts. If uncertain, say so.
                     "content": error_text
                 })
 
-
-    # =====================================================
+    # =================================================
     # 14. NORMAL AI CHAT
-    # =====================================================
+    # =================================================
 
     else:
 
@@ -979,9 +1009,7 @@ Do not invent facts. If uncertain, say so.
                         "parts": [item["content"]]
                     })
 
-                chat = model.start_chat(
-                    history=history
-                )
+                chat = model.start_chat(history=history)
 
                 response = chat.send_message(
                     active_prompt,
@@ -993,9 +1021,7 @@ Do not invent facts. If uncertain, say so.
                         if getattr(chunk, "text", None):
                             yield chunk.text
 
-                full_response = st.write_stream(
-                    stream_text()
-                )
+                full_response = st.write_stream(stream_text())
 
                 st.session_state.messages.append({
                     "role": "assistant",
@@ -1013,9 +1039,9 @@ Do not invent facts. If uncertain, say so.
                 st.error(f"AI core error: {exc}")
 
 
-# =========================================================
+# =====================================================
 # 15. CHAT ARCHIVE
-# =========================================================
+# =====================================================
 
 if st.session_state.messages:
 
