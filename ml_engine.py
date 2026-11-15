@@ -20,3 +20,20 @@ print("Dataset Loaded Successfully!")
 print("Total Records:", len(X))
 print("Features:", X.columns.tolist())
 
+# 4. Data ko Training aur Testing me baantna
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.2,
+    random_state=42
+)
+
+# 5. Machine Learning Model banana
+model = RandomForestClassifier(random_state=42)
+
+# 6. Model ko train karna
+model.fit(X_train, y_train)
+
+print("VEER AI ML Model Training Complete!")
+print("Training Records:", len(X_train))
+print("Testing Records:", len(X_test))
+
