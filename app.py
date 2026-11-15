@@ -399,6 +399,24 @@ with st.expander("🌸 VEER AI - ML FLOWER PREDICTOR"):
         )
         st.success(f"Predicted Flower: {result}")
 
+# =============== VEER AI FAQ SYSTEM ===============
+
+with st.expander("🤖 VEER AI - ASK MY OWN AI"):
+
+    faq_question = st.text_input(
+        "Ask your question:",
+        key="faq_question"
+    )
+
+    if st.button("GET FAQ ANSWER", key="faq_button"):
+
+        if faq_question.strip():
+            answer = get_faq_answer(faq_question)
+
+            st.success(answer)
+        else:
+            st.warning("Please enter a question.")
+
 if not st.session_state.messages:
     st.markdown("""
     <div class="welcome">
