@@ -37,3 +37,16 @@ print("VEER AI ML Model Training Complete!")
 print("Training Records:", len(X_train))
 print("Testing Records:", len(X_test))
 
+# 7. Model se prediction karwana
+y_pred = model.predict(X_test)
+
+# 8. Accuracy check karna
+accuracy = accuracy_score(y_test, y_pred)
+
+print("Model Accuracy:", accuracy * 100, "%")
+
+# 9. Model ko save karna
+joblib.dump(model, "iris_model.pkl")
+
+print("Model Saved Successfully!")
+
