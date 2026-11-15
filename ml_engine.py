@@ -50,3 +50,16 @@ joblib.dump(model, "iris_model.pkl")
 
 print("Model Saved Successfully!")
 
+# 10. Prediction function
+
+def predict_flower(sepal_length, sepal_width, petal_length, petal_width):
+
+    sample = pd.DataFrame(
+        [[sepal_length, sepal_width, petal_length, petal_width]],
+        columns=data.feature_names
+    )
+
+    prediction = model.predict(sample)[0]
+
+    return data.target_names[prediction]
+
