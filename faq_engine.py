@@ -24,7 +24,6 @@ def get_faq_answer(user_question):
     confidence = scores[0][best_match]
 
     if confidence < 0.40:
-    return "Sorry! I don't know the answer yet."
-        return "Sorry, mujhe iska jawab abhi nahi pata."
+        return "Sorry! I don't know the answer yet."
 
     return faq.iloc[best_match]["answer"]
