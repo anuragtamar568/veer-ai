@@ -2,6 +2,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import google.generativeai as genai
+from faq_engine import get_faq_answer
 from ml_engine import predict_flower
 from datetime import datetime
 from zoneinfo import ZoneInfo
