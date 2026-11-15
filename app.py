@@ -373,6 +373,31 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# =============== ML FLOWER PREDICTOR ===============
+
+with st.expander("🌸 VEER AI - ML FLOWER PREDICTOR"):
+
+    st.write("Enter flower measurements:")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        sepal_length = st.number_input("Sepal Length (cm)", value=5.1)
+        sepal_width = st.number_input("Sepal Width (cm)", value=3.5)
+
+    with col2:
+        petal_length = st.number_input("Petal Length (cm)", value=1.4)
+        petal_width = st.number_input("Petal Width (cm)", value=0.2)
+
+    if st.button("PREDICT FLOWER"):
+        result = predict_flower(
+            sepal_length,
+            sepal_width,
+            petal_length,
+            petal_width
+        )
+        st.success(f"Predicted Flower: {result}")
+
 if not st.session_state.messages:
     st.markdown("""
     <div class="welcome">
