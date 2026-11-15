@@ -6,3 +6,6 @@ gtts
 pillow
 PyPDF2
 streamlit-authenticator
+scikit-learn
+pandas
+joblib
